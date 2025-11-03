@@ -6,10 +6,10 @@ Palabra is a high-speed, offline-first Spanish vocabulary trainer built with Flu
 - `lib/app` — bootstrap, theming, navigation via `go_router` + Riverpod.
 - `lib/design_system` — tokens and shared widgets (gradient backgrounds, typography, spacing).
 - `lib/data_core` — Isar models, repositories, and database lifecycle providers.
-- `lib/feature_*` — feature-specific presentation layers stubbed for Gate, Pre-run, Run, Pause, Finish, Powerups, SRS, and Vocabulary.
+- `lib/feature_*` — feature-specific presentation layers (Gate, Pre-run, Run, Finish now interactive; Pause, Powerups, SRS, Vocabulary in progress).
 - `tool/content_cli` — CLI utilities for validating and ingesting local vocabulary JSON into Isar.
 - `assets/vocabulary` — leveled EN↔ES term lists (to be normalized to the Palabra schema).
-- `docs/` — project documentation, including daily progress logs (create `docs/daily.md` for stand-ups).
+- `docs/` — project documentation (`daily.md` for stand-ups, `project_status.md` for active focus and backlog).
 
 ## Vocabulary asset schema
 Each file under `assets/vocabulary/spanish/{a1,a2,b1,b2}.json` contains an array of entries shaped like:
@@ -51,4 +51,7 @@ dart run tool/content_cli/bin/content_cli.dart ingest    # Import vocabulary int
 - Use Conventional Commits (`feat:`, `fix:`, etc.) and follow trunk-based flow with feature branches (`feat/<ticket>`).
 
 ## Next steps
-Refer to the open tasks in `vision.md` and the daily log in `docs/daily.md` for active priorities. When adding new modules, keep files under 1,000 LOC and favor additional sub-packages where necessary.
+- Stay aligned with the feature brief in `vision.md` and the working backlog in `docs/project_status.md`.
+- Implement Time Extend offer flow and integrate remaining powerup inventory UI.
+- Expand widget/state tests (especially around the run controller and deck builder) once the new screens settle.
+- When adding modules, keep files under 1,000 LOC and favor additional sub-packages where necessary.

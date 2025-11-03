@@ -14,6 +14,8 @@ void main() {
   testWidgets('App boots to the gate screen', (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: PalabraApp()));
 
-    expect(find.text('Palabra Gate'), findsOneWidget);
+    expect(find.text('Palabra'), findsOneWidget);
+    expect(find.text('Make 90 correct matches in 1:45.'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
   });
 }

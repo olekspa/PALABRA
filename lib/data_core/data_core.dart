@@ -5,6 +5,7 @@ export 'models/run_log.dart';
 export 'models/user_item_state.dart';
 export 'models/user_meta.dart';
 export 'models/vocab_item.dart';
+export 'providers/user_meta_providers.dart';
 export 'repositories/attempt_log_repository.dart';
 export 'repositories/run_log_repository.dart';
 export 'repositories/user_meta_repository.dart';

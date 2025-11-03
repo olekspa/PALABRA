@@ -437,10 +437,6 @@ class RunController extends StateNotifier<RunState> {
   }
 }
 
-final runSettingsProvider = Provider<RunSettings>((ref) {
-  return const RunSettings();
-});
-
 final runControllerProvider =
     StateNotifierProvider.autoDispose<RunController, RunState>((ref) {
       final deckBuilder = ref.watch(deckBuilderServiceProvider);

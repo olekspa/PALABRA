@@ -14,4 +14,9 @@ class RunLogRepository {
       return _isar.runLogs.put(runLog);
     });
   }
+
+  /// Returns the most recent run log, if any.
+  Future<RunLog?> latest() {
+    return _isar.runLogs.where().sortByCompletedAtDesc().findFirst();
+  }
 }
