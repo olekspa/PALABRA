@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('App boots to the gate screen', (WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues(const <String, Object?>{});
+    SharedPreferences.setMockInitialValues(const <String, Object>{});
     await tester.pumpWidget(const ProviderScope(child: PalabraApp()));
 
     expect(find.text('Palabra'), findsOneWidget);

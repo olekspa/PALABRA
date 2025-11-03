@@ -15,11 +15,15 @@ flutter pub get
 ```
 
 ## Build Targets
-### Iterating in Chrome
+### Iterating in a browser
 ```bash
-flutter run -d chrome
+flutter run -d web-server
+# Once the URL prints, open it from Windows:
+wslview http://localhost:<port>
 ```
-This launches the SPA with hot-reload support. Progress and inventory reset on every browser refresh.
+Flutter keeps hot reload active in the WSL terminal, and the Windows browser reflects changes immediately. This avoids the remote-debugging handshake between WSL and Windows Chrome that can block `flutter run -d chrome`.
+
+If you are developing directly from a Windows shell (not WSL), you can still use `flutter run -d chrome` for the classic auto-launch workflow.
 
 ### Producing a Release Build
 ```bash
@@ -51,7 +55,6 @@ Record findings (pass/fail, device/browser, timestamp) in `docs/daily.md` or the
 - Course/device gating relies on stubbed values until LMS integration lands.
 
 ## Troubleshooting
-- **Flutter tool cannot find Dart SDK**: Ensure the full Flutter installation is used (Windows install recommended per README).
+- **Flutter tool cannot find Dart SDK**: Ensure your WSL shell exports `PATH="$HOME/flutter/bin:$PATH"` (log out/in after editing `~/.bashrc`), then re-run the command.
 - **Blank page after build**: Clear the browser cache, then re-run `flutter build web --release`.
 - **Glitchy board refills**: Confirm you are on the latest `master` and that `flutter pub get` has been executed.
-

@@ -6,10 +6,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class StorePersistence {
   StorePersistence._();
 
+  /// Singleton accessor for shared persistence helpers.
   static final StorePersistence instance = StorePersistence._();
 
+  /// Key used to store the serialized in-memory store payload.
   static const String _storageKey = 'palabra_store_v1';
 
+  /// Loads the persisted JSON payload, returning `null` when no data exists.
   Future<Map<String, dynamic>?> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -26,26 +29,28 @@ class StorePersistence {
           (key, value) => MapEntry(key.toString(), value),
         );
       }
-    } catch (_) {
+    } on Object catch (_) {
       // Ignore persistence errors; the store will fallback to defaults.
     }
     return null;
   }
 
+  /// Persists the provided JSON payload to shared preferences.
   Future<void> save(Map<String, dynamic> payload) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_storageKey, json.encode(payload));
-    } catch (_) {
+    } on Object catch (_) {
       // Ignore persistence errors in the beta prototype.
     }
   }
 
+  /// Removes any stored payload for the current build.
   Future<void> clear() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_storageKey);
-    } catch (_) {
+    } on Object catch (_) {
       // Ignore in beta builds.
     }
   }

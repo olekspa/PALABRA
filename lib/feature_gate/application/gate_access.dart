@@ -92,15 +92,20 @@ final gateAccessProvider = Provider<GateAccessStatus>((ref) {
 
   final forcedCourseId = flags.forceCourseId;
   final effectiveCourseId = forcedCourseId ?? detectedCourseId;
-  final courseOverrideApplied = forcedCourseId != null;
-  final hasCourse = effectiveCourseId != null && effectiveCourseId.isNotEmpty;
-  final courseAllowed =
-      hasCourse && effectiveCourseId!.toLowerCase() == requiredCourseId;
-  final courseValue = _describeCourse(
-    courseId: effectiveCourseId,
-    requiredCourseId: requiredCourseId,
-    overrideApplied: courseOverrideApplied,
-  );
+  final normalizedCourseId = effectiveCourseId?.toLowerCase();
+  final hasCourse =
+      normalizedCourseId != null && normalizedCourseId.isNotEmpty;
+  final debugCourseOverride = !hasCourse && allowsDebug;
+  final courseOverrideApplied = forcedCourseId != null || debugCourseOverride;
+  final courseAllowed = debugCourseOverride ||
+      (hasCourse && normalizedCourseId == requiredCourseId);
+  final courseValue = debugCourseOverride
+      ? 'Debug override active'
+      : _describeCourse(
+          courseId: effectiveCourseId,
+          requiredCourseId: requiredCourseId,
+          overrideApplied: forcedCourseId != null,
+        );
 
   return GateAccessStatus(
     device: GateCheckStatus(

@@ -16,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences.setMockInitialValues(const <String, Object?>{});
+  SharedPreferences.setMockInitialValues(const <String, Object>{});
 
   testWidgets('Gate → Pre-run → Run → Finish smoke flow (web)',
       (WidgetTester tester) async {
@@ -38,7 +38,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          runRowsProvider.overrideWith((ref) => StateController<int>(4)),
+          runRowsProvider.overrideWith((ref) => 4),
           runSettingsProvider.overrideWith(
             (ref) => const RunSettings(
               rows: 4,
@@ -71,6 +71,7 @@ void main() {
 
     // Pre-run → Run.
     expect(find.text('Ready to run?'), findsOneWidget);
+    await tester.ensureVisible(find.text('Start'));
     await tester.tap(find.text('Start'));
     await tester.pumpAndSettle();
 

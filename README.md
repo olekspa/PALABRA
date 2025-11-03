@@ -31,10 +31,16 @@ Each file under `assets/vocabulary/spanish/{a1,a2,b1,b2}.json` contains an array
 - `topic`: coarse semantic bucket per level (`core_vocab`, `daily_life`, `intermediate_concepts`, `advanced_concepts`).
 
 ## Local setup
-1. Ensure Flutter stable 3.35.7 is installed (`.tool-versions` provided for asdf).
+1. Ensure Flutter stable 3.35.7 is on your `PATH`. In WSL this means cloning `https://github.com/flutter/flutter.git` to `~/flutter` (already present in this workspace) and adding `export PATH="$HOME/flutter/bin:$PATH"` to your shell profile (e.g. `~/.bashrc`), then restarting the terminal.
 2. Run `flutter pub get`.
 3. Verify the toolchain with `flutter analyze` and `flutter test`.
 4. Review `vision.md` for the full product brief and execution plan.
+
+### WSL-specific notes
+- Install Chrome/Edge on the Windows side and expose it to WSL (`export CHROME_EXECUTABLE="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"` when running web builds, adjust the path if you installed a different browser). During day-to-day testing prefer `flutter run -d web-server` and open the served URL in Windows via `wslview http://localhost:<port>` (or copy/paste into Chrome/Edge); this avoids remote-debugging quirks between WSL and Windows.
+- Install Android Studio on Windows and point Flutter at that SDK from WSL via `flutter config --android-sdk /mnt/c/Users/<you>/AppData/Local/Android/Sdk` once it is available.
+- If you plan to target Linux desktop builds inside WSL, install the native build toolchain (`sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev`).
+- The end-to-end walkthrough lives in `docs/wsl_setup.md`.
 
 ## Scripts
 ```bash

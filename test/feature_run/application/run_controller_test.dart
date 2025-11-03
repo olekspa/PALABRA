@@ -91,7 +91,7 @@ Future<void> _matchFirstPair(RunController controller) async {
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues(const <String, Object?>{});
+    SharedPreferences.setMockInitialValues(const <String, Object>{});
   });
 
   group('RunController', () {

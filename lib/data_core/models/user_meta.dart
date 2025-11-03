@@ -1,13 +1,39 @@
+/// Persistent metadata for the prototype user profile across sessions.
 class UserMeta {
+  /// Creates prototype metadata with default values.
+  UserMeta();
+
+  /// Whether the vocabulary cache has been seeded for the user.
   bool hasSeededVocabulary = false;
+  /// Preferred row count on the board.
   int preferredRows = 5;
+  /// Current CEFR level for the user.
   String level = 'a1';
+  /// Total learned item count.
   int learnedCount = 0;
+  /// Total trouble item count.
   int troubleCount = 0;
+  /// Timestamp of the most recent run.
   DateTime? lastRunAt;
+  /// Available Row Blaster powerups.
   int rowBlasterCharges = 0;
+  /// Available time-extend tokens.
   int timeExtendTokens = 0;
 
+  /// Hydrates metadata from persisted JSON.
+  factory UserMeta.fromJson(Map<String, dynamic> json) {
+    return UserMeta()
+      ..hasSeededVocabulary = json['hasSeededVocabulary'] as bool? ?? false
+      ..preferredRows = json['preferredRows'] as int? ?? 5
+      ..level = (json['level'] as String? ?? 'a1').toLowerCase()
+      ..learnedCount = json['learnedCount'] as int? ?? 0
+      ..troubleCount = json['troubleCount'] as int? ?? 0
+      ..lastRunAt = _parseTimestamp(json['lastRunAt'])
+      ..rowBlasterCharges = json['rowBlasterCharges'] as int? ?? 0
+      ..timeExtendTokens = json['timeExtendTokens'] as int? ?? 0;
+  }
+
+  /// Serializes metadata to a JSON-compatible map.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'hasSeededVocabulary': hasSeededVocabulary,
@@ -21,19 +47,10 @@ class UserMeta {
     };
   }
 
-  factory UserMeta.fromJson(Map<String, dynamic> json) {
-    final meta = UserMeta();
-    meta.hasSeededVocabulary = json['hasSeededVocabulary'] as bool? ?? false;
-    meta.preferredRows = json['preferredRows'] as int? ?? 5;
-    meta.level = (json['level'] as String? ?? 'a1').toLowerCase();
-    meta.learnedCount = json['learnedCount'] as int? ?? 0;
-    meta.troubleCount = json['troubleCount'] as int? ?? 0;
-    final lastRun = json['lastRunAt'];
-    if (lastRun is String && lastRun.isNotEmpty) {
-      meta.lastRunAt = DateTime.tryParse(lastRun);
+  static DateTime? _parseTimestamp(Object? raw) {
+    if (raw is String && raw.isNotEmpty) {
+      return DateTime.tryParse(raw);
     }
-    meta.rowBlasterCharges = json['rowBlasterCharges'] as int? ?? 0;
-    meta.timeExtendTokens = json['timeExtendTokens'] as int? ?? 0;
-    return meta;
+    return null;
   }
 }

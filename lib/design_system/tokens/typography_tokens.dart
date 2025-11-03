@@ -1,9 +1,8 @@
-// ignore_for_file: public_member_api_docs
-
 import 'package:flutter/material.dart';
 
 /// Type scale for Palabra.
 abstract final class AppTypography {
+  /// Standardized text theme matching the Palabra design system.
   static final TextTheme textTheme = TextTheme(
     displayLarge: _textStyle(
       fontSize: 48,

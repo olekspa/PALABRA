@@ -58,15 +58,18 @@ class DeckBuilderService {
     required DeckProgressFetcher progressFetcher,
     required UserMetaRepository userMetaRepository,
     DeckBuilderConfig config = const DeckBuilderConfig(),
+    Random? random,
   }) : _vocabularyFetcher = vocabularyFetcher,
        _progressFetcher = progressFetcher,
        _userMetaRepository = userMetaRepository,
-       _config = config;
+       _config = config,
+       _random = random ?? Random();
 
   final DeckVocabularyFetcher _vocabularyFetcher;
   final DeckProgressFetcher _progressFetcher;
   final UserMetaRepository _userMetaRepository;
   final DeckBuilderConfig _config;
+  final Random _random;
 
   /// Builds a deck using the given configuration and user state.
   Future<DeckBuildResult> buildDeck() async {
@@ -132,11 +135,17 @@ class DeckBuilderService {
     var addedTrouble = troubleCount;
     final available = entries.where((entry) => !entry.isLearned).toList();
     final learned = entries.where((entry) => entry.isLearned).toList();
-    final trouble = available.where((entry) => entry.isTrouble).toList();
-    final fresh = available.where((entry) => entry.isFresh).toList();
-    final review = available
-        .where((entry) => !entry.isTrouble && !entry.isFresh)
-        .toList();
+    final trouble = _prioritizePool(
+      available.where((entry) => entry.isTrouble).toList(),
+    );
+    final fresh = _prioritizePool(
+      available.where((entry) => entry.isFresh).toList(),
+    );
+    final review = _prioritizePool(
+      available.where((entry) => !entry.isTrouble && !entry.isFresh).toList(),
+    );
+    final learnedPool = _prioritizePool(learned.toList());
+    final fallbackAvailable = _prioritizePool(available.toList());
 
     int added = 0;
     bool tryAdd(_DeckEntry entry, {bool allowDuplicateFamily = false}) {
@@ -173,7 +182,7 @@ class DeckBuilderService {
     consume(review);
 
     if (added < target) {
-      for (final entry in learned) {
+      for (final entry in learnedPool) {
         if (added >= target) {
           break;
         }
@@ -182,7 +191,7 @@ class DeckBuilderService {
     }
 
     if (added < target) {
-      for (final entry in available) {
+      for (final entry in fallbackAvailable) {
         if (added >= target) {
           break;
         }
@@ -191,7 +200,7 @@ class DeckBuilderService {
     }
 
     if (added < target) {
-      for (final entry in learned) {
+      for (final entry in learnedPool) {
         if (added >= target) {
           break;
         }
@@ -200,6 +209,32 @@ class DeckBuilderService {
     }
 
     return _SelectionResult(freshCount: addedFresh, troubleCount: addedTrouble);
+  }
+
+  List<_DeckEntry> _prioritizePool(List<_DeckEntry> pool) {
+    if (pool.isEmpty) {
+      return pool;
+    }
+    pool.shuffle(_random);
+    pool.sort(_experienceComparator);
+    return pool;
+  }
+
+  int _experienceComparator(_DeckEntry a, _DeckEntry b) {
+    final seenA = a.state?.seenCount ?? 0;
+    final seenB = b.state?.seenCount ?? 0;
+    if (seenA != seenB) {
+      return seenA.compareTo(seenB);
+    }
+    final lastSeenA =
+        a.state?.lastSeenAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final lastSeenB =
+        b.state?.lastSeenAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final lastSeenComparison = lastSeenA.compareTo(lastSeenB);
+    if (lastSeenComparison != 0) {
+      return lastSeenComparison;
+    }
+    return a.item.itemId.compareTo(b.item.itemId);
   }
 
   Map<String, int> _allocateCounts(int total, Map<String, double> mix) {

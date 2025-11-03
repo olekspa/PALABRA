@@ -230,7 +230,7 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void _handleWrong(String itemId) {
-    final itemState = _ensureItemState(itemId)
+    _ensureItemState(itemId)
       ..seenCount += 1
       ..correctStreak = 0
       ..wrongCount += 1

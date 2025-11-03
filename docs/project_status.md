@@ -13,9 +13,10 @@
 
 ## Web Beta Hosting Notes
 - After refactor, build with `flutter build web` (or `flutter run -d chrome`) to produce the SPA under `build/web`.
+- Inside WSL prefer `flutter run -d web-server` and open the printed URL via `wslview` (or copy/paste into Windows Chrome/Edge) to avoid remote-debugging issues.
 - Serve the `build/web` directory with any static server (`python -m http.server`, nginx, etc.). Each browser session keeps progress in-memory; refresh resets progress.
 - For LAN testing, expose the server’s IP:port; mobile devices join the same network and browse to `http://<pc-ip>:<port>/`.
-- Local Flutter SDK on WSL is incomplete (missing Dart binary). Run commands via Windows PowerShell/CMD with the full Flutter install.
+- Flutter SDK now lives under `~/flutter` inside WSL; ensure terminals export `PATH="$HOME/flutter/bin:$PATH"` before running `flutter`.
 
 ## Recently Completed
 - Gate → Pre-run → Run flow with device/course gating, row blaster toggle, and interactive board UI.

@@ -2,26 +2,34 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
-import 'models/attempt_log.dart';
-import 'models/run_log.dart';
-import 'models/user_item_state.dart';
-import 'models/user_meta.dart';
-import 'models/vocab_item.dart';
-import 'persistence/store_persistence.dart';
+import 'package:palabra/data_core/models/attempt_log.dart';
+import 'package:palabra/data_core/models/run_log.dart';
+import 'package:palabra/data_core/models/user_item_state.dart';
+import 'package:palabra/data_core/models/user_meta.dart';
+import 'package:palabra/data_core/models/vocab_item.dart';
+import 'package:palabra/data_core/persistence/store_persistence.dart';
 
+/// Internal backing store for prototype flows; see docs for behaviour.
 class InMemoryStore {
+  /// Private constructor for the singleton store.
   InMemoryStore._();
 
+  /// Singleton access to the shared in-memory store.
   static final InMemoryStore instance = InMemoryStore._();
 
   final Map<String, VocabItem> _vocabulary = <String, VocabItem>{};
+  /// Runtime user item state keyed by vocabulary ID.
   final Map<String, UserItemState> userStates = <String, UserItemState>{};
+  /// Persisted user metadata snapshot.
   UserMeta userMeta = UserMeta();
+  /// Chronological run logs with the most recent first.
   final List<RunLog> runLogs = <RunLog>[];
+  /// Attempt-level logs accumulated during runs.
   final List<AttemptLog> attemptLogs = <AttemptLog>[];
 
   bool _vocabularyLoaded = false;
 
+  /// Restores the store state from persisted JSON if available.
   Future<void> restore() async {
     final payload = await StorePersistence.instance.load();
     if (payload == null) {
@@ -30,10 +38,12 @@ class InMemoryStore {
     _loadFromJson(payload);
   }
 
+  /// Persists the current store snapshot to shared preferences.
   Future<void> persist() {
     return StorePersistence.instance.save(_toJson());
   }
 
+  /// Loads vocabulary assets once per runtime session.
   Future<void> ensureVocabularyLoaded(AssetBundle bundle) async {
     if (_vocabularyLoaded) {
       return;
@@ -45,16 +55,19 @@ class InMemoryStore {
     _vocabularyLoaded = true;
   }
 
+  /// Returns vocabulary entries filtered by CEFR level.
   List<VocabItem> vocabularyByLevel(String level) {
     return _vocabulary.values
         .where((item) => item.level == level)
         .toList(growable: false);
   }
 
+  /// Returns vocabulary entries for the provided IDs.
   List<VocabItem> vocabularyByIds(Iterable<String> ids) {
     return ids.map((id) => _vocabulary[id]).whereType<VocabItem>().toList();
   }
 
+  /// Inserts or updates vocabulary entries in the store.
   void upsertVocabulary(List<VocabItem> items) {
     for (final item in items) {
       _vocabulary[item.itemId] = item;
@@ -117,7 +130,10 @@ class InMemoryStore {
     }
   }
 
-  Future<void> _loadLevel({required AssetBundle bundle, required String level}) async {
+  Future<void> _loadLevel({
+    required AssetBundle bundle,
+    required String level,
+  }) async {
     final path = 'assets/vocabulary/spanish/$level.json';
     final raw = await bundle.loadString(path);
     final decoded = json.decode(raw);

@@ -121,43 +121,45 @@ class _PreRunContent extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Ready to run?',
-                style: theme.textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Make 90 correct matches in 1:45.',
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _TierRewards(theme: theme),
-              const SizedBox(height: AppSpacing.lg),
-              _RowBlasterToggle(
-                enabled: rowBlasterEnabled,
-                charges: rowBlasterCharges,
-                baseRows: baseRows,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _TimeExtendInfo(tokens: meta.timeExtendTokens),
-              const SizedBox(height: AppSpacing.xl),
-              ElevatedButton(
-                onPressed: isStarting ? null : () => _startRun(context, ref),
-                child: isStarting
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Start'),
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Ready to run?',
+                  style: theme.textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Make 90 correct matches in 1:45.',
+                  style: theme.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                _TierRewards(theme: theme),
+                const SizedBox(height: AppSpacing.lg),
+                _RowBlasterToggle(
+                  enabled: rowBlasterEnabled,
+                  charges: rowBlasterCharges,
+                  baseRows: baseRows,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                _TimeExtendInfo(tokens: meta.timeExtendTokens),
+                const SizedBox(height: AppSpacing.xl),
+                ElevatedButton(
+                  onPressed: isStarting ? null : () => _startRun(context, ref),
+                  child: isStarting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Start'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
