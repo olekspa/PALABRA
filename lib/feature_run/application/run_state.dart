@@ -61,6 +61,9 @@ class RunState {
     required this.pausedAtTier20,
     required this.pausedAtTier50,
     required this.inputLocked,
+    required this.timeExtendTokens,
+    required this.timeExtendsUsed,
+    required this.showingTimeExtendOffer,
   });
 
   factory RunState.loading({required int rows}) {
@@ -76,6 +79,9 @@ class RunState {
       pausedAtTier20: false,
       pausedAtTier50: false,
       inputLocked: false,
+      timeExtendTokens: 0,
+      timeExtendsUsed: 0,
+      showingTimeExtendOffer: false,
     );
   }
 
@@ -84,6 +90,8 @@ class RunState {
     required List<BoardRow> board,
     required int deckRemaining,
     required int millisecondsRemaining,
+    int timeExtendTokens = 0,
+    int timeExtendsUsed = 0,
   }) {
     return RunState(
       phase: RunPhase.ready,
@@ -97,6 +105,9 @@ class RunState {
       pausedAtTier20: false,
       pausedAtTier50: false,
       inputLocked: false,
+      timeExtendTokens: timeExtendTokens,
+      timeExtendsUsed: timeExtendsUsed,
+      showingTimeExtendOffer: false,
     );
   }
 
@@ -111,6 +122,9 @@ class RunState {
   final bool pausedAtTier20;
   final bool pausedAtTier50;
   final bool inputLocked;
+  final int timeExtendTokens;
+  final int timeExtendsUsed;
+  final bool showingTimeExtendOffer;
 
   bool get isReady => phase == RunPhase.ready;
 
@@ -130,6 +144,9 @@ class RunState {
     bool? pausedAtTier20,
     bool? pausedAtTier50,
     bool? inputLocked,
+    int? timeExtendTokens,
+    int? timeExtendsUsed,
+    bool? showingTimeExtendOffer,
   }) {
     return RunState(
       phase: phase ?? this.phase,
@@ -144,6 +161,10 @@ class RunState {
       pausedAtTier20: pausedAtTier20 ?? this.pausedAtTier20,
       pausedAtTier50: pausedAtTier50 ?? this.pausedAtTier50,
       inputLocked: inputLocked ?? this.inputLocked,
+      timeExtendTokens: timeExtendTokens ?? this.timeExtendTokens,
+      timeExtendsUsed: timeExtendsUsed ?? this.timeExtendsUsed,
+      showingTimeExtendOffer:
+          showingTimeExtendOffer ?? this.showingTimeExtendOffer,
     );
   }
 }

@@ -5,9 +5,8 @@ Palabra is a high-speed, offline-first Spanish vocabulary trainer built with Flu
 ## Repo layout
 - `lib/app` — bootstrap, theming, navigation via `go_router` + Riverpod.
 - `lib/design_system` — tokens and shared widgets (gradient backgrounds, typography, spacing).
-- `lib/data_core` — Isar models, repositories, and database lifecycle providers.
+- `lib/data_core` — in-memory models, repositories, and store helpers for vocabulary + progress state.
 - `lib/feature_*` — feature-specific presentation layers (Gate, Pre-run, Run, Finish now interactive; Pause, Powerups, SRS, Vocabulary in progress).
-- `tool/content_cli` — CLI utilities for validating and ingesting local vocabulary JSON into Isar.
 - `assets/vocabulary` — leveled EN↔ES term lists (to be normalized to the Palabra schema).
 - `docs/` — project documentation (`daily.md` for stand-ups, `project_status.md` for active focus and backlog).
 
@@ -33,7 +32,7 @@ Each file under `assets/vocabulary/spanish/{a1,a2,b1,b2}.json` contains an array
 
 ## Local setup
 1. Ensure Flutter stable 3.35.7 is installed (`.tool-versions` provided for asdf).
-2. Run `flutter pub get` and `dart pub get` inside `tool/content_cli`.
+2. Run `flutter pub get`.
 3. Verify the toolchain with `flutter analyze` and `flutter test`.
 4. Review `vision.md` for the full product brief and execution plan.
 
@@ -41,9 +40,6 @@ Each file under `assets/vocabulary/spanish/{a1,a2,b1,b2}.json` contains an array
 ```bash
 flutter analyze        # Static analysis using very_good_analysis
 flutter test           # Widget + unit tests
-dart pub get           # Install CLI deps (run inside tool/content_cli)
-dart run tool/content_cli/bin/content_cli.dart validate  # Validate vocabulary JSON
-dart run tool/content_cli/bin/content_cli.dart ingest    # Import vocabulary into local Isar (build/isar)
 ```
 
 ## Versioning
@@ -52,6 +48,6 @@ dart run tool/content_cli/bin/content_cli.dart ingest    # Import vocabulary int
 
 ## Next steps
 - Stay aligned with the feature brief in `vision.md` and the working backlog in `docs/project_status.md`.
-- Implement Time Extend offer flow and integrate remaining powerup inventory UI.
+- Finalise the web in-memory data layer and prepare beta instructions.
 - Expand widget/state tests (especially around the run controller and deck builder) once the new screens settle.
 - When adding modules, keep files under 1,000 LOC and favor additional sub-packages where necessary.

@@ -7,11 +7,17 @@ class RunSettings {
     this.rows = 5,
     this.targetMatches = 90,
     this.runDurationMs = 105000,
+    this.timeExtendDurationMs = 60000,
+    this.maxTimeExtendsPerRun = 2,
+    this.refillBatchSize = 3,
   });
 
   final int rows;
   final int targetMatches;
   final int runDurationMs;
+  final int timeExtendDurationMs;
+  final int maxTimeExtendsPerRun;
+  final int refillBatchSize;
 }
 
 /// Tracks the active board row count (Row Blaster toggles this to four).

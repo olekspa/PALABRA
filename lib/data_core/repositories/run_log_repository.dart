@@ -1,22 +1,21 @@
-// ignore_for_file: public_member_api_docs
-
-import 'package:isar/isar.dart';
-
-import 'package:palabra/data_core/models/run_log.dart';
+import '../in_memory_store.dart';
+import '../models/run_log.dart';
 
 class RunLogRepository {
-  RunLogRepository(this._isar);
+  RunLogRepository({InMemoryStore? store})
+    : _store = store ?? InMemoryStore.instance;
 
-  final Isar _isar;
+  final InMemoryStore _store;
 
   Future<int> add(RunLog runLog) async {
-    return _isar.writeTxn(() async {
-      return _isar.runLogs.put(runLog);
-    });
+    _store.runLogs.insert(0, runLog);
+    return _store.runLogs.length;
   }
 
-  /// Returns the most recent run log, if any.
-  Future<RunLog?> latest() {
-    return _isar.runLogs.where().sortByCompletedAtDesc().findFirst();
+  Future<RunLog?> latest() async {
+    if (_store.runLogs.isEmpty) {
+      return null;
+    }
+    return _store.runLogs.first;
   }
 }

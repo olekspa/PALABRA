@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, cascade_invocations
 
 import 'dart:async';
-import 'dart:math' show max;
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palabra/data_core/data_core.dart';
@@ -26,6 +26,7 @@ class RunController extends StateNotifier<RunState> {
     required SaveUserStates saveUserStates,
     required AddRunLog addRunLog,
     required AddAttemptLogs addAttemptLogs,
+    required UserMetaRepository userMetaRepository,
   }) : _deckBuilderService = deckBuilderService,
        _settings = settings,
        _timerService = timerService,
@@ -33,6 +34,7 @@ class RunController extends StateNotifier<RunState> {
        _saveUserStates = saveUserStates,
        _addRunLog = addRunLog,
        _addAttemptLogs = addAttemptLogs,
+       _userMetaRepository = userMetaRepository,
        super(RunState.loading(rows: settings.rows));
 
   final DeckBuilderService _deckBuilderService;
@@ -42,6 +44,7 @@ class RunController extends StateNotifier<RunState> {
   final SaveUserStates _saveUserStates;
   final AddRunLog _addRunLog;
   final AddAttemptLogs _addAttemptLogs;
+  final UserMetaRepository _userMetaRepository;
 
   final List<VocabItem> _deckQueue = <VocabItem>[];
   final Map<String, VocabItem> _vocabLookup = <String, VocabItem>{};
@@ -51,17 +54,22 @@ class RunController extends StateNotifier<RunState> {
   final List<String> _learnedPromotions = <String>[];
   final List<_PendingReinsert> _reinsertQueue = <_PendingReinsert>[];
   final Map<String, int> _troubleAppearances = <String, int>{};
+  final List<int> _pendingRefillRows = <int>[];
+  final Random _random = Random();
+  int _placeholderSalt = 0;
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
   int _cursor = 0;
   int _timeExtendsUsed = 0;
   bool _runFinished = false;
+  UserMeta? _userMeta;
 
   Future<void> initialize() async {
     state = RunState.loading(rows: _settings.rows);
     _resetSession();
 
+    await _loadUserMeta();
     _deckResult = await _deckBuilderService.buildDeck();
     _deckQueue
       ..clear()
@@ -83,13 +91,17 @@ class RunController extends StateNotifier<RunState> {
       initialBoard.add(_createRow(item));
     }
 
+    _randomizeRightColumn(initialBoard);
+
     state = RunState.ready(
       rows: _settings.rows,
       board: initialBoard,
       deckRemaining: _deckQueue.length - _cursor,
       millisecondsRemaining: _settings.runDurationMs,
+      timeExtendTokens: _userMeta?.timeExtendTokens ?? 0,
+      timeExtendsUsed: _timeExtendsUsed,
     );
-    _startTimer();
+    _startTimer(_settings.runDurationMs);
   }
 
   void onTileTapped(int row, TileColumn column) {
@@ -99,6 +111,9 @@ class RunController extends StateNotifier<RunState> {
     }
 
     final tile = current.tileAt(row, column);
+    if (tile.pairId.isEmpty) {
+      return;
+    }
     final newSelection = TileSelection(
       column: column,
       row: row,
@@ -155,8 +170,8 @@ class RunController extends StateNotifier<RunState> {
     _timerService.resume();
   }
 
-  void registerTimeExtendUse() {
-    _timeExtendsUsed += 1;
+  Future<void> _loadUserMeta() async {
+    _userMeta = await _userMetaRepository.getOrCreate();
   }
 
   Future<void> _loadUserStates() async {
@@ -182,6 +197,7 @@ class RunController extends StateNotifier<RunState> {
     _runStartedAt = DateTime.now();
     _runFinished = false;
     _timeExtendsUsed = 0;
+    _pendingRefillRows.clear();
   }
 
   BoardRow _createRow(VocabItem item) {
@@ -227,15 +243,10 @@ class RunController extends StateNotifier<RunState> {
     TileSelection leftSelection,
     TileSelection rightSelection,
   ) {
-    final item = _drawNextPair();
     final updatedBoard = List<BoardRow>.from(state.board);
 
-    if (item != null) {
-      updatedBoard[leftSelection.row] = updatedBoard[leftSelection.row]
-          .replaceTile(TileColumn.left, _buildLeftTile(item));
-      updatedBoard[rightSelection.row] = updatedBoard[rightSelection.row]
-          .replaceTile(TileColumn.right, _buildRightTile(item));
-    }
+    updatedBoard[leftSelection.row] = _emptyRow(leftSelection.row);
+    _pendingRefillRows.add(leftSelection.row);
 
     state = state.copyWith(
       board: updatedBoard,
@@ -243,6 +254,7 @@ class RunController extends StateNotifier<RunState> {
       clearSelection: true,
       deckRemaining: max(0, _deckQueue.length - _cursor),
     );
+    _maybeRefillPending();
     _checkTierPause();
   }
 
@@ -311,9 +323,9 @@ class RunController extends StateNotifier<RunState> {
     _reinsertQueue.add(_PendingReinsert(item, 4));
   }
 
-  void _startTimer() {
+  void _startTimer(int durationMs) {
     _timerService.start(
-      durationMs: _settings.runDurationMs,
+      durationMs: durationMs,
       onTick: (remaining) {
         if (_runFinished) {
           return;
@@ -329,7 +341,75 @@ class RunController extends StateNotifier<RunState> {
       return;
     }
     _timerService.stop();
-    state = state.copyWith(inputLocked: true, phase: RunPhase.completed);
+    if (_shouldOfferTimeExtend()) {
+      state = state.copyWith(
+        inputLocked: true,
+        showingTimeExtendOffer: true,
+      );
+      return;
+    }
+    await _finalizeTimeout();
+  }
+
+  bool _shouldOfferTimeExtend() {
+    final meta = _userMeta;
+    if (meta == null) {
+      return false;
+    }
+    if (state.progress >= _settings.targetMatches) {
+      return false;
+    }
+    if (_timeExtendsUsed >= _settings.maxTimeExtendsPerRun) {
+      return false;
+    }
+    return meta.timeExtendTokens > 0;
+  }
+
+  Future<void> acceptTimeExtend() async {
+    if (!state.showingTimeExtendOffer || !_shouldOfferTimeExtend()) {
+      return;
+    }
+    final meta = _userMeta;
+    if (meta == null || meta.timeExtendTokens <= 0) {
+      await _finalizeTimeout();
+      return;
+    }
+
+    meta.timeExtendTokens -= 1;
+    _timeExtendsUsed += 1;
+
+    final baseRemaining = max(0, state.millisecondsRemaining);
+    final updatedRemaining = baseRemaining + _settings.timeExtendDurationMs;
+
+    state = state.copyWith(
+      showingTimeExtendOffer: false,
+      inputLocked: false,
+      millisecondsRemaining: updatedRemaining,
+      timeExtendTokens: meta.timeExtendTokens,
+      timeExtendsUsed: _timeExtendsUsed,
+    );
+
+    await _userMetaRepository.save(meta);
+    _startTimer(updatedRemaining);
+  }
+
+  Future<void> declineTimeExtend() async {
+    if (!state.showingTimeExtendOffer) {
+      return;
+    }
+    await _finalizeTimeout();
+  }
+
+  Future<void> _finalizeTimeout() async {
+    if (_runFinished) {
+      return;
+    }
+    _timerService.stop();
+    state = state.copyWith(
+      inputLocked: true,
+      phase: RunPhase.completed,
+      showingTimeExtendOffer: false,
+    );
     await _finishRun(success: false);
   }
 
@@ -435,6 +515,86 @@ class RunController extends StateNotifier<RunState> {
     }
     return 1;
   }
+
+  void _maybeRefillPending({bool force = false}) {
+    if (_pendingRefillRows.isEmpty) {
+      return;
+    }
+    final remainingPairs = _deckQueue.length - _cursor;
+    final shouldRefill = force ||
+        _pendingRefillRows.length >= _settings.refillBatchSize ||
+        remainingPairs < _settings.refillBatchSize;
+    if (!shouldRefill) {
+      return;
+    }
+
+    final updatedBoard = List<BoardRow>.from(state.board);
+    final filledRows = <int>[];
+
+    for (final rowIndex in List<int>.from(_pendingRefillRows)) {
+      final item = _drawNextPair();
+      if (item == null) {
+        break;
+      }
+      updatedBoard[rowIndex] = _createRow(item);
+      filledRows.add(rowIndex);
+    }
+
+    if (filledRows.isEmpty) {
+      return;
+    }
+
+    _pendingRefillRows.removeWhere(filledRows.contains);
+    _randomizeRightColumn(updatedBoard);
+
+    state = state.copyWith(
+      board: updatedBoard,
+      deckRemaining: max(0, _deckQueue.length - _cursor),
+    );
+  }
+
+  BoardRow _emptyRow(int rowIndex) {
+    return BoardRow(
+      left: BoardTile(
+        id: 'empty_${rowIndex}_left_${_placeholderSalt++}',
+        pairId: '',
+        text: '',
+        column: TileColumn.left,
+      ),
+      right: BoardTile(
+        id: 'empty_${rowIndex}_right_${_placeholderSalt++}',
+        pairId: '',
+        text: '',
+        column: TileColumn.right,
+      ),
+    );
+  }
+
+  void _randomizeRightColumn(List<BoardRow> board) {
+    final indices = <int>[];
+    final tiles = <BoardTile>[];
+    for (var i = 0; i < board.length; i++) {
+      final tile = board[i].right;
+      if (tile.pairId.isEmpty) {
+        continue;
+      }
+      indices.add(i);
+      tiles.add(tile);
+    }
+
+    if (tiles.length <= 1) {
+      return;
+    }
+
+    tiles.shuffle(_random);
+    for (var i = 0; i < indices.length; i++) {
+      final rowIndex = indices[i];
+      board[rowIndex] = board[rowIndex].replaceTile(
+        TileColumn.right,
+        tiles[i],
+      );
+    }
+  }
 }
 
 final runControllerProvider =
@@ -444,6 +604,7 @@ final runControllerProvider =
       final userProgressRepo = ref.watch(userProgressRepositoryProvider);
       final runLogRepo = ref.watch(runLogRepositoryProvider);
       final attemptRepo = ref.watch(attemptLogRepositoryProvider);
+      final userMetaRepo = ref.watch(userMetaRepositoryProvider);
       final timerService = RunTimerService();
 
       final controller = RunController(
@@ -454,6 +615,7 @@ final runControllerProvider =
         saveUserStates: userProgressRepo.upsertStates,
         addRunLog: runLogRepo.add,
         addAttemptLogs: attemptRepo.addAll,
+        userMetaRepository: userMetaRepo,
       );
 
       controller.initialize();

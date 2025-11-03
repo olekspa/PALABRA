@@ -820,8 +820,8 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 - **Framework**: Flutter 3.35.7 (Dart 3.9).
 - **State**: Riverpod; all feature controllers exposed via providers.
 - **Navigation**: go_router with routes `/gate`, `/mm/prerun`, `/mm/run`, `/mm/finish` (aliases will be updated once final naming is set).
-- **Storage**: Isar + isar_flutter_libs for vocabulary, user state, run logs, and attempt logs.
-- **Tooling**: Custom CLI (`tool/content_cli`) for vocabulary validation and ingestion; Very Good Analysis linting.
+- **Storage**: In-memory store seeded from bundled JSON (web beta resets on refresh; persistence TBD).
+- **Tooling**: Very Good Analysis linting; in-memory stores seeded from bundled JSON during app bootstrap.
 
 ## 7. Data Model Overview
 - `VocabItem`: base content entry.
@@ -842,9 +842,9 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 - Fonts (Noto Sans) maintain readability; wrap multi-word Spanish without shrinking below accessibility thresholds.
 
 ## 10. Roadmap Snapshot
-**Week 1**: Repo, CI skeleton, app shell, design tokens, Isar models, CLI validator, initial ingestion.
+**Week 1**: Repo, CI skeleton, app shell, design tokens, data models, vocabulary validator, initial ingestion.
 
-**Week 2**: Deck builder + SRS rules, vocabulary import to Isar, repositories with tests.
+**Week 2**: Deck builder + SRS rules, vocabulary import to in-memory store, repositories with tests.
 
 **Week 3**: Board interactions (tap guards, correct/wrong flows), timer + pauses, run UI, powerup toggles.
 
@@ -876,6 +876,6 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 - Board solvable at all times; both tiles refill together in place.
 - Pauses freeze timer exactly at 20 and 50 correct answers; board remains untouched.
 - Wrong answers never deduct XP or trigger reshuffle.
-- Learned/trouble logic persists across sessions using Isar.
+- Learned/trouble logic persists across sessions (future persistent store; current web beta keeps data per session).
 - Powerups function exactly as specified, with clear inventory limits.
 - App operates fully offline with packaged assets.

@@ -14,15 +14,22 @@ class GateScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Device gating is strict—mobile iOS is the launch target.
-    final isSupportedDevice = defaultTargetPlatform == TargetPlatform.iOS;
+    final isIos = defaultTargetPlatform == TargetPlatform.iOS;
+    const isWeb = kIsWeb;
+    final betaOverride = isWeb || kDebugMode;
+    final isSupportedDevice = isIos;
     // TODO(content-team): Replace hard-coded course once LMS integration lands.
     const currentCourse = 'spanish';
     const requiredCourse = 'spanish';
     const isSupportedCourse = currentCourse == requiredCourse;
-    final canProceed = isSupportedDevice && isSupportedCourse;
-    final deviceStatus = isSupportedDevice
+    final canProceed = (isSupportedDevice || betaOverride) && isSupportedCourse;
+    final deviceStatus = isIos
         ? 'iPhone detected'
-        : 'Not supported';
+        : isWeb
+            ? 'Web demo (beta)'
+            : kDebugMode
+                ? 'Debug override active'
+                : 'Not supported';
     const courseStatus = isSupportedCourse
         ? 'Spanish course confirmed'
         : 'Requires Spanish course';
@@ -62,7 +69,7 @@ class GateScreen extends ConsumerWidget {
                         _GateStatusRow(
                           label: 'Device',
                           value: deviceStatus,
-                          isOk: isSupportedDevice,
+                          isOk: canProceed,
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         const _GateStatusRow(

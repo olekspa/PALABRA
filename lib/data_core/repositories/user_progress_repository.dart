@@ -1,34 +1,27 @@
-import 'package:isar/isar.dart';
+import '../in_memory_store.dart';
+import '../models/user_item_state.dart';
 
-import 'package:palabra/data_core/models/user_item_state.dart';
-
-/// Handles persistence of user-level spaced repetition state.
 class UserProgressRepository {
-  /// Creates a [UserProgressRepository] linked to the provided [_isar]
-  /// instance.
-  UserProgressRepository(this._isar);
+  UserProgressRepository({InMemoryStore? store})
+    : _store = store ?? InMemoryStore.instance;
 
-  final Isar _isar;
+  final InMemoryStore _store;
 
-  /// Fetches state rows for the provided [itemIds].
   Future<List<UserItemState>> getStates(Iterable<String> itemIds) async {
-    final ids = itemIds.toSet().toList();
-    final records = await _isar.userItemStates.getAllByItemId(ids);
-    return records.whereType<UserItemState>().toList();
+    final store = _store.userStates;
+    return itemIds
+        .map((id) => store[id])
+        .whereType<UserItemState>()
+        .toList(growable: false);
   }
 
-  /// Saves the supplied [states] set within a single transaction.
   Future<void> upsertStates(List<UserItemState> states) async {
-    if (states.isEmpty) {
-      return;
+    for (final state in states) {
+      _store.userStates[state.itemId] = state;
     }
-    await _isar.writeTxn(() async {
-      await _isar.userItemStates.putAll(states);
-    });
   }
 
-  /// Retrieves a single row for [itemId], if present.
-  Future<UserItemState?> getState(String itemId) {
-    return _isar.userItemStates.filter().itemIdEqualTo(itemId).findFirst();
+  Future<UserItemState?> getState(String itemId) async {
+    return _store.userStates[itemId];
   }
 }

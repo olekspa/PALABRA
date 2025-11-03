@@ -1,20 +1,13 @@
-// ignore_for_file: public_member_api_docs
-
-import 'package:isar/isar.dart';
-
-import 'package:palabra/data_core/models/attempt_log.dart';
+import '../in_memory_store.dart';
+import '../models/attempt_log.dart';
 
 class AttemptLogRepository {
-  AttemptLogRepository(this._isar);
+  AttemptLogRepository({InMemoryStore? store})
+    : _store = store ?? InMemoryStore.instance;
 
-  final Isar _isar;
+  final InMemoryStore _store;
 
   Future<void> addAll(List<AttemptLog> attempts) async {
-    if (attempts.isEmpty) {
-      return;
-    }
-    await _isar.writeTxn(() async {
-      await _isar.attemptLogs.putAll(attempts);
-    });
+    _store.attemptLogs.addAll(attempts);
   }
 }

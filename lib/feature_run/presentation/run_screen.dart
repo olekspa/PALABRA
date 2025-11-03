@@ -69,6 +69,8 @@ class _RunScreenState extends ConsumerState<RunScreen> {
                     settings: settings,
                     onTileTap: controller.onTileTapped,
                     onResume: controller.resumeFromPause,
+                    onAcceptTimeExtend: controller.acceptTimeExtend,
+                    onDeclineTimeExtend: controller.declineTimeExtend,
                   ),
           ),
         ),
@@ -83,12 +85,16 @@ class _RunView extends StatelessWidget {
     required this.settings,
     required this.onTileTap,
     required this.onResume,
+    required this.onAcceptTimeExtend,
+    required this.onDeclineTimeExtend,
   });
 
   final RunState state;
   final RunSettings settings;
   final void Function(int row, TileColumn column) onTileTap;
   final Future<void> Function() onResume;
+  final Future<void> Function() onAcceptTimeExtend;
+  final Future<void> Function() onDeclineTimeExtend;
 
   @override
   Widget build(BuildContext context) {
@@ -122,10 +128,21 @@ class _RunView extends StatelessWidget {
             ),
           ],
         ),
-        if (state.inputLocked && state.phase == RunPhase.ready)
+        if (state.inputLocked &&
+            state.phase == RunPhase.ready &&
+            !state.showingTimeExtendOffer)
           _TierPauseOverlay(
             state: state,
             onResume: onResume,
+          ),
+        if (state.showingTimeExtendOffer)
+          _TimeExtendOverlay(
+            tokensRemaining: state.timeExtendTokens,
+            timeExtendsUsed: state.timeExtendsUsed,
+            maxTimeExtends: settings.maxTimeExtendsPerRun,
+            extendSeconds: (settings.timeExtendDurationMs / 1000).round(),
+            onAccept: onAcceptTimeExtend,
+            onDecline: onDeclineTimeExtend,
           ),
       ],
     );
@@ -257,7 +274,7 @@ class _BoardRowView extends StatelessWidget {
             text: row.left.text,
             isSelected: _isSelected(TileColumn.left),
             onTap: () => onTileTap(index, TileColumn.left),
-            enabled: !inputLocked,
+            enabled: !inputLocked && row.left.pairId.isNotEmpty,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -266,7 +283,7 @@ class _BoardRowView extends StatelessWidget {
             text: row.right.text,
             isSelected: _isSelected(TileColumn.right),
             onTap: () => onTileTap(index, TileColumn.right),
-            enabled: !inputLocked,
+            enabled: !inputLocked && row.right.pairId.isNotEmpty,
           ),
         ),
       ],
@@ -408,6 +425,87 @@ class _TierPauseOverlay extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () => unawaited(onResume()),
                     child: const Text('Continue'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeExtendOverlay extends StatelessWidget {
+  const _TimeExtendOverlay({
+    required this.tokensRemaining,
+    required this.timeExtendsUsed,
+    required this.maxTimeExtends,
+    required this.extendSeconds,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  final int tokensRemaining;
+  final int timeExtendsUsed;
+  final int maxTimeExtends;
+  final int extendSeconds;
+  final Future<void> Function() onAccept;
+  final Future<void> Function() onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Positioned.fill(
+      child: ColoredBox(
+        color: Colors.black.withValues(alpha: 0.6),
+        child: Center(
+          child: Card(
+            color: AppColors.surfaceVariant,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Out of time!',
+                    style: theme.textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Add $extendSeconds seconds and keep your run alive?',
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Tokens remaining: $tokensRemaining',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    'Extends used this run: $timeExtendsUsed / $maxTimeExtends',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  ElevatedButton(
+                    onPressed: () => unawaited(onAccept()),
+                    child: Text('Add $extendSeconds seconds'),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: () => unawaited(onDecline()),
+                    child: const Text('Finish run'),
                   ),
                 ],
               ),
