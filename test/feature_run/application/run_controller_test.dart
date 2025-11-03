@@ -12,6 +12,7 @@ import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
 import 'package:palabra/feature_run/application/timer_service.dart';
 import 'package:palabra/feature_srs/deck_builder/deck_builder_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _InMemoryUserMetaRepository implements UserMetaRepository {
   _InMemoryUserMetaRepository(this._meta);
@@ -64,7 +65,35 @@ DeckBuilderService _buildDeckBuilder({int deckSize = 50}) {
   );
 }
 
+Future<void> _matchPairById(RunController controller, String pairId) async {
+  final state = controller.state;
+  final leftRow =
+      state.board.indexWhere((row) => row.left.pairId == pairId);
+  final rightRow =
+      state.board.indexWhere((row) => row.right.pairId == pairId);
+
+  expect(leftRow, isNot(-1), reason: 'Left tile for $pairId not found');
+  expect(rightRow, isNot(-1), reason: 'Right tile for $pairId not found');
+
+  controller.onTileTapped(leftRow, TileColumn.left);
+  controller.onTileTapped(rightRow, TileColumn.right);
+
+  await Future<void>.delayed(Duration.zero);
+}
+
+Future<void> _matchFirstPair(RunController controller) async {
+  final pairId = controller.state.board
+      .firstWhere((row) => row.left.pairId.isNotEmpty)
+      .left
+      .pairId;
+  await _matchPairById(controller, pairId);
+}
+
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues(const <String, Object?>{});
+  });
+
   group('RunController', () {
     test('initializes board with deck data', () async {
       final userStates = <String, UserItemState>{};
@@ -98,12 +127,13 @@ void main() {
 
       final controller = RunController(
         deckBuilderService: _buildDeckBuilder(deckSize: 30),
-        settings: const RunSettings(),
+        settings: const RunSettings(refillStepDelayMs: 0),
         timerService: RunTimerService.fake(),
         fetchUserStates: fetchStates,
         saveUserStates: saveStates,
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
       );
 
       await controller.initialize();
@@ -138,18 +168,18 @@ void main() {
 
       final controller = RunController(
         deckBuilderService: _buildDeckBuilder(deckSize: 30),
-        settings: const RunSettings(),
+        settings: const RunSettings(refillStepDelayMs: 0),
         timerService: RunTimerService.fake(),
         fetchUserStates: fetchStates,
         saveUserStates: saveStates,
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
       );
 
       await controller.initialize();
 
-      controller.onTileTapped(0, TileColumn.left);
-      controller.onTileTapped(0, TileColumn.right);
+      await _matchFirstPair(controller);
 
       final state = controller.state;
       expect(state.progress, 1);
@@ -188,26 +218,35 @@ void main() {
 
       final controller = RunController(
         deckBuilderService: _buildDeckBuilder(deckSize: 20),
-        settings: const RunSettings(rows: 2, targetMatches: 3),
+        settings:
+            const RunSettings(rows: 2, targetMatches: 3, refillStepDelayMs: 0),
         timerService: RunTimerService.fake(),
         fetchUserStates: fetchStates,
         saveUserStates: saveStates,
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
       );
 
       await controller.initialize();
 
-      final leftId = controller.state.board[0].left.pairId;
-      controller.onTileTapped(0, TileColumn.left);
-      controller.onTileTapped(1, TileColumn.right);
+      final initialState = controller.state;
+      final leftRow = initialState.board
+          .indexWhere((row) => row.left.pairId.isNotEmpty);
+      expect(leftRow, isNot(-1));
+      final leftId = initialState.board[leftRow].left.pairId;
+      final wrongRightRow = initialState.board.indexWhere(
+        (row) => row.right.pairId != leftId && row.right.pairId.isNotEmpty,
+      );
 
-      controller.onTileTapped(0, TileColumn.left);
-      controller.onTileTapped(0, TileColumn.right);
-      controller.onTileTapped(1, TileColumn.left);
-      controller.onTileTapped(1, TileColumn.right);
-      controller.onTileTapped(0, TileColumn.left);
-      controller.onTileTapped(0, TileColumn.right);
+      expect(wrongRightRow, isNot(-1));
+
+      controller.onTileTapped(leftRow, TileColumn.left);
+      controller.onTileTapped(wrongRightRow, TileColumn.right);
+
+      await _matchPairById(controller, leftId);
+      await _matchFirstPair(controller);
+      await _matchFirstPair(controller);
 
       await Future<void>.delayed(Duration.zero);
 
@@ -215,6 +254,174 @@ void main() {
       expect(attempts.length, greaterThanOrEqualTo(3));
       expect(userStates[leftId]?.wrongCount, greaterThanOrEqualTo(1));
       expect(runLogs.first.troubleDetected, contains(leftId));
+    });
+
+    test('refills pending rows sequentially after batch threshold', () async {
+      final userStates = <String, UserItemState>{};
+      Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+        return ids
+            .map(
+              (id) => userStates.putIfAbsent(
+                id,
+                () => UserItemState()..itemId = id,
+              ),
+            )
+            .toList();
+      }
+
+      Future<void> saveStates(List<UserItemState> states) async {
+        for (final state in states) {
+          userStates[state.itemId] = state;
+        }
+      }
+
+      Future<int> addRunLog(RunLog log) async => 1;
+      Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+      final controller = RunController(
+        deckBuilderService: _buildDeckBuilder(deckSize: 30),
+        settings: const RunSettings(
+          rows: 3,
+          refillBatchSize: 3,
+          refillStepDelayMs: 5,
+        ),
+        timerService: RunTimerService.fake(),
+        fetchUserStates: fetchStates,
+        saveUserStates: saveStates,
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+      );
+
+      await controller.initialize();
+
+      final initialPairs = controller.state.board
+          .where((row) => row.left.pairId.isNotEmpty)
+          .map((row) => row.left.pairId)
+          .take(3)
+          .toList();
+
+      for (final pairId in initialPairs) {
+        await _matchPairById(controller, pairId);
+      }
+
+      final stateAfterMatches = controller.state;
+      final immediateEmptyCount = stateAfterMatches.board
+          .where((row) => row.left.pairId.isEmpty)
+          .length;
+      expect(immediateEmptyCount, greaterThan(0));
+
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+
+      final stateAfterDelay = controller.state;
+      final finalEmptyCount = stateAfterDelay.board
+          .where((row) => row.left.pairId.isEmpty)
+          .length;
+      expect(finalEmptyCount, 0);
+    });
+
+    test('wrong match triggers temporary mismatch feedback', () async {
+      final userStates = <String, UserItemState>{};
+      Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+        return ids
+            .map(
+              (id) => userStates.putIfAbsent(
+                id,
+                () => UserItemState()..itemId = id,
+              ),
+            )
+            .toList();
+      }
+
+      Future<void> saveStates(List<UserItemState> states) async {}
+      Future<int> addRunLog(RunLog log) async => 1;
+      Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+      final controller = RunController(
+        deckBuilderService: _buildDeckBuilder(deckSize: 12),
+        settings: const RunSettings(rows: 2, refillStepDelayMs: 0),
+        timerService: RunTimerService.fake(),
+        fetchUserStates: fetchStates,
+        saveUserStates: saveStates,
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+      );
+
+      await controller.initialize();
+
+      final initialState = controller.state;
+      final leftRow = initialState.board
+          .indexWhere((row) => row.left.pairId.isNotEmpty);
+      expect(leftRow, isNot(-1));
+      final mismatchRightRow = initialState.board.indexWhere(
+        (row) =>
+            row.right.pairId !=
+                initialState.board[leftRow].left.pairId &&
+            row.right.pairId.isNotEmpty,
+      );
+      expect(mismatchRightRow, isNot(-1));
+
+      controller.onTileTapped(leftRow, TileColumn.left);
+      controller.onTileTapped(mismatchRightRow, TileColumn.right);
+
+      expect(controller.state.mismatchEffect, isNotNull);
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      expect(controller.state.mismatchEffect, isNull);
+    });
+
+    test('matched pair is removed from the session deck after resolution',
+        () async {
+      final userStates = <String, UserItemState>{};
+      Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+        return ids
+            .map(
+              (id) => userStates.putIfAbsent(
+                id,
+                () => UserItemState()..itemId = id,
+              ),
+            )
+            .toList();
+      }
+
+      Future<void> saveStates(List<UserItemState> states) async {}
+      Future<int> addRunLog(RunLog log) async => 1;
+      Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+      final controller = RunController(
+        deckBuilderService: _buildDeckBuilder(deckSize: 16),
+        settings: const RunSettings(
+          rows: 2,
+          refillBatchSize: 1,
+          refillStepDelayMs: 0,
+        ),
+        timerService: RunTimerService.fake(),
+        fetchUserStates: fetchStates,
+        saveUserStates: saveStates,
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+      );
+
+      await controller.initialize();
+
+      final firstPairId = controller.state.board[0].left.pairId;
+      final wrongRightRow = controller.state.board.indexWhere(
+        (row) => row.right.pairId != firstPairId && row.right.pairId.isNotEmpty,
+      );
+      expect(wrongRightRow, isNot(-1));
+
+      controller.onTileTapped(0, TileColumn.left);
+      controller.onTileTapped(wrongRightRow, TileColumn.right);
+
+      await _matchPairById(controller, firstPairId);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      final currentPairs = controller.state.board
+          .expand((row) => [row.left.pairId, row.right.pairId])
+          .toList();
+
+      expect(currentPairs, isNot(contains(firstPairId)));
     });
   });
 }

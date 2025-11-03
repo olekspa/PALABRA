@@ -9,6 +9,7 @@ class RunLogRepository {
 
   Future<int> add(RunLog runLog) async {
     _store.runLogs.insert(0, runLog);
+    await _store.persist();
     return _store.runLogs.length;
   }
 

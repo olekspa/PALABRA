@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palabra/app/router/app_router.dart';
@@ -23,6 +24,7 @@ class RunScreen extends ConsumerStatefulWidget {
 class _RunScreenState extends ConsumerState<RunScreen> {
   bool _navigatedToFinish = false;
   late final ProviderSubscription<RunState> _runSubscription;
+  int? _lastCelebrationToken;
 
   @override
   void initState() {
@@ -40,6 +42,11 @@ class _RunScreenState extends ConsumerState<RunScreen> {
             context.go(AppRoute.finish.path);
           });
         }
+        final celebration = next.celebrationEffect;
+        if (celebration != null && celebration.token != _lastCelebrationToken) {
+          _lastCelebrationToken = celebration.token;
+          _playCelebrationSound();
+        }
       },
     );
   }
@@ -48,6 +55,14 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   void dispose() {
     _runSubscription.close();
     super.dispose();
+  }
+
+  void _playCelebrationSound() {
+    try {
+      SystemSound.play(SystemSoundType.click);
+    } catch (_) {
+      // Ignore sound failures in unsupported environments (tests/web shell).
+    }
   }
 
   @override
@@ -128,6 +143,8 @@ class _RunView extends StatelessWidget {
             ),
           ],
         ),
+        if (state.celebrationEffect != null)
+          _CelebrationOverlay(token: state.celebrationEffect!.token),
         if (state.inputLocked &&
             state.phase == RunPhase.ready &&
             !state.showingTimeExtendOffer)
@@ -145,6 +162,54 @@ class _RunView extends StatelessWidget {
             onDecline: onDeclineTimeExtend,
           ),
       ],
+    );
+  }
+}
+
+class _CelebrationOverlay extends StatelessWidget {
+  const _CelebrationOverlay({required this.token});
+
+  final int token;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: TweenAnimationBuilder<double>(
+          key: ValueKey(token),
+          duration: const Duration(milliseconds: 320),
+          tween: Tween<double>(begin: 0, end: 1),
+          builder: (context, value, __) {
+            final opacity = (1 - value).clamp(0.0, 1.0);
+            final scale = 0.85 + (value * 0.3);
+            return Opacity(
+              opacity: opacity,
+              child: Transform.scale(
+                scale: scale,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: <Color>[
+                          AppColors.success.withValues(alpha: 0.3),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 72,
+                      color: AppColors.success,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
@@ -235,6 +300,7 @@ class _RunBoard extends StatelessWidget {
               index: i,
               row: state.board[i],
               selection: state.selection,
+              mismatchEffect: state.mismatchEffect,
               onTileTap: onTileTap,
               inputLocked: state.inputLocked,
             ),
@@ -249,6 +315,7 @@ class _BoardRowView extends StatelessWidget {
     required this.index,
     required this.row,
     required this.selection,
+    required this.mismatchEffect,
     required this.onTileTap,
     required this.inputLocked,
   });
@@ -256,6 +323,7 @@ class _BoardRowView extends StatelessWidget {
   final int index;
   final BoardRow row;
   final TileSelection? selection;
+  final MismatchEffect? mismatchEffect;
   final void Function(int row, TileColumn column) onTileTap;
   final bool inputLocked;
 
@@ -273,6 +341,9 @@ class _BoardRowView extends StatelessWidget {
           child: _RunTile(
             text: row.left.text,
             isSelected: _isSelected(TileColumn.left),
+            isMismatch:
+                mismatchEffect?.involves(index, TileColumn.left) ?? false,
+            mismatchToken: mismatchEffect?.token ?? 0,
             onTap: () => onTileTap(index, TileColumn.left),
             enabled: !inputLocked && row.left.pairId.isNotEmpty,
           ),
@@ -282,6 +353,9 @@ class _BoardRowView extends StatelessWidget {
           child: _RunTile(
             text: row.right.text,
             isSelected: _isSelected(TileColumn.right),
+            isMismatch:
+                mismatchEffect?.involves(index, TileColumn.right) ?? false,
+            mismatchToken: mismatchEffect?.token ?? 0,
             onTap: () => onTileTap(index, TileColumn.right),
             enabled: !inputLocked && row.right.pairId.isNotEmpty,
           ),
@@ -291,48 +365,126 @@ class _BoardRowView extends StatelessWidget {
   }
 }
 
-class _RunTile extends StatelessWidget {
+class _RunTile extends StatefulWidget {
   const _RunTile({
     required this.text,
     required this.isSelected,
+    required this.isMismatch,
+    required this.mismatchToken,
     required this.onTap,
     required this.enabled,
   });
 
   final String text;
   final bool isSelected;
+  final bool isMismatch;
+  final int mismatchToken;
   final VoidCallback onTap;
   final bool enabled;
 
   @override
+  State<_RunTile> createState() => _RunTileState();
+}
+
+class _RunTileState extends State<_RunTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _offsetAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _offsetAnimation = _buildShakeAnimation();
+    if (widget.isMismatch) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  Animation<double> _buildShakeAnimation() {
+    return TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -6.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -6.0, end: 6.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 6.0, end: -4.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -4.0, end: 4.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 4.0, end: 0.0), weight: 1),
+    ]).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _RunTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final mismatchTokenChanged =
+        widget.mismatchToken != oldWidget.mismatchToken;
+    if (widget.isMismatch && (!oldWidget.isMismatch || mismatchTokenChanged)) {
+      _controller.forward(from: 0);
+    } else if (!widget.isMismatch && oldWidget.isMismatch) {
+      _controller.stop();
+      _controller.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final background = isSelected
-        ? AppColors.secondary.withValues(alpha: 0.2)
-        : AppColors.surfaceVariant;
-    final border = isSelected ? AppColors.secondary : AppColors.outline;
+    final bool mismatch = widget.isMismatch;
+    final background = mismatch
+        ? AppColors.danger.withValues(alpha: 0.18)
+        : widget.isSelected
+            ? AppColors.secondary.withValues(alpha: 0.2)
+            : AppColors.surfaceVariant;
+    final border = mismatch
+        ? AppColors.danger
+        : widget.isSelected
+            ? AppColors.secondary
+            : AppColors.outline;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),
-      opacity: enabled ? 1 : 0.5,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(18),
-        splashColor: AppColors.secondary.withValues(alpha: 0.1),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: border),
-          ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium,
+      opacity: widget.enabled ? 1 : 0.5,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final double dx = mismatch ? _offsetAnimation.value : 0.0;
+          return Transform.translate(
+            offset: Offset(dx, 0),
+            child: child,
+          );
+        },
+        child: InkWell(
+          onTap: widget.enabled ? widget.onTap : null,
+          borderRadius: BorderRadius.circular(18),
+          splashColor: mismatch
+              ? AppColors.danger.withValues(alpha: 0.1)
+              : AppColors.secondary.withValues(alpha: 0.1),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: background,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: border),
+            ),
+            child: Text(
+              widget.text,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: mismatch ? AppColors.danger : null,
+              ),
+            ),
           ),
         ),
       ),

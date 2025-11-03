@@ -9,5 +9,6 @@ class AttemptLogRepository {
 
   Future<void> addAll(List<AttemptLog> attempts) async {
     _store.attemptLogs.addAll(attempts);
+    await _store.persist();
   }
 }

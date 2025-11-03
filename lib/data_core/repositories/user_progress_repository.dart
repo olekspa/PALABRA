@@ -19,6 +19,7 @@ class UserProgressRepository {
     for (final state in states) {
       _store.userStates[state.itemId] = state;
     }
+    await _store.persist();
   }
 
   Future<UserItemState?> getState(String itemId) async {

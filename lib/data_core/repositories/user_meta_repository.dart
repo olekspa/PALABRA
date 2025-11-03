@@ -13,5 +13,6 @@ class UserMetaRepository {
 
   Future<void> save(UserMeta meta) async {
     _store.userMeta = meta;
+    await _store.persist();
   }
 }

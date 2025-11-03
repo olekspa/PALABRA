@@ -7,6 +7,7 @@ import 'models/run_log.dart';
 import 'models/user_item_state.dart';
 import 'models/user_meta.dart';
 import 'models/vocab_item.dart';
+import 'persistence/store_persistence.dart';
 
 class InMemoryStore {
   InMemoryStore._();
@@ -20,6 +21,18 @@ class InMemoryStore {
   final List<AttemptLog> attemptLogs = <AttemptLog>[];
 
   bool _vocabularyLoaded = false;
+
+  Future<void> restore() async {
+    final payload = await StorePersistence.instance.load();
+    if (payload == null) {
+      return;
+    }
+    _loadFromJson(payload);
+  }
+
+  Future<void> persist() {
+    return StorePersistence.instance.save(_toJson());
+  }
 
   Future<void> ensureVocabularyLoaded(AssetBundle bundle) async {
     if (_vocabularyLoaded) {
@@ -45,6 +58,62 @@ class InMemoryStore {
   void upsertVocabulary(List<VocabItem> items) {
     for (final item in items) {
       _vocabulary[item.itemId] = item;
+    }
+  }
+
+  Map<String, dynamic> _toJson() {
+    final states = <String, dynamic>{
+      for (final entry in userStates.entries) entry.key: entry.value.toJson(),
+    };
+    return <String, dynamic>{
+      'userMeta': userMeta.toJson(),
+      'userStates': states,
+      'runLogs': runLogs.map((log) => log.toJson()).toList(),
+      'attemptLogs': attemptLogs.map((log) => log.toJson()).toList(),
+    };
+  }
+
+  void _loadFromJson(Map<String, dynamic> json) {
+    final metaJson = json['userMeta'];
+    if (metaJson is Map<String, dynamic>) {
+      userMeta = UserMeta.fromJson(metaJson);
+    }
+
+    final statesJson = json['userStates'];
+    if (statesJson is Map) {
+      userStates.clear();
+      statesJson.forEach((key, value) {
+        if (value is Map) {
+          final map = Map<String, dynamic>.from(value);
+          map['itemId'] ??= key.toString();
+          final state = UserItemState.fromJson(map);
+          if (state.itemId.isNotEmpty) {
+            userStates[state.itemId] = state;
+          }
+        }
+      });
+    }
+
+    final runLogsJson = json['runLogs'];
+    if (runLogsJson is List) {
+      runLogs
+        ..clear()
+        ..addAll(
+          runLogsJson
+              .whereType<Map<String, dynamic>>()
+              .map(RunLog.fromJson),
+        );
+    }
+
+    final attemptsJson = json['attemptLogs'];
+    if (attemptsJson is List) {
+      attemptLogs
+        ..clear()
+        ..addAll(
+          attemptsJson
+              .whereType<Map<String, dynamic>>()
+              .map(AttemptLog.fromJson),
+        );
     }
   }
 

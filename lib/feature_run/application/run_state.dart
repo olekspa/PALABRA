@@ -16,6 +16,29 @@ class TileSelection {
   final String pairId;
 }
 
+class MismatchEffect {
+  const MismatchEffect({
+    required this.token,
+    required this.left,
+    required this.right,
+  });
+
+  final int token;
+  final TileSelection left;
+  final TileSelection right;
+
+  bool involves(int row, TileColumn column) {
+    return (left.row == row && left.column == column) ||
+        (right.row == row && right.column == column);
+  }
+}
+
+class CelebrationEffect {
+  const CelebrationEffect({required this.token});
+
+  final int token;
+}
+
 class BoardTile {
   const BoardTile({
     required this.id,
@@ -55,6 +78,8 @@ class RunState {
     required this.board,
     required this.progress,
     required this.selection,
+    required this.mismatchEffect,
+    required this.celebrationEffect,
     required this.isResolving,
     required this.deckRemaining,
     required this.millisecondsRemaining,
@@ -73,6 +98,8 @@ class RunState {
       board: const <BoardRow>[],
       progress: 0,
       selection: null,
+      mismatchEffect: null,
+      celebrationEffect: null,
       isResolving: false,
       deckRemaining: 0,
       millisecondsRemaining: 105000,
@@ -99,6 +126,8 @@ class RunState {
       board: List<BoardRow>.unmodifiable(board),
       progress: 0,
       selection: null,
+      mismatchEffect: null,
+      celebrationEffect: null,
       isResolving: false,
       deckRemaining: deckRemaining,
       millisecondsRemaining: millisecondsRemaining,
@@ -116,6 +145,8 @@ class RunState {
   final List<BoardRow> board;
   final int progress;
   final TileSelection? selection;
+  final MismatchEffect? mismatchEffect;
+  final CelebrationEffect? celebrationEffect;
   final bool isResolving;
   final int deckRemaining;
   final int millisecondsRemaining;
@@ -138,6 +169,10 @@ class RunState {
     int? progress,
     TileSelection? selection,
     bool clearSelection = false,
+    MismatchEffect? mismatchEffect,
+    bool clearMismatch = false,
+    CelebrationEffect? celebrationEffect,
+    bool clearCelebration = false,
     bool? isResolving,
     int? deckRemaining,
     int? millisecondsRemaining,
@@ -154,6 +189,11 @@ class RunState {
       board: board != null ? List<BoardRow>.unmodifiable(board) : this.board,
       progress: progress ?? this.progress,
       selection: clearSelection ? null : selection ?? this.selection,
+      mismatchEffect:
+          clearMismatch ? null : mismatchEffect ?? this.mismatchEffect,
+      celebrationEffect: clearCelebration
+          ? null
+          : celebrationEffect ?? this.celebrationEffect,
       isResolving: isResolving ?? this.isResolving,
       deckRemaining: deckRemaining ?? this.deckRemaining,
       millisecondsRemaining:

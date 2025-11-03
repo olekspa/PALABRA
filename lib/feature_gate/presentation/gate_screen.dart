@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palabra/app/router/app_router.dart';
 import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
+import 'package:palabra/feature_gate/application/gate_access.dart';
 
 /// Entry gate screen that verifies device and course availability.
 class GateScreen extends ConsumerWidget {
@@ -13,26 +13,9 @@ class GateScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Device gating is strict—mobile iOS is the launch target.
-    final isIos = defaultTargetPlatform == TargetPlatform.iOS;
-    const isWeb = kIsWeb;
-    final betaOverride = isWeb || kDebugMode;
-    final isSupportedDevice = isIos;
-    // TODO(content-team): Replace hard-coded course once LMS integration lands.
-    const currentCourse = 'spanish';
-    const requiredCourse = 'spanish';
-    const isSupportedCourse = currentCourse == requiredCourse;
-    final canProceed = (isSupportedDevice || betaOverride) && isSupportedCourse;
-    final deviceStatus = isIos
-        ? 'iPhone detected'
-        : isWeb
-            ? 'Web demo (beta)'
-            : kDebugMode
-                ? 'Debug override active'
-                : 'Not supported';
-    const courseStatus = isSupportedCourse
-        ? 'Spanish course confirmed'
-        : 'Requires Spanish course';
+    final access = ref.watch(gateAccessProvider);
+    final requiredCourseId = ref.watch(gateRequiredCourseProvider);
+    final flags = ref.watch(gateFeatureFlagsProvider);
 
     return GradientBackground(
       child: Scaffold(
@@ -68,26 +51,39 @@ class GateScreen extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.xl),
                         _GateStatusRow(
                           label: 'Device',
-                          value: deviceStatus,
-                          isOk: canProceed,
+                          value: access.device.value,
+                          isOk: access.device.allowed,
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        const _GateStatusRow(
+                        _GateStatusRow(
                           label: 'Course',
-                          value: courseStatus,
-                          isOk: isSupportedCourse,
+                          value: access.course.value,
+                          isOk: access.course.allowed,
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         ElevatedButton(
-                          onPressed: canProceed
+                          onPressed: access.canProceed
                               ? () => context.go(AppRoute.preRun.path)
                               : null,
                           child: const Text('Continue'),
                         ),
-                        if (!canProceed) ...[
+                        if (_shouldShowOverrideNote(access, flags)) ...[
                           const SizedBox(height: AppSpacing.sm),
                           Text(
-                            'Palabra is currently limited to Spanish learners '
+                            'Override flags granted access on this device. '
+                            'Disable the PALABRA_* feature flags to restore '
+                            'production gating.',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: Colors.white70),
+                          ),
+                        ] else if (!access.canProceed) ...[
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            'Palabra is currently limited to '
+                            '${_formatCourseName(requiredCourseId)} learners '
                             'on iPhone.',
                             textAlign: TextAlign.center,
                             style: Theme.of(context)
@@ -138,4 +134,26 @@ class _GateStatusRow extends StatelessWidget {
       ],
     );
   }
+}
+
+bool _shouldShowOverrideNote(
+  GateAccessStatus status,
+  GateFeatureFlags flags,
+) {
+  return status.device.overrideApplied ||
+      (flags.forceCourseId != null && status.course.allowed);
+}
+
+String _formatCourseName(String value) {
+  if (value.isEmpty) {
+    return 'Spanish';
+  }
+  final segments = value.split(RegExp('[_\\-]')).where((s) => s.isNotEmpty);
+  final formatted = segments
+      .map(
+        (segment) =>
+            segment.substring(0, 1).toUpperCase() + segment.substring(1),
+      )
+      .join(' ');
+  return formatted.isEmpty ? 'Spanish' : formatted;
 }

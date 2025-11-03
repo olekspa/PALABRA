@@ -10,6 +10,7 @@ class RunSettings {
     this.timeExtendDurationMs = 60000,
     this.maxTimeExtendsPerRun = 2,
     this.refillBatchSize = 3,
+    this.refillStepDelayMs = 150,
   });
 
   final int rows;
@@ -18,6 +19,7 @@ class RunSettings {
   final int timeExtendDurationMs;
   final int maxTimeExtendsPerRun;
   final int refillBatchSize;
+  final int refillStepDelayMs;
 }
 
 /// Tracks the active board row count (Row Blaster toggles this to four).

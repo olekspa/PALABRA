@@ -52,11 +52,14 @@ class RunController extends StateNotifier<RunState> {
   final List<AttemptLog> _attempts = <AttemptLog>[];
   final Set<String> _troubleDetected = <String>{};
   final List<String> _learnedPromotions = <String>[];
-  final List<_PendingReinsert> _reinsertQueue = <_PendingReinsert>[];
-  final Map<String, int> _troubleAppearances = <String, int>{};
   final List<int> _pendingRefillRows = <int>[];
   final Random _random = Random();
+  bool _refillSequenceActive = false;
   int _placeholderSalt = 0;
+  int _mismatchSalt = 0;
+  Timer? _mismatchTimer;
+  int _celebrationSalt = 0;
+  Timer? _celebrationTimer;
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
@@ -92,11 +95,12 @@ class RunController extends StateNotifier<RunState> {
     }
 
     _randomizeRightColumn(initialBoard);
+    final balancedBoard = _ensureBoardInvariant(initialBoard);
 
     state = RunState.ready(
       rows: _settings.rows,
-      board: initialBoard,
-      deckRemaining: _deckQueue.length - _cursor,
+      board: balancedBoard,
+      deckRemaining: _remainingPairs,
       millisecondsRemaining: _settings.runDurationMs,
       timeExtendTokens: _userMeta?.timeExtendTokens ?? 0,
       timeExtendsUsed: _timeExtendsUsed,
@@ -152,13 +156,15 @@ class RunController extends StateNotifier<RunState> {
       _resolveMatch(leftSelection, rightSelection);
     } else {
       _handleWrong(leftSelection.pairId);
-      state = current.copyWith(clearSelection: true);
+      _triggerMismatchEffect(leftSelection, rightSelection);
     }
   }
 
   @override
   void dispose() {
     _timerService.stop();
+    _cancelMismatchTimer();
+    _cancelCelebrationTimer();
     super.dispose();
   }
 
@@ -190,14 +196,17 @@ class RunController extends StateNotifier<RunState> {
     _attempts.clear();
     _troubleDetected.clear();
     _learnedPromotions.clear();
-    _reinsertQueue.clear();
-    _troubleAppearances.clear();
     _vocabLookup.clear();
     _deckResult = null;
     _runStartedAt = DateTime.now();
     _runFinished = false;
     _timeExtendsUsed = 0;
     _pendingRefillRows.clear();
+    _refillSequenceActive = false;
+    _cancelMismatchTimer();
+    _mismatchSalt = 0;
+    _cancelCelebrationTimer();
+    _celebrationSalt = 0;
   }
 
   BoardRow _createRow(VocabItem item) {
@@ -229,7 +238,6 @@ class RunController extends StateNotifier<RunState> {
       ..lastSeenAt = DateTime.now();
 
     _troubleDetected.add(itemId);
-    _scheduleTroubleReinsert(itemState.itemId);
   }
 
   UserItemState _ensureItemState(String itemId) {
@@ -243,19 +251,57 @@ class RunController extends StateNotifier<RunState> {
     TileSelection leftSelection,
     TileSelection rightSelection,
   ) {
+    _clearMismatchEffect();
     final updatedBoard = List<BoardRow>.from(state.board);
 
     updatedBoard[leftSelection.row] = _emptyRow(leftSelection.row);
     _pendingRefillRows.add(leftSelection.row);
+    final balancedBoard = _ensureBoardInvariant(updatedBoard);
 
+    final celebration = CelebrationEffect(token: ++_celebrationSalt);
+    _cancelCelebrationTimer();
     state = state.copyWith(
-      board: updatedBoard,
+      board: balancedBoard,
       progress: state.progress + 1,
       clearSelection: true,
-      deckRemaining: max(0, _deckQueue.length - _cursor),
+      deckRemaining: _remainingPairs,
+      celebrationEffect: celebration,
     );
+    _scheduleCelebrationClear(celebration);
     _maybeRefillPending();
     _checkTierPause();
+  }
+
+  void _triggerMismatchEffect(
+    TileSelection leftSelection,
+    TileSelection rightSelection,
+  ) {
+    final effect = MismatchEffect(
+      token: ++_mismatchSalt,
+      left: leftSelection,
+      right: rightSelection,
+    );
+    _cancelMismatchTimer();
+    state = state.copyWith(
+      mismatchEffect: effect,
+      clearSelection: true,
+    );
+    _mismatchTimer = Timer(const Duration(milliseconds: 320), () {
+      if (!mounted || _runFinished) {
+        return;
+      }
+      if (state.mismatchEffect?.token == effect.token) {
+        state = state.copyWith(clearMismatch: true);
+      }
+    });
+  }
+
+  void _clearMismatchEffect() {
+    if (state.mismatchEffect == null) {
+      return;
+    }
+    _cancelMismatchTimer();
+    state = state.copyWith(clearMismatch: true);
   }
 
   BoardTile _buildLeftTile(VocabItem item) {
@@ -279,48 +325,12 @@ class RunController extends StateNotifier<RunState> {
   }
 
   VocabItem? _drawNextPair() {
-    final pending = _takePendingReinsert();
-    if (pending != null) {
-      return pending;
-    }
     if (_cursor >= _deckQueue.length) {
       return null;
     }
     final item = _deckQueue[_cursor];
     _cursor += 1;
     return item;
-  }
-
-  VocabItem? _takePendingReinsert() {
-    if (_reinsertQueue.isEmpty) {
-      return null;
-    }
-    for (final entry in _reinsertQueue) {
-      entry.remainingDelay -= 1;
-    }
-    final index = _reinsertQueue.indexWhere(
-      (entry) => entry.remainingDelay <= 0,
-    );
-    if (index == -1) {
-      return null;
-    }
-    return _reinsertQueue.removeAt(index).item;
-  }
-
-  void _scheduleTroubleReinsert(String itemId) {
-    final item = _vocabLookup[itemId];
-    if (item == null) {
-      return;
-    }
-    final currentCount = _troubleAppearances.putIfAbsent(itemId, () => 0);
-    if (currentCount >= 3) {
-      return;
-    }
-    if (_reinsertQueue.any((entry) => entry.item.itemId == itemId)) {
-      return;
-    }
-    _troubleAppearances[itemId] = currentCount + 1;
-    _reinsertQueue.add(_PendingReinsert(item, 4));
   }
 
   void _startTimer(int durationMs) {
@@ -446,6 +456,9 @@ class RunController extends StateNotifier<RunState> {
       return;
     }
     _runFinished = true;
+    _refillSequenceActive = false;
+    _clearMismatchEffect();
+    _clearCelebrationEffect();
     final runLog = RunLog()
       ..startedAt = _runStartedAt
       ..completedAt = DateTime.now()
@@ -517,40 +530,49 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void _maybeRefillPending({bool force = false}) {
-    if (_pendingRefillRows.isEmpty) {
+    if (_pendingRefillRows.isEmpty || !_canContinueRefill()) {
       return;
     }
-    final remainingPairs = _deckQueue.length - _cursor;
-    final shouldRefill = force ||
+
+    final remainingPairs = _remainingPairs;
+    final shouldStart = force ||
         _pendingRefillRows.length >= _settings.refillBatchSize ||
         remainingPairs < _settings.refillBatchSize;
-    if (!shouldRefill) {
+    if (!shouldStart || _refillSequenceActive) {
       return;
     }
 
-    final updatedBoard = List<BoardRow>.from(state.board);
-    final filledRows = <int>[];
+    _refillSequenceActive = true;
+    unawaited(_drainPendingRefills());
+  }
 
-    for (final rowIndex in List<int>.from(_pendingRefillRows)) {
-      final item = _drawNextPair();
-      if (item == null) {
-        break;
+  void _cancelMismatchTimer() {
+    _mismatchTimer?.cancel();
+    _mismatchTimer = null;
+  }
+
+  void _scheduleCelebrationClear(CelebrationEffect effect) {
+    _celebrationTimer = Timer(const Duration(milliseconds: 360), () {
+      if (!mounted || _runFinished) {
+        return;
       }
-      updatedBoard[rowIndex] = _createRow(item);
-      filledRows.add(rowIndex);
-    }
+      if (state.celebrationEffect?.token == effect.token) {
+        state = state.copyWith(clearCelebration: true);
+      }
+    });
+  }
 
-    if (filledRows.isEmpty) {
+  void _cancelCelebrationTimer() {
+    _celebrationTimer?.cancel();
+    _celebrationTimer = null;
+  }
+
+  void _clearCelebrationEffect() {
+    if (state.celebrationEffect == null) {
       return;
     }
-
-    _pendingRefillRows.removeWhere(filledRows.contains);
-    _randomizeRightColumn(updatedBoard);
-
-    state = state.copyWith(
-      board: updatedBoard,
-      deckRemaining: max(0, _deckQueue.length - _cursor),
-    );
+    _cancelCelebrationTimer();
+    state = state.copyWith(clearCelebration: true);
   }
 
   BoardRow _emptyRow(int rowIndex) {
@@ -568,6 +590,139 @@ class RunController extends StateNotifier<RunState> {
         column: TileColumn.right,
       ),
     );
+  }
+
+  Future<void> _drainPendingRefills() async {
+    while (_pendingRefillRows.isNotEmpty && _canContinueRefill()) {
+      await _waitForRefillStep();
+      final filled = _refillSingleRow();
+      if (!filled) {
+        break;
+      }
+    }
+    _refillSequenceActive = false;
+  }
+
+  Future<void> _waitForRefillStep() async {
+    final delayMs = _settings.refillStepDelayMs;
+    if (delayMs <= 0) {
+      await Future<void>.delayed(Duration.zero);
+      return;
+    }
+    await Future<void>.delayed(Duration(milliseconds: delayMs));
+  }
+
+  bool _refillSingleRow() {
+    if (_pendingRefillRows.isEmpty) {
+      return false;
+    }
+
+    final rowIndex = _pendingRefillRows.first;
+    final item = _drawNextPair();
+    if (item == null) {
+      return false;
+    }
+
+    final updatedBoard = List<BoardRow>.from(state.board);
+    _pendingRefillRows.removeAt(0);
+    updatedBoard[rowIndex] = _createRow(item);
+    _randomizeRightColumn(updatedBoard);
+    final balancedBoard = _ensureBoardInvariant(updatedBoard);
+
+    state = state.copyWith(
+      board: balancedBoard,
+      deckRemaining: _remainingPairs,
+    );
+    return true;
+  }
+
+  bool _canContinueRefill() {
+    return state.phase == RunPhase.ready && !_runFinished;
+  }
+
+  int get _remainingPairs {
+    return max(0, _deckQueue.length - _cursor);
+  }
+
+  List<BoardRow> _ensureBoardInvariant(List<BoardRow> board) {
+    if (!_boardHasMismatch(board)) {
+      return board;
+    }
+
+    final repaired = _repairBoard(board);
+    assert(
+      !_boardHasMismatch(repaired),
+      'Board invariant violated: unmatched pair counts detected.',
+    );
+    return repaired;
+  }
+
+  bool _boardHasMismatch(List<BoardRow> board) {
+    final leftCounts = <String, int>{};
+    final rightCounts = <String, int>{};
+    for (final row in board) {
+      final leftId = row.left.pairId;
+      if (leftId.isNotEmpty) {
+        leftCounts[leftId] = (leftCounts[leftId] ?? 0) + 1;
+      }
+      final rightId = row.right.pairId;
+      if (rightId.isNotEmpty) {
+        rightCounts[rightId] = (rightCounts[rightId] ?? 0) + 1;
+      }
+    }
+    if (leftCounts.length != rightCounts.length) {
+      return true;
+    }
+    for (final entry in leftCounts.entries) {
+      if (rightCounts[entry.key] != entry.value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  List<BoardRow> _repairBoard(List<BoardRow> board) {
+    final updated = List<BoardRow>.from(board);
+    final activeRows = <int>[];
+
+    for (var i = 0; i < updated.length; i++) {
+      if (updated[i].left.pairId.isEmpty) {
+        updated[i] = updated[i].replaceTile(
+          TileColumn.right,
+          BoardTile(
+            id: 'empty_${i}_right_${_placeholderSalt++}',
+            pairId: '',
+            text: '',
+            column: TileColumn.right,
+          ),
+        );
+        continue;
+      }
+      activeRows.add(i);
+    }
+
+    final rightTiles = <BoardTile>[];
+    for (final rowIndex in activeRows) {
+      final pairId = updated[rowIndex].left.pairId;
+      final vocab = _vocabLookup[pairId];
+      if (vocab == null) {
+        continue;
+      }
+      rightTiles.add(_buildRightTile(vocab));
+    }
+
+    rightTiles.shuffle(_random);
+    var cursor = 0;
+    for (final rowIndex in activeRows) {
+      if (cursor >= rightTiles.length) {
+        break;
+      }
+      updated[rowIndex] = updated[rowIndex].replaceTile(
+        TileColumn.right,
+        rightTiles[cursor++],
+      );
+    }
+    return updated;
   }
 
   void _randomizeRightColumn(List<BoardRow> board) {
@@ -597,6 +752,12 @@ class RunController extends StateNotifier<RunState> {
   }
 }
 
+final runTimerServiceProvider = Provider<RunTimerService>((ref) {
+  final service = RunTimerService();
+  ref.onDispose(service.stop);
+  return service;
+});
+
 final runControllerProvider =
     StateNotifierProvider.autoDispose<RunController, RunState>((ref) {
       final deckBuilder = ref.watch(deckBuilderServiceProvider);
@@ -605,7 +766,7 @@ final runControllerProvider =
       final runLogRepo = ref.watch(runLogRepositoryProvider);
       final attemptRepo = ref.watch(attemptLogRepositoryProvider);
       final userMetaRepo = ref.watch(userMetaRepositoryProvider);
-      final timerService = RunTimerService();
+      final timerService = ref.watch(runTimerServiceProvider);
 
       final controller = RunController(
         deckBuilderService: deckBuilder,
@@ -619,13 +780,5 @@ final runControllerProvider =
       );
 
       controller.initialize();
-      ref.onDispose(timerService.stop);
       return controller;
     });
-
-class _PendingReinsert {
-  _PendingReinsert(this.item, this.remainingDelay);
-
-  final VocabItem item;
-  int remainingDelay;
-}
