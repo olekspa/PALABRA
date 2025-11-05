@@ -1,3 +1,4 @@
+// Early SRS experiments skip exhaustive docs/types to keep iteration fast.
 // ignore_for_file: public_member_api_docs, omit_local_variable_types
 
 import 'dart:math';
@@ -99,7 +100,13 @@ class DeckBuilderService {
       final vocab = await _vocabularyFetcher(level);
       final states = await _progressFetcher(vocab.map((item) => item.itemId));
       final entries = vocab
-          .map((item) => _DeckEntry(item: item, state: states[item.itemId]))
+          .map(
+            (item) => _DeckEntry(
+              item: item,
+              state: states[item.itemId],
+              prioritySeed: _random.nextDouble(),
+            ),
+          )
           .toList();
 
       final added = _selectForLevel(
@@ -115,6 +122,7 @@ class DeckBuilderService {
       troubleCount = added.troubleCount;
     }
 
+    deck.shuffle(_random);
     return DeckBuildResult(
       items: deck.map((entry) => entry.item).toList(),
       freshCount: freshCount,
@@ -133,6 +141,7 @@ class DeckBuilderService {
   }) {
     var addedFresh = freshCount;
     var addedTrouble = troubleCount;
+    final selectedIds = deck.map((entry) => entry.item.itemId).toSet();
     final available = entries.where((entry) => !entry.isLearned).toList();
     final learned = entries.where((entry) => entry.isLearned).toList();
     final trouble = _prioritizePool(
@@ -148,15 +157,23 @@ class DeckBuilderService {
     final fallbackAvailable = _prioritizePool(available.toList());
 
     int added = 0;
-    bool tryAdd(_DeckEntry entry, {bool allowDuplicateFamily = false}) {
+    bool tryAdd(
+      _DeckEntry entry, {
+      bool allowDuplicateFamily = false,
+      bool ignoreFreshLimit = false,
+    }) {
+      if (selectedIds.contains(entry.item.itemId)) {
+        return false;
+      }
       final familyKey = entry.familyKey;
       if (!allowDuplicateFamily && usedFamilies.contains(familyKey)) {
         return false;
       }
-      if (entry.isFresh && addedFresh >= freshLimit) {
+      if (entry.isFresh && !ignoreFreshLimit && addedFresh >= freshLimit) {
         return false;
       }
       usedFamilies.add(familyKey);
+      selectedIds.add(entry.item.itemId);
       deck.add(entry);
       added += 1;
       if (entry.isFresh) {
@@ -208,6 +225,32 @@ class DeckBuilderService {
       }
     }
 
+    if (added < target) {
+      for (final entry in fresh) {
+        if (added >= target) {
+          break;
+        }
+        tryAdd(
+          entry,
+          allowDuplicateFamily: true,
+          ignoreFreshLimit: true,
+        );
+      }
+    }
+
+    if (added < target) {
+      for (final entry in fallbackAvailable) {
+        if (added >= target) {
+          break;
+        }
+        tryAdd(
+          entry,
+          allowDuplicateFamily: true,
+          ignoreFreshLimit: true,
+        );
+      }
+    }
+
     return _SelectionResult(freshCount: addedFresh, troubleCount: addedTrouble);
   }
 
@@ -233,6 +276,9 @@ class DeckBuilderService {
     final lastSeenComparison = lastSeenA.compareTo(lastSeenB);
     if (lastSeenComparison != 0) {
       return lastSeenComparison;
+    }
+    if (a.prioritySeed != b.prioritySeed) {
+      return a.prioritySeed.compareTo(b.prioritySeed);
     }
     return a.item.itemId.compareTo(b.item.itemId);
   }
@@ -270,10 +316,15 @@ class DeckBuilderService {
 }
 
 class _DeckEntry {
-  _DeckEntry({required this.item, required this.state});
+  _DeckEntry({
+    required this.item,
+    required this.state,
+    required this.prioritySeed,
+  });
 
   final VocabItem item;
   final UserItemState? state;
+  final double prioritySeed;
 
   String get familyKey {
     final family = item.family;

@@ -1,3 +1,4 @@
+// Lightweight service intentionally omits docs until API stabilizes.
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
@@ -55,6 +56,22 @@ class RunTimerService {
     _remainingMs = (_remainingMs - decrementMs).clamp(0, _remainingMs);
     _onTick?.call(_remainingMs);
     if (_remainingMs <= 0) {
+      _onTimeout?.call();
+    }
+  }
+
+  void reduceBy(int milliseconds) {
+    if (milliseconds <= 0) {
+      return;
+    }
+    if (_remainingMs <= 0) {
+      return;
+    }
+    final next = _remainingMs - milliseconds;
+    _remainingMs = next < 0 ? 0 : next;
+    _onTick?.call(_remainingMs);
+    if (_remainingMs == 0) {
+      stop();
       _onTimeout?.call();
     }
   }

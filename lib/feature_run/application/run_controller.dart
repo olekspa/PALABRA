@@ -1,3 +1,4 @@
+// Documentation lint is suppressed because these beta-only helpers change rapidly.
 // ignore_for_file: public_member_api_docs, cascade_invocations
 
 import 'dart:async';
@@ -53,6 +54,7 @@ class RunController extends StateNotifier<RunState> {
   final Set<String> _troubleDetected = <String>{};
   final List<String> _learnedPromotions = <String>[];
   final List<int> _pendingRefillRows = <int>[];
+  final Set<String> _dirtyItemIds = <String>{};
   final Random _random = Random();
   bool _refillSequenceActive = false;
   int _placeholderSalt = 0;
@@ -60,6 +62,7 @@ class RunController extends StateNotifier<RunState> {
   Timer? _mismatchTimer;
   int _celebrationSalt = 0;
   Timer? _celebrationTimer;
+  Timer? _progressPersistTimer;
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
@@ -156,6 +159,7 @@ class RunController extends StateNotifier<RunState> {
       _resolveMatch(leftSelection, rightSelection);
     } else {
       _handleWrong(leftSelection.pairId);
+      _applyMismatchPenalty();
       _triggerMismatchEffect(leftSelection, rightSelection);
     }
   }
@@ -165,6 +169,7 @@ class RunController extends StateNotifier<RunState> {
     _timerService.stop();
     _cancelMismatchTimer();
     _cancelCelebrationTimer();
+    unawaited(_flushPendingProgress());
     super.dispose();
   }
 
@@ -207,6 +212,8 @@ class RunController extends StateNotifier<RunState> {
     _mismatchSalt = 0;
     _cancelCelebrationTimer();
     _celebrationSalt = 0;
+    _dirtyItemIds.clear();
+    _cancelProgressPersistTimer();
   }
 
   BoardRow _createRow(VocabItem item) {
@@ -227,6 +234,7 @@ class RunController extends StateNotifier<RunState> {
         _learnedPromotions.add(itemId);
       }
     }
+    _markStateDirty(itemId);
   }
 
   void _handleWrong(String itemId) {
@@ -238,6 +246,51 @@ class RunController extends StateNotifier<RunState> {
       ..lastSeenAt = DateTime.now();
 
     _troubleDetected.add(itemId);
+    _markStateDirty(itemId);
+  }
+
+  void _applyMismatchPenalty() {
+    final penalty = _settings.mismatchPenaltyMs;
+    if (penalty <= 0 || _runFinished || state.phase != RunPhase.ready) {
+      return;
+    }
+    _timerService.reduceBy(penalty);
+  }
+
+  void _markStateDirty(String itemId) {
+    _dirtyItemIds.add(itemId);
+    _scheduleProgressPersist();
+  }
+
+  void _scheduleProgressPersist() {
+    if (_progressPersistTimer?.isActive ?? false) {
+      return;
+    }
+    _progressPersistTimer = Timer(const Duration(seconds: 2), () {
+      unawaited(_flushPendingProgress());
+    });
+  }
+
+  Future<void> _flushPendingProgress() async {
+    _cancelProgressPersistTimer();
+    if (_dirtyItemIds.isEmpty) {
+      return;
+    }
+    final ids = _dirtyItemIds.toList(growable: false);
+    _dirtyItemIds.clear();
+    final payload = ids
+        .map((id) => _itemStates[id])
+        .whereType<UserItemState>()
+        .toList(growable: false);
+    if (payload.isEmpty) {
+      return;
+    }
+    await _saveUserStates(payload);
+  }
+
+  void _cancelProgressPersistTimer() {
+    _progressPersistTimer?.cancel();
+    _progressPersistTimer = null;
   }
 
   UserItemState _ensureItemState(String itemId) {
@@ -459,6 +512,7 @@ class RunController extends StateNotifier<RunState> {
     _refillSequenceActive = false;
     _clearMismatchEffect();
     _clearCelebrationEffect();
+    await _flushPendingProgress();
     final runLog = RunLog()
       ..startedAt = _runStartedAt
       ..completedAt = DateTime.now()
@@ -768,7 +822,7 @@ final runControllerProvider =
       final userMetaRepo = ref.watch(userMetaRepositoryProvider);
       final timerService = ref.watch(runTimerServiceProvider);
 
-      final controller = RunController(
+      final RunController controller = RunController(
         deckBuilderService: deckBuilder,
         settings: settings,
         timerService: timerService,
@@ -779,6 +833,6 @@ final runControllerProvider =
         userMetaRepository: userMetaRepo,
       );
 
-      controller.initialize();
+      unawaited(controller.initialize());
       return controller;
     });

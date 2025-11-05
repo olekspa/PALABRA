@@ -1,3 +1,4 @@
+// These settings objects intentionally skip doc comments while gameplay is in flux.
 // ignore_for_file: public_member_api_docs
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ class RunSettings {
     this.maxTimeExtendsPerRun = 2,
     this.refillBatchSize = 3,
     this.refillStepDelayMs = 150,
+    this.mismatchPenaltyMs = 1000,
   });
 
   final int rows;
@@ -20,6 +22,7 @@ class RunSettings {
   final int maxTimeExtendsPerRun;
   final int refillBatchSize;
   final int refillStepDelayMs;
+  final int mismatchPenaltyMs;
 }
 
 /// Tracks the active board row count (Row Blaster toggles this to four).

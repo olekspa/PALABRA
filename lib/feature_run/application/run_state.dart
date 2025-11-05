@@ -1,3 +1,4 @@
+// Internal-only state types remain undocumented while mechanics are still shifting.
 // ignore_for_file: public_member_api_docs
 
 enum RunPhase { loading, ready, completed }

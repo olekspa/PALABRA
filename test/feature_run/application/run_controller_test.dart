@@ -1,3 +1,4 @@
+// These tests intentionally chain helpers densely; documenting each ignore would be noise.
 // ignore_for_file: cascade_invocations
 
 import 'package:flutter_test/flutter_test.dart';
