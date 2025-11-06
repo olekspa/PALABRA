@@ -43,7 +43,7 @@ Visit `http://localhost:8080/` in Chrome/Edge. For LAN testing, replace `localho
 1. **Cold start**: Load the app; verify the Gate screen appears with platform/course checks stubbed.
 2. **Pre-run**: Start a session, toggle Row Blaster, and confirm that the UI reflects the selected row count.
 3. **Run loop**: Match tiles until at least three pairs resolve, ensuring the board refills gradually and always offers valid matches.
-4. **Tier pause**: Reach 20 matches using the debug deck (if available) and confirm the pause overlay appearance and resume behavior.
+4. **Tier pause**: Reach 12 matches using the debug deck (if available) and confirm the pause overlay appearance and resume behavior. Repeat at 30 to verify the second milestone.
 5. **Finish screen**: Let the timer expire or reach the target; verify the summary pulls the latest run log.
 6. **Refresh**: Reload the page and confirm that run history and settings persist (SharedPreferences-backed). Clear browser storage to simulate a fresh profile until in-app reset tooling lands or the hosted persistence service is ready.
 

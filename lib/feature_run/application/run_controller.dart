@@ -117,7 +117,10 @@ class RunController extends StateNotifier<RunState> {
     _startTimer(_settings.runDurationMs);
   }
 
-  Future<void> _updateMetaAfterRun({required RunLog runLog, required bool success}) async {
+  Future<void> _updateMetaAfterRun({
+    required RunLog runLog,
+    required bool success,
+  }) async {
     final meta = _userMeta ?? await _userMetaRepository.getOrCreate();
     meta.totalRuns += 1;
     meta.totalMatches += runLog.matchesCompleted;
@@ -239,16 +242,16 @@ class RunController extends StateNotifier<RunState> {
     _runFinished = false;
     _timeExtendsUsed = 0;
     _pendingRefillRows.clear();
-   _refillSequenceActive = false;
-   _cancelMismatchTimer();
-   _mismatchSalt = 0;
-   _cancelCelebrationTimer();
-   _celebrationSalt = 0;
+    _refillSequenceActive = false;
+    _cancelMismatchTimer();
+    _mismatchSalt = 0;
+    _cancelCelebrationTimer();
+    _celebrationSalt = 0;
     _cancelConfettiTimer();
     _confettiSalt = 0;
-   _dirtyItemIds.clear();
-   _cancelProgressPersistTimer();
- }
+    _dirtyItemIds.clear();
+    _cancelProgressPersistTimer();
+  }
 
   BoardRow _createRow(VocabItem item) {
     final left = _buildLeftTile(item);
@@ -521,25 +524,30 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void _checkTierPause() {
-    if (!state.pausedAtTier20 && state.progress == 20) {
-      _enterPause(pausedAt20: true);
-    } else if (!state.pausedAtTier50 && state.progress == 50) {
-      _enterPause(pausedAt50: true);
+    if (!state.pausedAtTierOne &&
+        state.progress == _settings.tierOneThreshold) {
+      _enterPause(pausedAtTierOne: true);
+    } else if (!state.pausedAtTierTwo &&
+        state.progress == _settings.tierTwoThreshold) {
+      _enterPause(pausedAtTierTwo: true);
     } else if (state.progress >= _settings.targetMatches) {
       unawaited(_completeRun());
     }
   }
 
-  void _enterPause({bool pausedAt20 = false, bool pausedAt50 = false}) {
+  void _enterPause({
+    bool pausedAtTierOne = false,
+    bool pausedAtTierTwo = false,
+  }) {
     _timerService.pause();
     state = state.copyWith(
       inputLocked: true,
-      pausedAtTier20: pausedAt20 || state.pausedAtTier20,
-      pausedAtTier50: pausedAt50 || state.pausedAtTier50,
+      pausedAtTierOne: pausedAtTierOne || state.pausedAtTierOne,
+      pausedAtTierTwo: pausedAtTierTwo || state.pausedAtTierTwo,
     );
-    final tier = pausedAt50 ? 2 : 1;
+    final tier = pausedAtTierTwo ? 2 : 1;
     unawaited(_feedbackService.onTierPause(tier: tier));
-    _triggerConfetti(intensity: pausedAt50 ? 0.8 : 0.6);
+    _triggerConfetti(intensity: pausedAtTierTwo ? 0.8 : 0.6);
   }
 
   Future<void> _completeRun() async {
@@ -634,10 +642,10 @@ class RunController extends StateNotifier<RunState> {
   }
 
   int _tierForProgress(int progress) {
-    if (progress >= 90) {
+    if (progress >= _settings.targetMatches) {
       return 3;
     }
-    if (progress >= 50) {
+    if (progress >= _settings.tierTwoThreshold) {
       return 2;
     }
     return 1;
@@ -649,7 +657,8 @@ class RunController extends StateNotifier<RunState> {
     }
 
     final remainingPairs = _remainingPairs;
-    final shouldStart = force ||
+    final shouldStart =
+        force ||
         _pendingRefillRows.length >= _settings.refillBatchSize ||
         remainingPairs < _settings.refillBatchSize;
     if (!shouldStart || _refillSequenceActive) {

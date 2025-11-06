@@ -117,7 +117,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     // Finish screen should be displayed.
-    expect(find.text('Nice work!'), findsOneWidget);
+    expect(find.text('Goal achieved!'), findsOneWidget);
     expect(find.text('Play again'), findsOneWidget);
     expect(find.text('Exit to gate'), findsOneWidget);
   });

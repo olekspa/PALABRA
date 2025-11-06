@@ -203,6 +203,7 @@ class _RunView extends StatelessWidget {
             !state.showingTimeExtendOffer)
           _TierPauseOverlay(
             state: state,
+            settings: settings,
             onResume: onResume,
           ),
         if (state.showingTimeExtendOffer)
@@ -655,27 +656,29 @@ class _RunFooter extends StatelessWidget {
 class _TierPauseOverlay extends StatelessWidget {
   const _TierPauseOverlay({
     required this.state,
+    required this.settings,
     required this.onResume,
   });
 
   final RunState state;
+  final RunSettings settings;
   final Future<void> Function() onResume;
 
   String get _title {
-    if (state.pausedAtTier50 && state.progress >= 50) {
+    if (state.pausedAtTierTwo && state.progress >= settings.tierTwoThreshold) {
       return 'Tier 2 complete';
     }
-    if (state.pausedAtTier20 && state.progress >= 20) {
+    if (state.pausedAtTierOne && state.progress >= settings.tierOneThreshold) {
       return 'Tier 1 complete';
     }
     return 'Paused';
   }
 
   String get _subtitle {
-    if (state.pausedAtTier50 && state.progress >= 50) {
+    if (state.pausedAtTierTwo && state.progress >= settings.tierTwoThreshold) {
       return '+10 XP secured • Total +15 XP';
     }
-    if (state.pausedAtTier20 && state.progress >= 20) {
+    if (state.pausedAtTierOne && state.progress >= settings.tierOneThreshold) {
       return '+5 XP secured';
     }
     return 'Catch your breath and resume when ready.';

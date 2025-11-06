@@ -8,8 +8,9 @@ import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 
-final _rowBlasterEnabledProvider =
-    StateProvider.autoDispose<bool>((ref) => false);
+final _rowBlasterEnabledProvider = StateProvider.autoDispose<bool>(
+  (ref) => false,
+);
 final _isStartingProvider = StateProvider.autoDispose<bool>((ref) => false);
 
 /// Pre-run staging screen where the player configures the run.
@@ -113,6 +114,12 @@ class _PreRunContent extends ConsumerWidget {
     final isStarting = ref.watch(_isStartingProvider);
     final rowBlasterCharges = meta.rowBlasterCharges;
     final baseRows = meta.preferredRows.clamp(4, 5);
+    const runSettings = RunSettings();
+    final runDuration = Duration(milliseconds: runSettings.runDurationMs);
+    final minutes = runDuration.inMinutes;
+    final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
+    final objectiveText =
+        'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 520),
@@ -133,12 +140,15 @@ class _PreRunContent extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Make 90 correct matches in 1:45.',
+                  objectiveText,
                   style: theme.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                _TierRewards(theme: theme),
+                _TierRewards(
+                  theme: theme,
+                  settings: runSettings,
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 _RowBlasterToggle(
                   enabled: rowBlasterEnabled,
@@ -168,16 +178,17 @@ class _PreRunContent extends ConsumerWidget {
 }
 
 class _TierRewards extends StatelessWidget {
-  const _TierRewards({required this.theme});
+  const _TierRewards({required this.theme, required this.settings});
 
   final ThemeData theme;
+  final RunSettings settings;
 
   @override
   Widget build(BuildContext context) {
     final items = <(String, String)>[
-      ('20 matches', '+5 XP secured'),
-      ('50 matches', '+10 XP secured'),
-      ('90 matches', '+25 XP secured'),
+      ('${settings.tierOneThreshold} matches', '+5 XP secured'),
+      ('${settings.tierTwoThreshold} matches', '+10 XP secured'),
+      ('${settings.targetMatches} matches', '+25 XP secured'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -196,8 +207,9 @@ class _TierRewards extends StatelessWidget {
                 Text(label, style: theme.textTheme.bodyMedium),
                 Text(
                   reward,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: AppColors.secondary),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.secondary,
+                  ),
                 ),
               ],
             ),
@@ -243,11 +255,11 @@ class _RowBlasterToggle extends ConsumerWidget {
                 value: enabled && hasCharges,
                 onChanged: hasCharges
                     ? (value) {
-                        ref
-                            .read(_rowBlasterEnabledProvider.notifier)
-                            .state = value;
-                        ref.read(runRowsProvider.notifier).state =
-                            value ? 4 : baseRows;
+                        ref.read(_rowBlasterEnabledProvider.notifier).state =
+                            value;
+                        ref.read(runRowsProvider.notifier).state = value
+                            ? 4
+                            : baseRows;
                       }
                     : null,
               ),
@@ -257,12 +269,11 @@ class _RowBlasterToggle extends ConsumerWidget {
           Text(
             hasCharges
                 ? 'Reduce the board to four rows for this run. Charges left: '
-                    '$charges'
+                      '$charges'
                 : 'You need a Row Blaster charge to activate this powerup.',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: AppColors.textMuted),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(

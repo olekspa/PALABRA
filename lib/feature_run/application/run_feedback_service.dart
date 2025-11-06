@@ -28,19 +28,23 @@ class RunFeedbackService {
     ]);
   }
 
-  /// Triggered at tier pauses (20 or 50 matches).
+  /// Triggered at tier pauses (first or second milestone).
   Future<void> onTierPause({required int tier}) async {
     await Future.wait<void>([
       _safe(
-        () =>
-            tier >= 2 ? HapticFeedback.heavyImpact() : HapticFeedback.mediumImpact(),
+        () => tier >= 2
+            ? HapticFeedback.heavyImpact()
+            : HapticFeedback.mediumImpact(),
       ),
       _safe(() => SystemSound.play(SystemSoundType.click)),
     ]);
   }
 
   /// Triggered when the run completes.
-  Future<void> onRunComplete({required int tierReached, required bool success}) {
+  Future<void> onRunComplete({
+    required int tierReached,
+    required bool success,
+  }) {
     if (!success) {
       return _safe(() => HapticFeedback.heavyImpact());
     }

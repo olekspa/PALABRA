@@ -5,6 +5,7 @@ import 'package:palabra/app/router/app_router.dart';
 import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_gate/application/gate_access.dart';
+import 'package:palabra/feature_run/application/run_settings.dart';
 
 /// Entry gate screen that verifies device and course availability.
 class GateScreen extends ConsumerWidget {
@@ -100,6 +101,12 @@ class _GateContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    const runSettings = RunSettings();
+    final runDuration = Duration(milliseconds: runSettings.runDurationMs);
+    final minutes = runDuration.inMinutes;
+    final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
+    final objectiveText =
+        'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -111,7 +118,7 @@ class _GateContent extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'Make 90 correct matches in 1:45.',
+          objectiveText,
           style: textTheme.bodyLarge,
           textAlign: TextAlign.center,
         ),

@@ -95,8 +95,8 @@ class RunState {
     required this.isResolving,
     required this.deckRemaining,
     required this.millisecondsRemaining,
-    required this.pausedAtTier20,
-    required this.pausedAtTier50,
+    required this.pausedAtTierOne,
+    required this.pausedAtTierTwo,
     required this.inputLocked,
     required this.timeExtendTokens,
     required this.timeExtendsUsed,
@@ -115,9 +115,9 @@ class RunState {
       confettiEffect: null,
       isResolving: false,
       deckRemaining: 0,
-      millisecondsRemaining: 105000,
-      pausedAtTier20: false,
-      pausedAtTier50: false,
+      millisecondsRemaining: 60000,
+      pausedAtTierOne: false,
+      pausedAtTierTwo: false,
       inputLocked: false,
       timeExtendTokens: 0,
       timeExtendsUsed: 0,
@@ -145,8 +145,8 @@ class RunState {
       isResolving: false,
       deckRemaining: deckRemaining,
       millisecondsRemaining: millisecondsRemaining,
-      pausedAtTier20: false,
-      pausedAtTier50: false,
+      pausedAtTierOne: false,
+      pausedAtTierTwo: false,
       inputLocked: false,
       timeExtendTokens: timeExtendTokens,
       timeExtendsUsed: timeExtendsUsed,
@@ -165,8 +165,8 @@ class RunState {
   final bool isResolving;
   final int deckRemaining;
   final int millisecondsRemaining;
-  final bool pausedAtTier20;
-  final bool pausedAtTier50;
+  final bool pausedAtTierOne;
+  final bool pausedAtTierTwo;
   final bool inputLocked;
   final int timeExtendTokens;
   final int timeExtendsUsed;
@@ -193,8 +193,8 @@ class RunState {
     bool? isResolving,
     int? deckRemaining,
     int? millisecondsRemaining,
-    bool? pausedAtTier20,
-    bool? pausedAtTier50,
+    bool? pausedAtTierOne,
+    bool? pausedAtTierTwo,
     bool? inputLocked,
     int? timeExtendTokens,
     int? timeExtendsUsed,
@@ -206,19 +206,21 @@ class RunState {
       board: board != null ? List<BoardRow>.unmodifiable(board) : this.board,
       progress: progress ?? this.progress,
       selection: clearSelection ? null : selection ?? this.selection,
-      mismatchEffect:
-          clearMismatch ? null : mismatchEffect ?? this.mismatchEffect,
+      mismatchEffect: clearMismatch
+          ? null
+          : mismatchEffect ?? this.mismatchEffect,
       celebrationEffect: clearCelebration
           ? null
           : celebrationEffect ?? this.celebrationEffect,
-      confettiEffect:
-          clearConfetti ? null : confettiEffect ?? this.confettiEffect,
+      confettiEffect: clearConfetti
+          ? null
+          : confettiEffect ?? this.confettiEffect,
       isResolving: isResolving ?? this.isResolving,
       deckRemaining: deckRemaining ?? this.deckRemaining,
       millisecondsRemaining:
           millisecondsRemaining ?? this.millisecondsRemaining,
-      pausedAtTier20: pausedAtTier20 ?? this.pausedAtTier20,
-      pausedAtTier50: pausedAtTier50 ?? this.pausedAtTier50,
+      pausedAtTierOne: pausedAtTierOne ?? this.pausedAtTierOne,
+      pausedAtTierTwo: pausedAtTierTwo ?? this.pausedAtTierTwo,
       inputLocked: inputLocked ?? this.inputLocked,
       timeExtendTokens: timeExtendTokens ?? this.timeExtendTokens,
       timeExtendsUsed: timeExtendsUsed ?? this.timeExtendsUsed,

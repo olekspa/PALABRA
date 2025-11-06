@@ -1,7 +1,7 @@
 
 Project vision
 
-Build a fast, offline, Spanish-only matching game. Two fixed columns. Left shows English. Right shows Spanish. The player must reach 90 correct matches in 105 seconds. The timer hard-pauses at 20 and 50 correct. Correct pairs disappear in place and both empty slots refill from a prebuilt deck. No reshuffle. Wrong selections have no penalty. The board must always be solvable. The system promotes learned words and repeats trouble words. Powerups exist: Row Blaster reduces rows to four. Time Extend adds 60 seconds at timeout. All assets are local. All graphics are procedural.
+Build a fast, offline, Spanish-only matching game. Two fixed columns. Left shows English. Right shows Spanish. The player must reach 50 correct matches in 60 seconds. The timer hard-pauses at 12 and 30 correct. Correct pairs disappear in place and both empty slots refill from a prebuilt deck. No reshuffle. Wrong selections have no penalty. The board must always be solvable. The system promotes learned words and repeats trouble words. Powerups exist: Row Blaster reduces rows to four. Time Extend adds 60 seconds at timeout. All assets are local. All graphics are procedural.
 
 Pronunciation remains available offline. Web speech uses the browser API when possible, but every vocabulary item (and core number set 1–100) ships with Piper-generated MP3 fallbacks so learners still hear the word even when speech synthesis is unavailable.
 
@@ -27,9 +27,9 @@ If allowed, proceed to Pre-run.
 Pre-run screen
 Show title “Palabra.”
 
-Show objective “Make 90 correct matches in 1:45.”
+Show objective “Make 50 correct matches in 1:00.”
 
-Show tier rewards: “20 → 5 XP”, “50 → +10 XP”, “90 → +25 XP.”
+Show tier rewards: “12 → 5 XP”, “30 → +10 XP”, “50 → +25 XP.”
 
 Show Row Blaster powerup control.
 
@@ -67,7 +67,7 @@ Place Spanish parts into unique right rows.
 Repair until each left id has its matching right id on board. No orphan tiles.
 
 Running state
-Timer starts at 105 seconds.
+Timer starts at 60 seconds.
 
 Progress starts at 0 of 90. Markers at 20, 50, and 90.
 
@@ -135,7 +135,7 @@ Show “Tier 2 complete. +10 XP secured. Total +15 XP.”
 Finish conditions
 Success:
 
-At 90 correct, stop timer.
+At 50 correct, stop timer.
 
 Show “You earned 40 XP.” Show learned promotions. Show “Practice again.”
 
@@ -427,7 +427,7 @@ This document defines the gameplay loop, the user journey, the module contracts,
 Gameplay loop — exhaustive, implementation-ready
 0) Run state you must track
 
-runClock: milliseconds remaining (starts 105000).
+runClock: milliseconds remaining (starts 60000).
 
 progress: correct matches so far (0→90).
 
@@ -466,7 +466,7 @@ Place ES into boardRight unique rows independently.
 
 Repair pass until every EN on board has its matching ES on board. Never insert one side without the other.
 
-Clock = 105 s. progress=0. inputLock=idle.
+Clock = 60 s. progress=0. inputLock=idle.
 
 UI visible: top bar (timer, tier ticks at 20/50/90, powerup icons), grid (5×2 or 4×2), empty bottom.
 
@@ -780,7 +780,7 @@ USE THIS TEXT AS A GENERAL GUIDELINE TO HELP YOU UNDERSTAND THE PROJECT
 # Palabra Product Vision (v7.0)
 
 ## 1. Purpose
-Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matching English and Spanish tiles on a fixed 2-column board to clear 90 correct pairs in 105 seconds. The mode feels arcade-fast while quietly tracking mastery and trouble items so future runs adapt to each learner.
+Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matching English and Spanish tiles on a fixed 2-column board to clear 50 correct pairs in 60 seconds. The mode feels arcade-fast while quietly tracking mastery and trouble items so future runs adapt to each learner.
 
 ## 2. Guiding Pillars
 - **Always solvable, never random**: Both columns refill in place with valid pairs; tiles never reshuffle or drift.
@@ -792,7 +792,7 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 ## 3. Player Journey
 1. **Gate**: Entry screen confirms Spanish course, surfaces streak/progress, and advertises powerups. (If prerequisites fail, show "Palabra not available".)
 2. **Pre-Run**: Displays goal "90 in 1:45", tier rewards (20/50/90), Row Blaster toggle, powerup inventory, Start CTA.
-3. **Run**: Default 5x2 grid (Row Blaster makes it 4x2). Timer counts down from 105 seconds. Progress bar marks 20/50/90.
+3. **Run**: Default 5x2 grid (Row Blaster makes it 4x2). Timer counts down from 60 seconds. Progress bar marks 12/30/50.
 4. **Pauses**: Automatic at 20 and 50 correct. Timer freezes, board locks, XP summary shown. Resume keeps board untouched.
 5. **Finish**: Success (+40 XP) at 90 pairs before time expires. On timeout, offer +60 s/time extend if token available; otherwise show completion summary with secured XP.
 
@@ -801,7 +801,7 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 - **Tap guards**: Ignore taps in the same column consecutively; second tap must be opposite column.
 - **Correct pair**: Flash green ≤80 ms, scale/fade ≤120 ms, remove both tiles, refill both slots simultaneously.
 - **Wrong pair**: Flash red, shake 200–250 ms, reset selection without penalties; timer keeps ticking.
-- **Timer**: 105 seconds (1:45). Pauses triggered exactly at 20 and 50 correct pairs; finishing at 90 ends run.
+- **Timer**: 60 seconds (1:00). Pauses trigger exactly at 12 and 30 correct pairs; finishing at 50 ends run.
 - **Powerups**:
   - *Row Blaster*: optional pre-run toggle, board becomes 4 rows. Goal remains 90 matches.
   - *Time Extend*: offered on timeout when progress <90 and a token exists; adds 60 s, max twice per run.

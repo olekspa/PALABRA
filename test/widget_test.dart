@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:palabra/app/app.dart';
 import 'package:palabra/feature_gate/application/gate_detection_service.dart';
+import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -35,8 +36,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
+    const runSettings = RunSettings();
+    final runDuration = Duration(milliseconds: runSettings.runDurationMs);
+    final minutes = runDuration.inMinutes;
+    final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
+    final expectedObjective =
+        'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
+
     expect(find.text('Palabra'), findsOneWidget);
-    expect(find.text('Make 90 correct matches in 1:45.'), findsOneWidget);
+    expect(find.text(expectedObjective), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
   });
 }

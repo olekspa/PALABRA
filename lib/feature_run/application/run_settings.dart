@@ -6,13 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class RunSettings {
   const RunSettings({
     this.rows = 5,
-    this.targetMatches = 90,
-    this.runDurationMs = 105000,
+    this.targetMatches = 50,
+    this.runDurationMs = 60000,
     this.timeExtendDurationMs = 60000,
     this.maxTimeExtendsPerRun = 2,
     this.refillBatchSize = 3,
     this.refillStepDelayMs = 150,
     this.mismatchPenaltyMs = 1000,
+    this.tierOneThreshold = 12,
+    this.tierTwoThreshold = 30,
   });
 
   final int rows;
@@ -23,6 +25,8 @@ class RunSettings {
   final int refillBatchSize;
   final int refillStepDelayMs;
   final int mismatchPenaltyMs;
+  final int tierOneThreshold;
+  final int tierTwoThreshold;
 }
 
 /// Tracks the active board row count (Row Blaster toggles this to four).
