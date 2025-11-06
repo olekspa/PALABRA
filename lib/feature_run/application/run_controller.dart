@@ -67,6 +67,8 @@ class RunController extends StateNotifier<RunState> {
   int _celebrationSalt = 0;
   Timer? _celebrationTimer;
   Timer? _progressPersistTimer;
+  int _confettiSalt = 0;
+  Timer? _confettiTimer;
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
@@ -198,6 +200,7 @@ class RunController extends StateNotifier<RunState> {
     _timerService.stop();
     _cancelMismatchTimer();
     _cancelCelebrationTimer();
+    _cancelConfettiTimer();
     unawaited(_flushPendingProgress());
     super.dispose();
   }
@@ -236,14 +239,16 @@ class RunController extends StateNotifier<RunState> {
     _runFinished = false;
     _timeExtendsUsed = 0;
     _pendingRefillRows.clear();
-    _refillSequenceActive = false;
-    _cancelMismatchTimer();
-    _mismatchSalt = 0;
-    _cancelCelebrationTimer();
-    _celebrationSalt = 0;
-    _dirtyItemIds.clear();
-    _cancelProgressPersistTimer();
-  }
+   _refillSequenceActive = false;
+   _cancelMismatchTimer();
+   _mismatchSalt = 0;
+   _cancelCelebrationTimer();
+   _celebrationSalt = 0;
+    _cancelConfettiTimer();
+    _confettiSalt = 0;
+   _dirtyItemIds.clear();
+   _cancelProgressPersistTimer();
+ }
 
   BoardRow _createRow(VocabItem item) {
     final left = _buildLeftTile(item);
@@ -534,6 +539,7 @@ class RunController extends StateNotifier<RunState> {
     );
     final tier = pausedAt50 ? 2 : 1;
     unawaited(_feedbackService.onTierPause(tier: tier));
+    _triggerConfetti(intensity: pausedAt50 ? 0.8 : 0.6);
   }
 
   Future<void> _completeRun() async {
@@ -585,6 +591,7 @@ class RunController extends StateNotifier<RunState> {
         success: success,
       ),
     );
+    _triggerConfetti(intensity: success ? 1.0 : 0.4);
   }
 
   List<DeckLevelCount> _buildDeckComposition() {
@@ -672,6 +679,28 @@ class RunController extends StateNotifier<RunState> {
   void _cancelCelebrationTimer() {
     _celebrationTimer?.cancel();
     _celebrationTimer = null;
+  }
+
+  void _triggerConfetti({required double intensity}) {
+    final clamped = intensity.clamp(0.25, 1.2);
+    state = state.copyWith(
+      confettiEffect: ConfettiEffect(
+        token: ++_confettiSalt,
+        intensity: clamped,
+      ),
+    );
+    _cancelConfettiTimer();
+    _confettiTimer = Timer(const Duration(milliseconds: 1800), () {
+      if (!mounted) {
+        return;
+      }
+      state = state.copyWith(clearConfetti: true);
+    });
+  }
+
+  void _cancelConfettiTimer() {
+    _confettiTimer?.cancel();
+    _confettiTimer = null;
   }
 
   void _clearCelebrationEffect() {

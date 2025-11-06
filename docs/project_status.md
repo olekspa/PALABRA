@@ -20,9 +20,9 @@
 - Flutter SDK now lives under `~/flutter` inside WSL; ensure terminals export `PATH="$HOME/flutter/bin:$PATH"` before running `flutter`.
 - Planned upgrade: host the SPA + future persistence API on a Proxmox LXC node. Until then, keep expectations scoped to client-side storage.
 
-## Recently Completed
 - Animated gradient + sparkle background applied app-wide.
 - RunController emits audio/haptics (platform aware), match celebrations, and mismatch penalties.
+- Tier pauses and run completion now trigger confetti overlays and celebratory states.
 - Finish screen now surfaces inventory deltas, streaks, averages, and total run telemetry.
 - Gate → Pre-run → Run flow with device/course gating, row blaster toggle, and interactive board UI.
 - Pause overlays for tier breaks and finish summary screen pulling from the latest run log.
@@ -32,7 +32,7 @@
 - Lightweight SharedPreferences persistence keeps user meta, run logs, and attempts across refreshes.
 
 ## Backlog & Risks
-- Confetti/tier celebration FX and power-up visuals still pending.
+- Power-up visuals (Row Blaster/Time Extend art) and store polish still pending.
 - Real LMS course detection still stubbed on the gate screen.
 - Content validation beyond vocabulary (powerups/config) not in place.
 - Persistence migrations, multi-profile support, and remote sync unimplemented.

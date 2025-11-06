@@ -10,6 +10,7 @@ import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
+import 'package:palabra/feature_run/presentation/confetti_overlay.dart';
 
 /// Core timed run experience view backed by [RunController].
 class RunScreen extends ConsumerStatefulWidget {
@@ -130,6 +131,8 @@ class _RunView extends StatelessWidget {
         ),
         if (state.celebrationEffect != null)
           _CelebrationOverlay(token: state.celebrationEffect!.token),
+        if (state.confettiEffect != null)
+          ConfettiOverlay(effect: state.confettiEffect!),
         if (state.inputLocked &&
             state.phase == RunPhase.ready &&
             !state.showingTimeExtendOffer)

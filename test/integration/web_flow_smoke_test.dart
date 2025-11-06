@@ -6,6 +6,7 @@ import 'package:palabra/data_core/models/user_meta.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/data_core/providers/repository_providers.dart';
+import 'package:palabra/feature_gate/application/gate_detection_service.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
 import 'package:palabra/feature_run/application/run_feedback_service.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
@@ -60,6 +61,15 @@ void main() {
           ),
           deckBuilderServiceProvider.overrideWithValue(
             _StaticDeckBuilderService(deckItems),
+          ),
+          gateDetectionServiceProvider.overrideWithValue(
+            _TestGateDetectionService(
+              GateDetectionResult(
+                deviceLabel: 'Web Browser',
+                isSupportedDevice: true,
+                courseId: 'spanish',
+              ),
+            ),
           ),
         ],
         child: const PalabraApp(),
@@ -162,4 +172,13 @@ class _TestRunFeedbackService extends RunFeedbackService {
 
   @override
   Future<void> onRunComplete({required int tierReached, required bool success}) async {}
+}
+
+class _TestGateDetectionService extends GateDetectionService {
+  _TestGateDetectionService(this._result);
+
+  final GateDetectionResult _result;
+
+  @override
+  Future<GateDetectionResult> detect() async => _result;
 }

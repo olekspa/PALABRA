@@ -40,6 +40,16 @@ class CelebrationEffect {
   final int token;
 }
 
+class ConfettiEffect {
+  const ConfettiEffect({
+    required this.token,
+    required this.intensity,
+  });
+
+  final int token;
+  final double intensity;
+}
+
 class BoardTile {
   const BoardTile({
     required this.id,
@@ -81,6 +91,7 @@ class RunState {
     required this.selection,
     required this.mismatchEffect,
     required this.celebrationEffect,
+    required this.confettiEffect,
     required this.isResolving,
     required this.deckRemaining,
     required this.millisecondsRemaining,
@@ -101,6 +112,7 @@ class RunState {
       selection: null,
       mismatchEffect: null,
       celebrationEffect: null,
+      confettiEffect: null,
       isResolving: false,
       deckRemaining: 0,
       millisecondsRemaining: 105000,
@@ -129,6 +141,7 @@ class RunState {
       selection: null,
       mismatchEffect: null,
       celebrationEffect: null,
+      confettiEffect: null,
       isResolving: false,
       deckRemaining: deckRemaining,
       millisecondsRemaining: millisecondsRemaining,
@@ -148,6 +161,7 @@ class RunState {
   final TileSelection? selection;
   final MismatchEffect? mismatchEffect;
   final CelebrationEffect? celebrationEffect;
+  final ConfettiEffect? confettiEffect;
   final bool isResolving;
   final int deckRemaining;
   final int millisecondsRemaining;
@@ -174,6 +188,8 @@ class RunState {
     bool clearMismatch = false,
     CelebrationEffect? celebrationEffect,
     bool clearCelebration = false,
+    ConfettiEffect? confettiEffect,
+    bool clearConfetti = false,
     bool? isResolving,
     int? deckRemaining,
     int? millisecondsRemaining,
@@ -195,6 +211,8 @@ class RunState {
       celebrationEffect: clearCelebration
           ? null
           : celebrationEffect ?? this.celebrationEffect,
+      confettiEffect:
+          clearConfetti ? null : confettiEffect ?? this.confettiEffect,
       isResolving: isResolving ?? this.isResolving,
       deckRemaining: deckRemaining ?? this.deckRemaining,
       millisecondsRemaining:

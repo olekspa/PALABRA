@@ -41,6 +41,7 @@ class GateDetectionService {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
       case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
         return _fallbackResult(
           label: describeEnum(defaultTargetPlatform),
           supported: false,

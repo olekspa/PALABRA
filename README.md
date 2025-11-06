@@ -62,6 +62,7 @@ flutter test           # Widget + unit tests
 ## Current highlights
 - Animated gradient background with sparkle layer for richer presentation.
 - Run loop delivers audio/haptic feedback (where supported), pulse/shake mismatch cues, and celebration overlays.
+- Tier pauses and run completion trigger confetti bursts to reinforce milestones.
 - Finish screen conveys per-run inventory changes alongside lifetime streak/accuracy stats.
 - CI runs static analysis, unit/widget/integration tests (`.github/workflows/ci.yml`).
 
