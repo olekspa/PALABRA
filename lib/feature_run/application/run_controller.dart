@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palabra/data_core/data_core.dart';
+import 'package:palabra/feature_profiles/application/profile_service.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
 import 'package:palabra/feature_run/application/timer_service.dart';
@@ -30,6 +31,7 @@ class RunController extends StateNotifier<RunState> {
     required AddAttemptLogs addAttemptLogs,
     required UserMetaRepository userMetaRepository,
     required RunFeedbackService feedbackService,
+    required ProfileService profileService,
   }) : _deckBuilderService = deckBuilderService,
        _settings = settings,
        _timerService = timerService,
@@ -39,6 +41,7 @@ class RunController extends StateNotifier<RunState> {
        _addAttemptLogs = addAttemptLogs,
        _userMetaRepository = userMetaRepository,
        _feedbackService = feedbackService,
+       _profileService = profileService,
        super(
          RunState.loading(
            rows: settings.rows,
@@ -55,6 +58,7 @@ class RunController extends StateNotifier<RunState> {
   final AddAttemptLogs _addAttemptLogs;
   final UserMetaRepository _userMetaRepository;
   final RunFeedbackService _feedbackService;
+  final ProfileService _profileService;
 
   final List<VocabItem> _deckQueue = <VocabItem>[];
   final Map<String, VocabItem> _vocabLookup = <String, VocabItem>{};
@@ -733,6 +737,7 @@ class RunController extends StateNotifier<RunState> {
 
     await _saveUserStates(_itemStates.values.toList());
     await _updateMetaAfterRun(runLog: runLog, success: success);
+    unawaited(_profileService.pushActiveProfile());
     unawaited(
       _feedbackService.onRunComplete(
         tierReached: runLog.tierReached,
@@ -1186,6 +1191,7 @@ final runControllerProvider =
       final userMetaRepo = ref.watch(userMetaRepositoryProvider);
       final timerService = ref.watch(runTimerServiceProvider);
       final feedbackService = ref.watch(runFeedbackServiceProvider);
+      final profileService = ref.watch(profileServiceProvider);
 
       final RunController controller = RunController(
         deckBuilderService: deckBuilder,
@@ -1197,6 +1203,7 @@ final runControllerProvider =
         addAttemptLogs: attemptRepo.addAll,
         userMetaRepository: userMetaRepo,
         feedbackService: feedbackService,
+        profileService: profileService,
       );
 
       unawaited(controller.initialize());

@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palabra/feature_finish/presentation/finish_screen.dart';
 import 'package:palabra/feature_gate/presentation/gate_screen.dart';
+import 'package:palabra/feature_numbers/presentation/number_drill_screen.dart';
 import 'package:palabra/feature_prerun/presentation/prerun_screen.dart';
 import 'package:palabra/feature_profiles/presentation/profile_selector_screen.dart';
-import 'package:palabra/feature_numbers/presentation/number_drill_screen.dart';
 import 'package:palabra/feature_run/presentation/run_screen.dart';
 
 /// Declarative identifiers for app navigation targets.

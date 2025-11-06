@@ -1,10 +1,10 @@
-# Palabra Project Status — v7.344
+# Palabra Project Status — v7.345
 
 _Last updated: 2025-11-06_
 
 ## Snapshot
 - **Build target:** Web-first Spanish vocabulary trainer with timed matching, streak XP, powerups, and a number-listening drill.
-- **Current release:** 7.344 (forced Spanish course, multi-profile selector, offline audio library).
+- **Current release:** 7.345 (forced Spanish course, multi-profile selector, offline audio library, optional remote profile sync).
 - **Deployment:** Static web bundle served from the Proxmox LXC (nginx). `deploy_palabra_web` handles fetch, build, rsync, and reload.
 - **Persistence:** In-memory store persisted to shared_preferences; Piper-generated audio assets bundled in `assets/audio`.
 
@@ -14,6 +14,7 @@ _Last updated: 2025-11-06_
 - Reworked deck difficulty scaling (15 → 50 matches per CEFR milestone) and CEFR gating logic.
 - Bundled Piper `es_MX-claude-high` audio for vocabulary and numbers 1–100 as default fallbacks.
 - Implemented web speech + asset tiered TTS with caching, unlock gestures, and Safari-friendly flow.
+- Deployed a lightweight FastAPI profile service plus web client sync so profiles follow the learner across devices when configured.
 
 ## Active Focus
 1. **Profile polish:** Improve list handling, add deletion safeguards, and surface deep links back into Gate/Run.

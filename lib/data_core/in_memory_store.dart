@@ -241,6 +241,75 @@ class InMemoryStore {
     };
   }
 
+  /// Returns a serializable snapshot for the specified profile id.
+  Map<String, dynamic> profileSnapshot(String profileId) {
+    final meta = profileMeta(profileId);
+    final states = userStatesFor(profileId);
+    final runLogs = runLogsFor(profileId);
+    final attemptLogs = attemptLogsFor(profileId);
+    return <String, dynamic>{
+      'meta': meta.toJson(),
+      'userStates': <String, dynamic>{
+        for (final entry in states.entries) entry.key: entry.value.toJson(),
+      },
+      'runLogs': runLogs.map((log) => log.toJson()).toList(),
+      'attemptLogs': attemptLogs.map((log) => log.toJson()).toList(),
+      'version': meta.syncVersion,
+    };
+  }
+
+  /// Hydrates the profile state from a remote snapshot payload.
+  void applyProfileSnapshot(String profileId, Map<String, dynamic> snapshot) {
+    final metaJson = Map<String, dynamic>.from(
+      (snapshot['meta'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{},
+    );
+    final meta = UserMeta.fromJson(metaJson)
+      ..syncVersion =
+          snapshot['version'] as int? ?? metaJson['syncVersion'] as int? ?? 0;
+    upsertProfile(profileId, meta);
+
+    final statesJson = Map<String, dynamic>.from(
+      (snapshot['userStates'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{},
+    );
+    final states = <String, UserItemState>{};
+    statesJson.forEach((key, value) {
+      if (value is Map) {
+        final map = Map<String, dynamic>.from(value.cast<String, dynamic>());
+        map['itemId'] ??= key;
+        final state = UserItemState.fromJson(map);
+        if (state.itemId.isNotEmpty) {
+          states[state.itemId] = state;
+        }
+      }
+    });
+    _profileUserStates[profileId] = states;
+
+    final runLogList =
+        (snapshot['runLogs'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(RunLog.fromJson)
+            .toList() ??
+        <RunLog>[];
+    _profileRunLogs[profileId] = runLogList;
+
+    final attemptList =
+        (snapshot['attemptLogs'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(AttemptLog.fromJson)
+            .toList() ??
+        <AttemptLog>[];
+    _profileAttemptLogs[profileId] = attemptList;
+  }
+
+  /// Updates the sync version for the provided profile.
+  void updateProfileVersion(String profileId, int version) {
+    final meta = profileMeta(profileId);
+    meta.syncVersion = version;
+    upsertProfile(profileId, meta);
+  }
+
   void _loadFromJson(Map<String, dynamic> json) {
     activeProfileId = json['activeProfileId'] as String?;
 

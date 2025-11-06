@@ -13,6 +13,7 @@
         "flutter_riverpod",
         "flutter_tts",
         "go_router",
+        "http",
         "intl",
         "just_audio",
         "shared_preferences"
@@ -537,6 +538,26 @@
       "dependencies": [
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.5.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
       ]
     }
   ],

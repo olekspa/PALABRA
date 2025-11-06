@@ -57,6 +57,11 @@ class ProfileService {
   Future<void> deleteProfile(String profileId) async {
     await _repo.deleteProfile(profileId);
   }
+
+  /// Pushes the active profile to the remote API when configured.
+  Future<void> pushActiveProfile() async {
+    await _repo.pushActiveProfile();
+  }
 }
 
 final profileServiceProvider = Provider<ProfileService>((ref) {

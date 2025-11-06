@@ -11,6 +11,9 @@ class UserMeta {
   /// Ordered list of CEFR levels supported by the app.
   static const List<String> levelOrder = <String>['a1', 'a2', 'b1', 'b2'];
 
+  /// Remote sync version for concurrency control.
+  int syncVersion = 0;
+
   /// Whether the vocabulary cache has been seeded for the user.
   bool hasSeededVocabulary = false;
 
@@ -110,6 +113,7 @@ class UserMeta {
       ..bestStreak = json['bestStreak'] as int? ?? 0
       ..lastLearnedDelta = json['lastLearnedDelta'] as int? ?? 0
       ..lastTroubleDelta = json['lastTroubleDelta'] as int? ?? 0;
+    meta.syncVersion = json['syncVersion'] as int? ?? 0;
 
     final progressJson = json['levelProgress'];
     if (progressJson is Map<String, dynamic>) {
@@ -148,6 +152,7 @@ class UserMeta {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'hasSeededVocabulary': hasSeededVocabulary,
+      'syncVersion': syncVersion,
       'preferredRows': preferredRows,
       'level': level,
       'profileName': profileName,

@@ -1,13 +1,14 @@
 export 'in_memory_store.dart';
 export 'models/attempt_log.dart';
+export 'models/level_progress.dart';
+export 'models/profile_summary.dart';
 export 'models/run_log.dart';
 export 'models/user_item_state.dart';
 export 'models/user_meta.dart';
-export 'models/level_progress.dart';
 export 'models/vocab_item.dart';
-export 'models/profile_summary.dart';
 export 'providers/repository_providers.dart';
 export 'providers/user_meta_providers.dart';
+export 'remote/profile_api_client.dart';
 export 'repositories/attempt_log_repository.dart';
 export 'repositories/run_log_repository.dart';
 export 'repositories/user_meta_repository.dart';

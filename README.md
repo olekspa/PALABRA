@@ -4,7 +4,7 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 
 ## Highlights
 - **Progressive mastery:** A1 → B2 decks unlock sequentially. Match goals ramp from 15 to 50 within each milestone, and words are marked “learned” after three clean matches across sessions.
-- **Profile aware:** A lightweight profile selector lets multiple learners share a device while keeping separate XP totals, streaks, powerups, and drill history.
+- **Profile aware:** A lightweight profile selector lets multiple learners share a device (or sync via the optional profile API) while keeping separate XP totals, streaks, powerups, and drill history.
 - **Rewarding loop:** Tier checkpoints deliver XP bonuses, clean runs award powerups, and the finish screen summarizes gains before launching the number-listening mini-game.
 - **Offline audio:** Web Speech API powers live TTS on supported browsers, while high-quality Piper MP3s cover every vocabulary item and number.
 - **Web-first publishing:** A single command builds and deploys the app to an nginx-backed LXC container; everything else lives in the repo.
@@ -55,13 +55,23 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 - Add new widget tests for UI changes and keep run-time animations short to avoid pump timeouts.
 
 ## Release & Deployment
-- Application version is surfaced on the Gate screen and must be bumped in `lib/app/app_constants.dart` for every change (current: **7.344**).
+- Application version is surfaced on the Gate screen and must be bumped in `lib/app/app_constants.dart` for every change (current: **7.345**).
 - Deploy to the Proxmox LXC container with:
   ```bash
   deploy_palabra_web
   ```
   The script fetches `origin/master`, builds `flutter build web --release`, rsyncs to `/var/www/palabra/`, and reloads nginx.
 - Include Piper assets, vocabulary JSON, and other static files in commits; the deployment is static-site only.
+
+## Remote Profile Sync (optional)
+Expose the FastAPI profile service (see `docs/project_status.md`) and run Flutter with:
+
+```
+--dart-define=PALABRA_PROFILE_API_BASE=https://your-domain/api
+--dart-define=PALABRA_PROFILE_API_KEY=<shared-secret>
+```
+
+When set, the profile selector lists remote profiles, pulls the chosen snapshot, and uploads progress after every run. Leave the defines unset to keep progress local-only.
 
 ## Repository Layout
 - `lib/app` – bootstrap, router, constants (version), and theme entry points.
@@ -75,7 +85,7 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 ## Working Agreements
 - Branch naming: `feat/`, `fix/`, `chore/`, etc., using Conventional Commit prefixes.
 - Keep the workspace lint-clean (`flutter analyze`) and add tests alongside new logic.
-- Version bump rule: increment the micro component (e.g., 7.344 → 7.345) whenever the repository changes.
+- Version bump rule: increment the micro component (e.g., 7.345 → 7.346) whenever the repository changes.
 - Store Piper `.onnx` models under `tool/` (ignored from commits); generated audio output belongs in `assets/audio`.
 
 ## Next Up

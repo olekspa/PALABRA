@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:palabra/app/app_config.dart';
 import 'package:palabra/data_core/in_memory_store.dart';
 import 'package:palabra/data_core/repositories/attempt_log_repository.dart';
 import 'package:palabra/data_core/repositories/run_log_repository.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/data_core/repositories/user_progress_repository.dart';
 import 'package:palabra/data_core/repositories/vocab_repository.dart';
+import 'package:palabra/data_core/remote/profile_api_client.dart';
 
 /// Exposes the shared in-memory store instance.
 final inMemoryStoreProvider = Provider<InMemoryStore>((ref) {
@@ -40,4 +41,16 @@ final runLogRepositoryProvider = Provider<RunLogRepository>((ref) {
 final attemptLogRepositoryProvider = Provider<AttemptLogRepository>((ref) {
   final store = ref.watch(inMemoryStoreProvider);
   return AttemptLogRepository(store: store);
+});
+
+final remoteProfileApiProvider = Provider<RemoteProfileApi?>((ref) {
+  if (!AppConfig.profileSyncEnabled) {
+    return null;
+  }
+  final api = RemoteProfileApi(
+    baseUrl: AppConfig.profileApiBaseUrl,
+    apiKey: AppConfig.profileApiKey,
+  );
+  ref.onDispose(api.dispose);
+  return api;
 });
