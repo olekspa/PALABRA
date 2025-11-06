@@ -96,6 +96,20 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
+    // Profile selection → Gate.
+    expect(find.text('Choose your profile'), findsOneWidget);
+    if (find.text('Create new profile').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Create new profile'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Test Profile');
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+    } else {
+      final firstTile = find.byType(ListTile).first;
+      await tester.tap(firstTile);
+      await tester.pumpAndSettle();
+    }
+
     // Gate screen → Pre-run.
     expect(find.text('Palabra'), findsOneWidget);
     await tester.tap(find.text('Continue'));

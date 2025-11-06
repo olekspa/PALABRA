@@ -1,87 +1,85 @@
-# Palabra v7.0
+# Palabra
 
-Palabra is a high-speed, offline-first Spanish vocabulary trainer built with Flutter 3.35.7 and Dart 3.9. The project is structured for modular feature development, targeting Android/iOS first with desktop/web shells for local testing.
+Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter. Learners race against the clock to match English prompts to Spanish translations, earn streak-based XP, unlock powerups, and tackle a listening bonus round for numbers 1–100. The experience runs entirely in the browser, keeps progress locally, and ships with offline pronunciation so practice never stalls.
 
-## Repo layout
-- `lib/app` — bootstrap, theming, navigation via `go_router` + Riverpod.
-- `lib/design_system` — tokens and shared widgets (animated backgrounds, typography, spacing).
-- `lib/data_core` — in-memory models, repositories, and store helpers for vocabulary + progress state.
-- `lib/feature_*` — feature-specific presentation layers (Gate, Pre-run, Run, Finish now interactive; Pause, Powerups, SRS, Vocabulary in progress).
-- `assets/vocabulary` — leveled EN↔ES term lists (to be normalized to the Palabra schema).
-- `docs/` — project documentation (`daily.md` for stand-ups, `project_status.md` for active focus and backlog).
+## Highlights
+- **Progressive mastery:** A1 → B2 decks unlock sequentially. Match goals ramp from 15 to 50 within each milestone, and words are marked “learned” after three clean matches across sessions.
+- **Profile aware:** A lightweight profile selector lets multiple learners share a device while keeping separate XP totals, streaks, powerups, and drill history.
+- **Rewarding loop:** Tier checkpoints deliver XP bonuses, clean runs award powerups, and the finish screen summarizes gains before launching the number-listening mini-game.
+- **Offline audio:** Web Speech API powers live TTS on supported browsers, while high-quality Piper MP3s cover every vocabulary item and number.
+- **Web-first publishing:** A single command builds and deploys the app to an nginx-backed LXC container; everything else lives in the repo.
 
-## Vocabulary asset schema
-Each file under `assets/vocabulary/spanish/{a1,a2,b1,b2}.json` contains an array of entries shaped like:
+## Core Flow
+1. **Profile selector** – create or choose a learner profile. Progress is stored in shared_preferences per profile.
+2. **Gate** – confirm course/device eligibility (forced to Spanish today) and surface the current build number.
+3. **Pre-run** – review objectives, active powerups, and deck composition before launching a 60-second round.
+4. **Run** – tap-to-match on a five-row (or four with powerups) grid, earning XP for streaks and clean tiers.
+5. **Number drill** – a 4×4 grid plays audio for numbers 1–100; match five prompts to earn bonus XP.
+6. **Finish** – celebrate progress, review stats, and queue the next run.
 
-```json
-{
-  "id": "a1_0001",
-  "en": "tree",
-  "es": "árbol",
-  "level": "a1",
-  "family": "arbol",
-  "topic": "core_vocab"
-}
-```
+## Tech Stack
+- **Framework:** Flutter 3.35.7 (Dart 3.9)
+- **State:** Riverpod (providers + StateNotifiers)
+- **Routing:** go_router
+- **Persistence:** shared_preferences via a custom in-memory store layer
+- **Audio:** flutter_tts (Web Speech API bridge) + just_audio for Piper fallbacks
+- **Testing:** flutter_test with widget, unit, and integration coverage
 
-- `id`: stable unique identifier (`<level>_<zero-padded index>`).
-- `en` / `es`: display strings used on tiles.
-- `level`: CEFR bucket (`a1`..`b2`), inferred from the filename.
-- `family`: slug grouping confusable pairs (currently derived from the Spanish form).
-- `topic`: coarse semantic bucket per level (`core_vocab`, `daily_life`, `intermediate_concepts`, `advanced_concepts`).
+## Getting Started
+1. **Install Flutter**  
+   Clone Flutter stable 3.35.7 and export `PATH="$HOME/flutter/bin:$PATH"`. On WSL follow `docs/wsl_setup.md`.
+2. **Fetch packages**  
+   ```bash
+   flutter pub get
+   ```
+3. **Run static checks & tests**  
+   ```bash
+   flutter analyze
+   flutter test
+   ```
+4. **Launch on web**  
+   ```bash
+   flutter run -d chrome --dart-define=PALABRA_FORCE_COURSE=spanish
+   ```  
+   For WSL, prefer `flutter run -d web-server` and open the provided URL in the Windows browser.
 
-## Local setup
-1. Ensure Flutter stable 3.35.7 is on your `PATH`. In WSL this means cloning `https://github.com/flutter/flutter.git` to `~/flutter` (already present in this workspace) and adding `export PATH="$HOME/flutter/bin:$PATH"` to your shell profile (e.g. `~/.bashrc`), then restarting the terminal.
-2. Run `flutter pub get`.
-3. Verify the toolchain with `flutter analyze` and `flutter test`.
-4. Review `vision.md` for the full product brief and execution plan.
+## Local Development Tips
+- Export `CHROME_EXECUTABLE` inside WSL to point at the Windows Chrome installation for direct launches.
+- Use `flutter run -d chrome --web-renderer canvaskit` when profiling animation-heavy scenes.
+- Piper-generated assets live in `assets/audio`; regenerate vocabulary or number clips with tools under `tool/`.
+- The active profile and progress data are stored in shared_preferences. Use `StorePersistence.clear()` in a debug shell or delete browser storage to reset.
 
-### WSL-specific notes
-- Install Chrome/Edge on the Windows side and expose it to WSL (`export CHROME_EXECUTABLE="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"` when running web builds, adjust the path if you installed a different browser). During day-to-day testing prefer `flutter run -d web-server` and open the served URL in Windows via `wslview http://localhost:<port>` (or copy/paste into Chrome/Edge); this avoids remote-debugging quirks between WSL and Windows.
-- Install Android Studio on Windows and point Flutter at that SDK from WSL via `flutter config --android-sdk /mnt/c/Users/<you>/AppData/Local/Android/Sdk` once it is available.
-- If you plan to target Linux desktop builds inside WSL, install the native build toolchain (`sudo apt install clang cmake ninja-build pkg-config libgtk-3-dev`).
-- The end-to-end walkthrough lives in `docs/wsl_setup.md`.
+## Testing & Quality
+- `flutter test` exercises profile logic, deck building, run flow, finish screen stats, and the new number drill.
+- `test/integration/web_flow_smoke_test.dart` walks the Gate → Pre-run → Run → Finish path with seeded data.
+- Add new widget tests for UI changes and keep run-time animations short to avoid pump timeouts.
 
-## Scripts
-```bash
-flutter analyze        # Static analysis using very_good_analysis
-flutter test           # Widget + unit tests
-```
+## Release & Deployment
+- Application version is surfaced on the Gate screen and must be bumped in `lib/app/app_constants.dart` for every change (current: **7.344**).
+- Deploy to the Proxmox LXC container with:
+  ```bash
+  deploy_palabra_web
+  ```
+  The script fetches `origin/master`, builds `flutter build web --release`, rsyncs to `/var/www/palabra/`, and reloads nginx.
+- Include Piper assets, vocabulary JSON, and other static files in commits; the deployment is static-site only.
 
-## Web text-to-speech
-- Web builds now speak the right-column (Spanish) tiles via the browser Web Speech API using `flutter_tts`. Speech is lazily initialised on the first user tap to satisfy iOS autoplay policies.
-- Voices are filtered to Spanish locales, preferring Spain → Mexico → any other `es-*`. The selected voice is cached in `localStorage` when available.
-- If speech fails (no voices, timeouts, or iOS restrictions), the app will try to play an asset-based fallback from `assets/audio/spanish/<itemId>.mp3`. Add files following that naming convention to opt specific words into the fallback.
-- All four CEFR levels now ship with pre-rendered MP3 fallbacks generated offline with Piper (`tool/gen_tts_from_json.py`) using the `es_MX-claude-high` model at a slower 0.85x rate for clarity. Regenerate clips by re-running the script with the desired model/rate.
-- Spanish numbers (1–100) live under `assets/audio/spanish_numbers/num_###.mp3`. Use `tool/gen_tts_numbers.py --model <voice>.onnx --outdir assets/audio/spanish_numbers --rate 0.85` to rebuild or tweak speed/prefixes.
-- When no voice or asset can play, the UI presents a one-line toast notifying the learner that TTS is unavailable.
-- A developer-only tuning panel (rate, pitch, current voice label) can be enabled with `--dart-define=PALABRA_TTS_DEV_PANEL=true` when running the app on web.
+## Repository Layout
+- `lib/app` – bootstrap, router, constants (version), and theme entry points.
+- `lib/data_core` – in-memory store, models, repositories, and persistence helpers.
+- `lib/design_system` – gradient backgrounds, token sets, and shared UI widgets.
+- `lib/feature_*` – modular feature packages (gate, prerun, run, finish, number drill, profiles, powerups).
+- `assets/` – vocabulary JSON, pre-rendered audio, and static web assets.
+- `docs/` – setup guides, project status, and deployment notes.
+- `tool/` – Piper automation scripts for vocabulary and number audio generation.
 
-## Prototype persistence & telemetry
-- User metadata, run logs, number-drill progress, and item states persist locally via `shared_preferences` (in-memory fallback on unsupported platforms).
-- Clearing app storage resets the active profile; profile switching and remote sync are scoped for an upcoming milestone.
-- RunController tracks streaks, XP, inventory deltas, run duration, and now chains into the number drill for bonus XP. The Finish screen surfaces the combined stats for QA.
-- A manual reset helper lives in `StorePersistence.clear()` while the profile selector/debug UI is pending.
-- Future milestone: host a central persistence + telemetry service on the Proxmox LXC cluster (static web + API). Docs will be updated once that pipeline ships.
+## Working Agreements
+- Branch naming: `feat/`, `fix/`, `chore/`, etc., using Conventional Commit prefixes.
+- Keep the workspace lint-clean (`flutter analyze`) and add tests alongside new logic.
+- Version bump rule: increment the micro component (e.g., 7.344 → 7.345) whenever the repository changes.
+- Store Piper `.onnx` models under `tool/` (ignored from commits); generated audio output belongs in `assets/audio`.
 
-## Versioning
-- Current app version: **7.342**
-- Use Conventional Commits (`feat:`, `fix:`, etc.) and follow trunk-based flow with feature branches (`feat/<ticket>`).
-- Always bump `lib/app/app_constants.dart`’s `kAppVersion` (micro increments such as 7.341 → 7.342) whenever you land code so the Gate screen reflects the deployed build.
-
-## Current highlights
-- Animated gradient background with sparkle layer for richer presentation.
-- Run loop delivers audio/haptic feedback (where supported), pulse/shake mismatch cues, and celebration overlays.
-- Tier pauses and run completion trigger confetti bursts to reinforce milestones.
-- Finish screen conveys per-run inventory changes alongside lifetime streak/accuracy stats.
-- Sequential CEFR progression keeps learners on a single deck (A1 → B2) until every pair in that tier is mastered, and the HUD now surfaces live XP, streak, and deck depth readouts.
-- Clean runs award bonus XP and unlock powerups; the in-run toolbar exposes available boosts (time extend today, more coming) with inventory counts that persist across sessions.
-- Successful runs automatically launch a 4×4 number listening drill that plays from bundled `spanish_numbers` audio, awards bonus XP based on time/mistakes, and updates number mastery per profile.
-- CI runs static analysis, unit/widget/integration tests (`.github/workflows/ci.yml`).
-
-## Near-term roadmap
-1. Confetti/tier celebration FX and power-up visuals.
-2. Tile interaction polish (glows, hover states, mismatch pulses).
-3. Real LMS/device gating integration.
-4. Persistence migration tooling + debug/reset UI.
-5. Powerups store UX, content validation, and LXC-hosted persistence pilot.
+## Next Up
+- Polish the profile selector (long lists, deletion safeguards, deep links).
+- Add additional powerups and visual FX.
+- Introduce optional cloud sync and telemetry once the LXC API service is online.
+- Expand accessibility (keyboard navigation, screen reader support) and localize UI copy.

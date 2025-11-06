@@ -5,6 +5,7 @@ export 'models/user_item_state.dart';
 export 'models/user_meta.dart';
 export 'models/level_progress.dart';
 export 'models/vocab_item.dart';
+export 'models/profile_summary.dart';
 export 'providers/repository_providers.dart';
 export 'providers/user_meta_providers.dart';
 export 'repositories/attempt_log_repository.dart';

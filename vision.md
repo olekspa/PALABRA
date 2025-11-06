@@ -1,202 +1,41 @@
 
-Project vision
-
-Build a fast, offline, Spanish-only matching game with sequential CEFR progression. Two fixed columns. Left shows English. Right shows Spanish. Each run targets 50 correct matches in 60 seconds with hard pauses at 12 and 30 correct. Correct pairs disappear in place and both empty slots refill from a prebuilt deck. No reshuffle. Wrong selections shave one second off the clock to keep tension high. The board must always be solvable. The system promotes learned words, repeats trouble words, and tracks mastery per level so learners must complete A1 before seeing A2, and so on. Powerups exist: Row Blaster reduces rows to four for the next run; Time Extend adds 60 seconds mid-run. Powerups drop from clean runs or hitting XP thresholds, and the XP HUD tracks base + streak bonuses in real time. All assets are local. All graphics are procedural.
-
-Pronunciation remains available offline. Web speech uses the browser API when possible, but every vocabulary item (and core number set 1–100) ships with Piper-generated MP3 fallbacks so learners still hear the word even when speech synthesis is unavailable.
-
-What the game is
-
-A timed EN↔ES word pairing challenge with visible XP and streak tracking. Each board shows five rows by two columns by default. One English tile per row on the left. One Spanish tile per row on the right. Each English tile has exactly one Spanish match on the board at all times. The player taps one left tile and one right tile to resolve a match. Correct removes both. Wrong shakes both, breaks the streak, flags the item as trouble, and removes one second from the timer. The game rewards speed, accuracy, and consistency. The game teaches by hiding mastered items, repeating trouble pairs, and locking each learner into their current CEFR tier until every vocabulary item in that level is mastered.
-
-Player journey: end-to-end steps
-
-Launch and gate
-App launches to the home menu.
-
-Player opens Palabra.
-
-Gate checks device and course.
-
-If device is not iPhone, show “Palabra not available.”
-
-If course is not Spanish, show “Palabra not available for this course.”
-
-If allowed, proceed to Pre-run.
-
-Pre-run screen
-Show title “Palabra.”
-
-Show objective “Make 50 correct matches in 1:00.”
-
-Show tier rewards: “12 → 5 XP”, “30 → +10 XP”, “50 → +25 XP.”
-
-Show Row Blaster powerup control.
-
-If inventory ≥1, allow toggle. If zero, show price and disabled state.
-
-Show Time Extend info. This can only be used when time reaches zero during a run.
-
-Show Start. No network needed. All data is local.
-
-Deck build and board fill
-Read user level. Default A1 if unknown.
-
-Build a deck of ~100 to 110 pairs using the rules:
-
-Learned items excluded for this run.
-
-Trouble items placed first but capped at 4 to 6.
-
-Level mix by user level.
-
-Fresh items ≤20% of the deck.
-
-Confusable families not repeated within any window of five pairs.
-
-Backfill if short. Same level, then lower level, then learned as last resort.
-
-Choose board rows. Five by default. Four if Row Blaster is active.
-
-Draw N pairs where N equals rows.
-
-Place English parts into unique left rows.
-
-Place Spanish parts into unique right rows.
-
-Repair until each left id has its matching right id on board. No orphan tiles.
-
-Running state
-Timer starts at 60 seconds.
-
-Progress starts at 0 of 50. Markers at 12, 30, and 50.
-
-The grid shows N rows with two tiles per row.
-
-Player taps a left tile. Tile scales to 0.98 then returns to 1.0. Tile becomes selected.
-
-Player taps a right tile.
-
-If the pair matches:
-
-Both tiles flash green for 80 ms.
-
-Both scale to 0.9 and fade to 0 over 120 ms.
-
-Both tiles are removed.
-
-Refill both empty slots with the next pair from the deck.
-
-New tiles fade in over 100 ms.
-
-Progress increments by one.
-
-Attempt logged as correct.
-
-If the pair does not match:
-
-Both tiles flash red for 80 ms.
-
-Both shake horizontally for 200 to 250 ms.
-
-Selection clears to idle.
-
-Attempt logged as wrong. Item error counters update.
-
-Selection rules:
-
-Only zero or two tiles can be non-idle at once.
-
-Selection must be one left and one right.
-
-A second tap on the same column is ignored.
-
-Board invariant:
-
-The multiset of pairIds on the left equals the multiset on the right.
-
-If a refill would insert only one side, cancel that insert and wait for the next complete pair.
-
-Tier pauses
-At 12 correct:
-
-Freeze timer. Freeze board input. Dim board.
-
-Show “Tier 1 complete. +5 XP secured.”
-
-On Continue, undim, resume timer. Board stays identical. No refill occurs.
-
-At 30 correct:
-
-Same behavior.
-
-Show “Tier 2 complete. +10 XP secured. Total +15 XP.”
-
-Finish conditions
-Success:
-
-At 50 correct, stop timer.
-
-Show “You earned 40 XP.” Show learned promotions. Show “Practice again.”
-
-Timeout without 50:
-
-If Time Extend inventory >0:
-
-Offer “Add 60 s?” with one token.
-
-If accepted, add 60 seconds. Resume in place. No reshuffle.
-
-If declined, award the highest secured tier XP. End session.
-
-If no token, award secured XP. End session.
-
-After the run
-Save XP. Update streak if run finished.
-
-Promote learned items if they met the rule.
-
-Flag trouble items if they met the rule. Place them early in the next deck.
-
-Persist RunLog and AttemptLog.
-
-Update powerup inventory based on earn rules.
-
-Sample playthrough timeline
-Perfect five-row run without powerups
-
-00:00 Start. Rows=5. Progress 0/50.
-
-00:12 Reach 12. Pause. Show +5 XP. Resume.
-
-00:30 Reach 30. Pause. Show +15 XP total. Resume.
-
-00:46 Reach 50. Success. Award +40 XP. Show learned list.
-
-Timeout with extend
-
-00:00 Start. Rows=5.
-
-01:00 Progress at 38. Time hits zero. Offer +60 s.
-
-Player accepts. Timer becomes 01:00. Resume.
-
-00:32 later reach 50. Success. Inventory reduced by one extend token.
-
-High error rate with trouble items
-
-Early misses on “pero” vs “perro.”
-
-Each miss logs to AttemptLog. Item flagged as trouble.
-
-The item reinserts 4 to 6 positions later.
-
-Next run begins with that family near the top. Fresh items cap remains ≤20%.
-
-Modules with deeper detail
-
-App shell
-Owns startup order. Fonts. DB open. Provider graph.
+## Vision
+
+Palabra is a browser-friendly, mobile-ready Spanish vocabulary trainer designed to feel like a rhythm game. The experience is built around rapid English–Spanish matching, gentle pressure from a ticking clock, and visible progress that rewards streaks, accuracy, and consistency. Learners advance through the CEFR ladder (A1 → B2) only after demonstrating mastery, so every run matters and the content stays appropriately challenging.
+
+### What Success Looks Like
+- **Fast on every device.** Sessions start instantly, remain responsive in the browser, and survive flaky networks thanks to local storage and offline audio.
+- **Mastery over memorization.** The system continually promotes learned words, surfaces trouble items, and adjusts match targets so proficiency grows level by level.
+- **Confidence through feedback.** XP, streak indicators, celebrations, and post-run stats make improvement obvious and motivate another attempt.
+- **Inclusive audio.** Web Speech API provides native voices when possible; high-quality Piper clips for every vocabulary item ensure pronunciation never disappears.
+
+### Experience Pillars
+1. **Match:** Five-row dual-column boards highlight clear pairings, predictable gestures, and immediate confirmation or correction.
+2. **Master:** Difficulty ramps from 15 matches to 50 across each CEFR milestone, only unlocking the next tier once the current deck is mastered. Powerups reward clean runs and streaks.
+3. **Celebrate:** Tier checkpoints pause the clock, deliver XP bonuses, and set goals for the next push. Finish screens summarize gains, and bonus number drills reinforce listening skills.
+
+### Current Feature Set
+- Sequential CEFR progression with profile-aware tracking of learned, trouble, and fresh vocabulary.
+- XP, streak, and powerup systems with clean-run rewards and manual activations (time extend available today).
+- Bonus number drill mini-game using pre-generated Spanish audio for numbers 1–100 and speed-based scoring.
+- Full offline audio library with Piper-generated clips; automatic Web Speech fallback and voice caching on supported browsers.
+- Profile selector for local multi-learner households; each profile keeps its own progression, XP, inventories, and drill history.
+- Web-first deployment workflow targeting an LXC-hosted nginx origin, with a simple CLI deploy script.
+
+### Design Principles
+- **Offline-first:** Assets, progress, and audio live locally; network calls are optional enhancements.
+- **Deterministic decks:** Every refill maintains solvable boards, enforces family spacing, and respects trouble item limits.
+- **Short-session friendly:** 60-second timers, 4×4 number grids, and celebratory checkpoints make Palabra ideal for quick practice.
+- **Transparency:** HUD elements show match goals, XP gains, streaks, and available powerups so learners understand how to improve.
+
+### Roadmap Themes
+- **Profile polish:** Long lists, deep links, and parental controls for shared devices.
+- **Powerup variety:** Additional boosts (row blaster, hint windows) tied to higher XP thresholds.
+- **Telemetry & cloud sync:** Optional backend to sync progress across devices while keeping offline support intact.
+- **Accessibility & localization:** Broader language support for UI copy, screen-reader affordances, and adjustable tile density.
+- **Community & curriculum:** Layered missions, daily challenges, and curated vocabulary packs beyond the base CEFR decks.
+
+Palabra delivers quick, satisfying study loops today while laying the groundwork for a richer language-learning arcade built on mastery, momentum, and delightful feedback.*** End Patch
 
 Owns routes. Gate → Pre-run → Run → Finish.
 

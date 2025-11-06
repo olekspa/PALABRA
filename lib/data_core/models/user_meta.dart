@@ -20,6 +20,15 @@ class UserMeta {
   /// Current CEFR level for the user.
   String level = 'a1';
 
+  /// Friendly display name for the profile.
+  String profileName = 'Player';
+
+  /// When the profile was created.
+  DateTime createdAt = DateTime.now();
+
+  /// When the profile was last selected.
+  DateTime? lastSeenAt;
+
   /// Total learned item count.
   int learnedCount = 0;
 
@@ -83,6 +92,9 @@ class UserMeta {
       ..hasSeededVocabulary = json['hasSeededVocabulary'] as bool? ?? false
       ..preferredRows = json['preferredRows'] as int? ?? 5
       ..level = (json['level'] as String? ?? 'a1').toLowerCase()
+      ..profileName = (json['profileName'] as String? ?? 'Player').trim()
+      ..createdAt = _parseTimestamp(json['createdAt']) ?? DateTime.now()
+      ..lastSeenAt = _parseTimestamp(json['lastSeenAt'])
       ..learnedCount = json['learnedCount'] as int? ?? 0
       ..troubleCount = json['troubleCount'] as int? ?? 0
       ..lastRunAt = _parseTimestamp(json['lastRunAt'])
@@ -138,6 +150,9 @@ class UserMeta {
       'hasSeededVocabulary': hasSeededVocabulary,
       'preferredRows': preferredRows,
       'level': level,
+      'profileName': profileName,
+      'createdAt': createdAt.toIso8601String(),
+      'lastSeenAt': lastSeenAt?.toIso8601String(),
       'learnedCount': learnedCount,
       'troubleCount': troubleCount,
       'lastRunAt': lastRunAt?.toIso8601String(),
@@ -180,6 +195,10 @@ class UserMeta {
         levelId: existing[levelId]?.mapCopy() ?? LevelProgress(),
     };
     level = activeLevel;
+    if (profileName.trim().isEmpty) {
+      profileName = 'Player';
+    }
+    createdAt = createdAt;
   }
 
   static DateTime? _parseTimestamp(Object? raw) {

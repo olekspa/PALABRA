@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -35,6 +36,19 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
+
+    // Profile selector appears first.
+    expect(find.text('Choose your profile'), findsOneWidget);
+    if (find.text('Create new profile').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Create new profile'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'QA Tester');
+      await tester.tap(find.text('Create'));
+      await tester.pumpAndSettle();
+    } else {
+      await tester.tap(find.byType(ListTile).first);
+      await tester.pumpAndSettle();
+    }
 
     const runSettings = RunSettings();
     final runDuration = Duration(milliseconds: runSettings.runDurationMs);

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'package:palabra/data_core/models/attempt_log.dart';
+import 'package:palabra/data_core/models/profile_summary.dart';
 import 'package:palabra/data_core/models/run_log.dart';
 import 'package:palabra/data_core/models/user_item_state.dart';
 import 'package:palabra/data_core/models/user_meta.dart';
@@ -41,27 +42,64 @@ class InMemoryStore {
     final requested = profileId ?? activeProfileId;
     if (requested != null && _profiles.containsKey(requested)) {
       activeProfileId = requested;
+      _touchProfile(requested);
       return requested;
     }
     if (activeProfileId != null && _profiles.containsKey(activeProfileId)) {
+      _touchProfile(activeProfileId!);
       return activeProfileId!;
     }
     final id = _generateDefaultProfileId();
-    _profiles.putIfAbsent(id, UserMeta.new);
-    _profileUserStates.putIfAbsent(id, () => <String, UserItemState>{});
-    _profileRunLogs.putIfAbsent(id, () => <RunLog>[]);
-    _profileAttemptLogs.putIfAbsent(id, () => <AttemptLog>[]);
+    final name = _defaultProfileName();
+    final now = DateTime.now();
+    final meta = UserMeta()
+      ..profileName = name
+      ..createdAt = now
+      ..lastSeenAt = now;
+    _profiles[id] = meta;
+    _profileUserStates[id] = <String, UserItemState>{};
+    _profileRunLogs[id] = <RunLog>[];
+    _profileAttemptLogs[id] = <AttemptLog>[];
     activeProfileId = id;
+    _touchProfile(id);
     return id;
   }
 
   /// Returns the metadata for the profile.
   UserMeta profileMeta(String profileId) {
-    return _profiles.putIfAbsent(profileId, UserMeta.new);
+    return _profiles.putIfAbsent(profileId, () {
+      final now = DateTime.now();
+      return UserMeta()
+        ..profileName = _defaultProfileName()
+        ..createdAt = now
+        ..lastSeenAt = now;
+    });
+  }
+
+  /// Creates a new profile with the provided display name.
+  String createProfile({required String name}) {
+    final resolvedName = _sanitizeProfileName(name);
+    final id = _generateProfileIdForName(resolvedName);
+    final now = DateTime.now();
+    final meta = UserMeta()
+      ..profileName = resolvedName
+      ..createdAt = now
+      ..lastSeenAt = now;
+    _profiles[id] = meta;
+    _profileUserStates[id] = <String, UserItemState>{};
+    _profileRunLogs[id] = <RunLog>[];
+    _profileAttemptLogs[id] = <AttemptLog>[];
+    activeProfileId = id;
+    _touchProfile(id);
+    return id;
   }
 
   /// Updates or inserts the provided profile metadata.
   void upsertProfile(String profileId, UserMeta meta) {
+    if (meta.profileName.trim().isEmpty) {
+      meta.profileName = _sanitizeProfileName('');
+    }
+    meta.lastSeenAt ??= DateTime.now();
     _profiles[profileId] = meta;
   }
 
@@ -77,6 +115,7 @@ class InMemoryStore {
     if (activeProfileId == profileId) {
       activeProfileId = _profiles.isEmpty ? null : _profiles.keys.first;
     }
+    ensureActiveProfile();
   }
 
   Map<String, UserItemState> userStatesFor(String profileId) {
@@ -92,6 +131,24 @@ class InMemoryStore {
 
   List<AttemptLog> attemptLogsFor(String profileId) {
     return _profileAttemptLogs.putIfAbsent(profileId, () => <AttemptLog>[]);
+  }
+
+  ProfileSummary profileSummary(String profileId) {
+    final meta = profileMeta(profileId);
+    return ProfileSummary(
+      id: profileId,
+      displayName: meta.profileName,
+      createdAt: meta.createdAt,
+      lastSeenAt: meta.lastSeenAt,
+      level: meta.level,
+      totalRuns: meta.totalRuns,
+      isActive: profileId == activeProfileId,
+    );
+  }
+
+  List<ProfileSummary> profileSummaries() {
+    ensureActiveProfile();
+    return profileIds.map(profileSummary).toList(growable: false);
   }
 
   /// Convenience getter for the active profile metadata.
@@ -159,8 +216,7 @@ class InMemoryStore {
 
   Map<String, dynamic> _toJson() {
     final profilesJson = <String, dynamic>{
-      for (final entry in _profiles.entries)
-        entry.key: entry.value.toJson(),
+      for (final entry in _profiles.entries) entry.key: entry.value.toJson(),
     };
     final userStatesJson = _profileUserStates.map(
       (profileId, map) => MapEntry(
@@ -259,6 +315,54 @@ class InMemoryStore {
       suffix += 1;
     }
     return '$base$suffix';
+  }
+
+  String _generateProfileIdForName(String name) {
+    final slug = _slugify(name);
+    if (slug.isEmpty) {
+      return _generateDefaultProfileId();
+    }
+    var candidate = slug;
+    var suffix = 2;
+    while (_profiles.containsKey(candidate)) {
+      candidate = '$slug-$suffix';
+      suffix += 1;
+    }
+    return candidate;
+  }
+
+  String _slugify(String input) {
+    final lower = input.toLowerCase();
+    final replaced = lower.replaceAll(RegExp('[^a-z0-9]+'), '-');
+    final trimmed = replaced.replaceAll(RegExp('^-+|-+\$'), '');
+    return trimmed;
+  }
+
+  String _sanitizeProfileName(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      return _defaultProfileName();
+    }
+    return trimmed;
+  }
+
+  String _defaultProfileName() {
+    const base = 'Player';
+    final existing = _profiles.values.map((meta) => meta.profileName).toSet();
+    var index = _profiles.length + 1;
+    var candidate = '$base $index';
+    while (existing.contains(candidate)) {
+      index += 1;
+      candidate = '$base $index';
+    }
+    return candidate;
+  }
+
+  void _touchProfile(String id) {
+    final meta = profileMeta(id)..lastSeenAt = DateTime.now();
+    if (meta.profileName.trim().isEmpty) {
+      meta.profileName = _defaultProfileName();
+    }
   }
 
   Future<void> _loadLevel({
