@@ -22,6 +22,7 @@
 
 - Animated gradient + sparkle background applied app-wide.
 - RunController emits audio/haptics (platform aware), match celebrations, and mismatch penalties.
+- Offline speech fallback now ships with Piper-generated MP3s for all vocabulary items and numbers 1–100 (`assets/audio/spanish*`), keeping pronunciation available when Web Speech APIs fail.
 - Tier pauses and run completion now trigger confetti overlays and celebratory states.
 - Finish screen now surfaces inventory deltas, streaks, averages, and total run telemetry.
 - Gate → Pre-run → Run flow with device/course gating, row blaster toggle, and interactive board UI.

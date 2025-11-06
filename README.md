@@ -48,6 +48,15 @@ flutter analyze        # Static analysis using very_good_analysis
 flutter test           # Widget + unit tests
 ```
 
+## Web text-to-speech
+- Web builds now speak the right-column (Spanish) tiles via the browser Web Speech API using `flutter_tts`. Speech is lazily initialised on the first user tap to satisfy iOS autoplay policies.
+- Voices are filtered to Spanish locales, preferring Spain → Mexico → any other `es-*`. The selected voice is cached in `localStorage` when available.
+- If speech fails (no voices, timeouts, or iOS restrictions), the app will try to play an asset-based fallback from `assets/audio/spanish/<itemId>.mp3`. Add files following that naming convention to opt specific words into the fallback.
+- All four CEFR levels now ship with pre-rendered MP3 fallbacks generated offline with Piper (`tool/gen_tts_from_json.py`) using the `es_MX-claude-high` model at a slower 0.85x rate for clarity. Regenerate clips by re-running the script with the desired model/rate.
+- Spanish numbers (1–100) live under `assets/audio/spanish_numbers/num_###.mp3`. Use `tool/gen_tts_numbers.py --model <voice>.onnx --outdir assets/audio/spanish_numbers --rate 0.85` to rebuild or tweak speed/prefixes.
+- When no voice or asset can play, the UI presents a one-line toast notifying the learner that TTS is unavailable.
+- A developer-only tuning panel (rate, pitch, current voice label) can be enabled with `--dart-define=PALABRA_TTS_DEV_PANEL=true` when running the app on web.
+
 ## Prototype persistence & telemetry
 - User metadata, run logs, and item states persist locally via `shared_preferences` (in-memory fallback on unsupported platforms).
 - Clearing app storage resets progress; migrations, multi-profile support, and remote sync are still in planning.

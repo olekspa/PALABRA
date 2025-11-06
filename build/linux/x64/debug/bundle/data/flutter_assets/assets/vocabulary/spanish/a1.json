@@ -1,0 +1,2858 @@
+[
+  {
+    "id": "a1_0001",
+    "en": "tree",
+    "es": "árbol",
+    "level": "a1",
+    "family": "arbol",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0002",
+    "en": "water",
+    "es": "agua",
+    "level": "a1",
+    "family": "agua",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0003",
+    "en": "sky",
+    "es": "cielo",
+    "level": "a1",
+    "family": "cielo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0004",
+    "en": "earth",
+    "es": "tierra",
+    "level": "a1",
+    "family": "tierra",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0005",
+    "en": "flower",
+    "es": "flor",
+    "level": "a1",
+    "family": "flor",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0006",
+    "en": "sun",
+    "es": "sol",
+    "level": "a1",
+    "family": "sol",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0007",
+    "en": "moon",
+    "es": "luna",
+    "level": "a1",
+    "family": "luna",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0008",
+    "en": "star",
+    "es": "estrella",
+    "level": "a1",
+    "family": "estrella",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0009",
+    "en": "river",
+    "es": "río",
+    "level": "a1",
+    "family": "rio",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0010",
+    "en": "sea",
+    "es": "mar",
+    "level": "a1",
+    "family": "mar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0011",
+    "en": "mountain",
+    "es": "montaña",
+    "level": "a1",
+    "family": "montana",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0012",
+    "en": "forest",
+    "es": "bosque",
+    "level": "a1",
+    "family": "bosque",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0013",
+    "en": "countryside",
+    "es": "campo",
+    "level": "a1",
+    "family": "campo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0014",
+    "en": "rope",
+    "es": "cuerda",
+    "level": "a1",
+    "family": "cuerda",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0015",
+    "en": "chair",
+    "es": "silla",
+    "level": "a1",
+    "family": "silla",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0016",
+    "en": "table",
+    "es": "mesa",
+    "level": "a1",
+    "family": "mesa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0017",
+    "en": "door",
+    "es": "puerta",
+    "level": "a1",
+    "family": "puerta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0018",
+    "en": "window",
+    "es": "ventana",
+    "level": "a1",
+    "family": "ventana",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0019",
+    "en": "roof",
+    "es": "techo",
+    "level": "a1",
+    "family": "techo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0020",
+    "en": "wall",
+    "es": "pared",
+    "level": "a1",
+    "family": "pared",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0021",
+    "en": "floor",
+    "es": "suelo",
+    "level": "a1",
+    "family": "suelo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0022",
+    "en": "spoon",
+    "es": "cuchara",
+    "level": "a1",
+    "family": "cuchara",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0023",
+    "en": "fork",
+    "es": "tenedor",
+    "level": "a1",
+    "family": "tenedor",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0024",
+    "en": "knife",
+    "es": "cuchillo",
+    "level": "a1",
+    "family": "cuchillo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0025",
+    "en": "plate",
+    "es": "plato",
+    "level": "a1",
+    "family": "plato",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0026",
+    "en": "cup",
+    "es": "taza",
+    "level": "a1",
+    "family": "taza",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0027",
+    "en": "glass",
+    "es": "vaso",
+    "level": "a1",
+    "family": "vaso",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0028",
+    "en": "bread",
+    "es": "pan",
+    "level": "a1",
+    "family": "pan",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0029",
+    "en": "cheese",
+    "es": "queso",
+    "level": "a1",
+    "family": "queso",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0030",
+    "en": "egg",
+    "es": "huevo",
+    "level": "a1",
+    "family": "huevo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0031",
+    "en": "chicken",
+    "es": "pollo",
+    "level": "a1",
+    "family": "pollo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0032",
+    "en": "fish",
+    "es": "pescado",
+    "level": "a1",
+    "family": "pescado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0033",
+    "en": "rice",
+    "es": "arroz",
+    "level": "a1",
+    "family": "arroz",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0034",
+    "en": "bean",
+    "es": "frijol",
+    "level": "a1",
+    "family": "frijol",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0035",
+    "en": "apple",
+    "es": "manzana",
+    "level": "a1",
+    "family": "manzana",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0036",
+    "en": "pear",
+    "es": "pera",
+    "level": "a1",
+    "family": "pera",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0037",
+    "en": "orange",
+    "es": "naranja",
+    "level": "a1",
+    "family": "naranja",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0038",
+    "en": "grape",
+    "es": "uva",
+    "level": "a1",
+    "family": "uva",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0039",
+    "en": "lemon",
+    "es": "limón",
+    "level": "a1",
+    "family": "limon",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0040",
+    "en": "cherry",
+    "es": "cereza",
+    "level": "a1",
+    "family": "cereza",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0041",
+    "en": "carrot",
+    "es": "zanahoria",
+    "level": "a1",
+    "family": "zanahoria",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0042",
+    "en": "tomato",
+    "es": "tomate",
+    "level": "a1",
+    "family": "tomate",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0043",
+    "en": "lettuce",
+    "es": "lechuga",
+    "level": "a1",
+    "family": "lechuga",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0044",
+    "en": "dad",
+    "es": "papá",
+    "level": "a1",
+    "family": "papa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0045",
+    "en": "mom",
+    "es": "mamá",
+    "level": "a1",
+    "family": "mama",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0046",
+    "en": "brother",
+    "es": "hermano",
+    "level": "a1",
+    "family": "hermano",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0047",
+    "en": "sister",
+    "es": "hermana",
+    "level": "a1",
+    "family": "hermana",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0048",
+    "en": "grandfather",
+    "es": "abuelo",
+    "level": "a1",
+    "family": "abuelo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0049",
+    "en": "grandmother",
+    "es": "abuela",
+    "level": "a1",
+    "family": "abuela",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0050",
+    "en": "boy/child",
+    "es": "niño",
+    "level": "a1",
+    "family": "nino",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0051",
+    "en": "girl/child",
+    "es": "niña",
+    "level": "a1",
+    "family": "nina",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0052",
+    "en": "friend",
+    "es": "amigo",
+    "level": "a1",
+    "family": "amigo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0053",
+    "en": "family",
+    "es": "familia",
+    "level": "a1",
+    "family": "familia",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0054",
+    "en": "son",
+    "es": "hijo",
+    "level": "a1",
+    "family": "hijo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0055",
+    "en": "daughter",
+    "es": "hija",
+    "level": "a1",
+    "family": "hija",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0056",
+    "en": "name",
+    "es": "nombre",
+    "level": "a1",
+    "family": "nombre",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0057",
+    "en": "age",
+    "es": "edad",
+    "level": "a1",
+    "family": "edad",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0058",
+    "en": "bed",
+    "es": "cama",
+    "level": "a1",
+    "family": "cama",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0059",
+    "en": "sheet",
+    "es": "sábana",
+    "level": "a1",
+    "family": "sabana",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0060",
+    "en": "pillow",
+    "es": "almohada",
+    "level": "a1",
+    "family": "almohada",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0061",
+    "en": "bathroom",
+    "es": "baño",
+    "level": "a1",
+    "family": "bano",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0062",
+    "en": "shower",
+    "es": "ducha",
+    "level": "a1",
+    "family": "ducha",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0063",
+    "en": "sink",
+    "es": "lavabo",
+    "level": "a1",
+    "family": "lavabo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0064",
+    "en": "mirror",
+    "es": "espejo",
+    "level": "a1",
+    "family": "espejo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0065",
+    "en": "book",
+    "es": "libro",
+    "level": "a1",
+    "family": "libro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0066",
+    "en": "notebook",
+    "es": "cuaderno",
+    "level": "a1",
+    "family": "cuaderno",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0067",
+    "en": "pen",
+    "es": "pluma",
+    "level": "a1",
+    "family": "pluma",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0068",
+    "en": "pencil",
+    "es": "lápiz",
+    "level": "a1",
+    "family": "lapiz",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0069",
+    "en": "ballpoint pen",
+    "es": "bolígrafo",
+    "level": "a1",
+    "family": "boligrafo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0070",
+    "en": "shoe",
+    "es": "zapato",
+    "level": "a1",
+    "family": "zapato",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0071",
+    "en": "shirt",
+    "es": "camisa",
+    "level": "a1",
+    "family": "camisa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0072",
+    "en": "trousers",
+    "es": "pantalón",
+    "level": "a1",
+    "family": "pantalon",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0073",
+    "en": "hat",
+    "es": "sombrero",
+    "level": "a1",
+    "family": "sombrero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0074",
+    "en": "sock",
+    "es": "calcetín",
+    "level": "a1",
+    "family": "calcetin",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0075",
+    "en": "coat",
+    "es": "abrigo",
+    "level": "a1",
+    "family": "abrigo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0076",
+    "en": "bag",
+    "es": "bolso",
+    "level": "a1",
+    "family": "bolso",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0077",
+    "en": "key",
+    "es": "llave",
+    "level": "a1",
+    "family": "llave",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0078",
+    "en": "school",
+    "es": "escuela",
+    "level": "a1",
+    "family": "escuela",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0079",
+    "en": "city",
+    "es": "ciudad",
+    "level": "a1",
+    "family": "ciudad",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0080",
+    "en": "town",
+    "es": "pueblo",
+    "level": "a1",
+    "family": "pueblo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0081",
+    "en": "market",
+    "es": "mercado",
+    "level": "a1",
+    "family": "mercado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0082",
+    "en": "shop",
+    "es": "tienda",
+    "level": "a1",
+    "family": "tienda",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0083",
+    "en": "house",
+    "es": "casa",
+    "level": "a1",
+    "family": "casa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0084",
+    "en": "garden",
+    "es": "jardín",
+    "level": "a1",
+    "family": "jardin",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0085",
+    "en": "restaurant",
+    "es": "restaurante",
+    "level": "a1",
+    "family": "restaurante",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0086",
+    "en": "hospital",
+    "es": "hospital",
+    "level": "a1",
+    "family": "hospital",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0087",
+    "en": "church",
+    "es": "iglesia",
+    "level": "a1",
+    "family": "iglesia",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0088",
+    "en": "clock/watch",
+    "es": "reloj",
+    "level": "a1",
+    "family": "reloj",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0089",
+    "en": "hour/time",
+    "es": "hora",
+    "level": "a1",
+    "family": "hora",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0090",
+    "en": "day",
+    "es": "día",
+    "level": "a1",
+    "family": "dia",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0091",
+    "en": "night",
+    "es": "noche",
+    "level": "a1",
+    "family": "noche",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0092",
+    "en": "morning",
+    "es": "mañana",
+    "level": "a1",
+    "family": "manana",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0093",
+    "en": "afternoon",
+    "es": "tarde",
+    "level": "a1",
+    "family": "tarde",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0094",
+    "en": "Monday",
+    "es": "lunes",
+    "level": "a1",
+    "family": "lunes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0095",
+    "en": "Tuesday",
+    "es": "martes",
+    "level": "a1",
+    "family": "martes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0096",
+    "en": "Wednesday",
+    "es": "miércoles",
+    "level": "a1",
+    "family": "miercoles",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0097",
+    "en": "Thursday",
+    "es": "jueves",
+    "level": "a1",
+    "family": "jueves",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0098",
+    "en": "Friday",
+    "es": "viernes",
+    "level": "a1",
+    "family": "viernes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0099",
+    "en": "Saturday",
+    "es": "sábado",
+    "level": "a1",
+    "family": "sabado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0100",
+    "en": "Sunday",
+    "es": "domingo",
+    "level": "a1",
+    "family": "domingo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0101",
+    "en": "January",
+    "es": "enero",
+    "level": "a1",
+    "family": "enero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0102",
+    "en": "February",
+    "es": "febrero",
+    "level": "a1",
+    "family": "febrero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0103",
+    "en": "March",
+    "es": "marzo",
+    "level": "a1",
+    "family": "marzo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0104",
+    "en": "April",
+    "es": "abril",
+    "level": "a1",
+    "family": "abril",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0105",
+    "en": "May",
+    "es": "mayo",
+    "level": "a1",
+    "family": "mayo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0106",
+    "en": "June",
+    "es": "junio",
+    "level": "a1",
+    "family": "junio",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0107",
+    "en": "July",
+    "es": "julio",
+    "level": "a1",
+    "family": "julio",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0108",
+    "en": "August",
+    "es": "agosto",
+    "level": "a1",
+    "family": "agosto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0109",
+    "en": "September",
+    "es": "septiembre",
+    "level": "a1",
+    "family": "septiembre",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0110",
+    "en": "October",
+    "es": "octubre",
+    "level": "a1",
+    "family": "octubre",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0111",
+    "en": "November",
+    "es": "noviembre",
+    "level": "a1",
+    "family": "noviembre",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0112",
+    "en": "December",
+    "es": "diciembre",
+    "level": "a1",
+    "family": "diciembre",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0113",
+    "en": "red",
+    "es": "rojo",
+    "level": "a1",
+    "family": "rojo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0114",
+    "en": "blue",
+    "es": "azul",
+    "level": "a1",
+    "family": "azul",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0115",
+    "en": "green",
+    "es": "verde",
+    "level": "a1",
+    "family": "verde",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0116",
+    "en": "yellow",
+    "es": "amarillo",
+    "level": "a1",
+    "family": "amarillo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0117",
+    "en": "purple",
+    "es": "morado",
+    "level": "a1",
+    "family": "morado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0118",
+    "en": "black",
+    "es": "negro",
+    "level": "a1",
+    "family": "negro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0119",
+    "en": "white",
+    "es": "blanco",
+    "level": "a1",
+    "family": "blanco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0120",
+    "en": "gray",
+    "es": "gris",
+    "level": "a1",
+    "family": "gris",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0121",
+    "en": "pink",
+    "es": "rosa",
+    "level": "a1",
+    "family": "rosa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0122",
+    "en": "brown",
+    "es": "marrón",
+    "level": "a1",
+    "family": "marron",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0123",
+    "en": "one",
+    "es": "uno",
+    "level": "a1",
+    "family": "uno",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0124",
+    "en": "two",
+    "es": "dos",
+    "level": "a1",
+    "family": "dos",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0125",
+    "en": "three",
+    "es": "tres",
+    "level": "a1",
+    "family": "tres",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0126",
+    "en": "four",
+    "es": "cuatro",
+    "level": "a1",
+    "family": "cuatro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0127",
+    "en": "five",
+    "es": "cinco",
+    "level": "a1",
+    "family": "cinco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0128",
+    "en": "six",
+    "es": "seis",
+    "level": "a1",
+    "family": "seis",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0129",
+    "en": "seven",
+    "es": "siete",
+    "level": "a1",
+    "family": "siete",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0130",
+    "en": "eight",
+    "es": "ocho",
+    "level": "a1",
+    "family": "ocho",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0131",
+    "en": "nine",
+    "es": "nueve",
+    "level": "a1",
+    "family": "nueve",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0132",
+    "en": "ten",
+    "es": "diez",
+    "level": "a1",
+    "family": "diez",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0133",
+    "en": "good",
+    "es": "bueno",
+    "level": "a1",
+    "family": "bueno",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0134",
+    "en": "bad",
+    "es": "malo",
+    "level": "a1",
+    "family": "malo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0135",
+    "en": "big",
+    "es": "grande",
+    "level": "a1",
+    "family": "grande",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0136",
+    "en": "small",
+    "es": "pequeño",
+    "level": "a1",
+    "family": "pequeno",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0137",
+    "en": "tall/high",
+    "es": "alto",
+    "level": "a1",
+    "family": "alto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0138",
+    "en": "short/low",
+    "es": "bajo",
+    "level": "a1",
+    "family": "bajo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0139",
+    "en": "new",
+    "es": "nuevo",
+    "level": "a1",
+    "family": "nuevo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0140",
+    "en": "old",
+    "es": "viejo",
+    "level": "a1",
+    "family": "viejo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0141",
+    "en": "hot",
+    "es": "caliente",
+    "level": "a1",
+    "family": "caliente",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0142",
+    "en": "cold",
+    "es": "frío",
+    "level": "a1",
+    "family": "frio",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0143",
+    "en": "pretty",
+    "es": "bonito",
+    "level": "a1",
+    "family": "bonito",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0144",
+    "en": "ugly",
+    "es": "feo",
+    "level": "a1",
+    "family": "feo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0145",
+    "en": "long",
+    "es": "largo",
+    "level": "a1",
+    "family": "largo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0146",
+    "en": "short",
+    "es": "corto",
+    "level": "a1",
+    "family": "corto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0147",
+    "en": "happy",
+    "es": "feliz",
+    "level": "a1",
+    "family": "feliz",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0148",
+    "en": "sad",
+    "es": "triste",
+    "level": "a1",
+    "family": "triste",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0149",
+    "en": "easy",
+    "es": "fácil",
+    "level": "a1",
+    "family": "facil",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0150",
+    "en": "difficult",
+    "es": "difícil",
+    "level": "a1",
+    "family": "dificil",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0151",
+    "en": "to be (essential/permanent)",
+    "es": "ser",
+    "level": "a1",
+    "family": "ser",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0152",
+    "en": "to be (state/condition)",
+    "es": "estar",
+    "level": "a1",
+    "family": "estar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0153",
+    "en": "to have",
+    "es": "tener",
+    "level": "a1",
+    "family": "tener",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0154",
+    "en": "to do, to make",
+    "es": "hacer",
+    "level": "a1",
+    "family": "hacer",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0155",
+    "en": "to go",
+    "es": "ir",
+    "level": "a1",
+    "family": "ir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0156",
+    "en": "to come",
+    "es": "venir",
+    "level": "a1",
+    "family": "venir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0157",
+    "en": "to eat",
+    "es": "comer",
+    "level": "a1",
+    "family": "comer",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0158",
+    "en": "to drink",
+    "es": "beber",
+    "level": "a1",
+    "family": "beber",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0159",
+    "en": "to sleep",
+    "es": "dormir",
+    "level": "a1",
+    "family": "dormir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0160",
+    "en": "to live",
+    "es": "vivir",
+    "level": "a1",
+    "family": "vivir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0161",
+    "en": "to speak",
+    "es": "hablar",
+    "level": "a1",
+    "family": "hablar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0162",
+    "en": "to read",
+    "es": "leer",
+    "level": "a1",
+    "family": "leer",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0163",
+    "en": "to write",
+    "es": "escribir",
+    "level": "a1",
+    "family": "escribir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0164",
+    "en": "to listen",
+    "es": "escuchar",
+    "level": "a1",
+    "family": "escuchar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0165",
+    "en": "to look",
+    "es": "mirar",
+    "level": "a1",
+    "family": "mirar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0166",
+    "en": "to walk",
+    "es": "caminar",
+    "level": "a1",
+    "family": "caminar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0167",
+    "en": "to run",
+    "es": "correr",
+    "level": "a1",
+    "family": "correr",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0168",
+    "en": "car",
+    "es": "coche",
+    "level": "a1",
+    "family": "coche",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0169",
+    "en": "train",
+    "es": "tren",
+    "level": "a1",
+    "family": "tren",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0170",
+    "en": "plane",
+    "es": "avión",
+    "level": "a1",
+    "family": "avion",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0171",
+    "en": "hello",
+    "es": "hola",
+    "level": "a1",
+    "family": "hola",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0172",
+    "en": "goodbye",
+    "es": "adiós",
+    "level": "a1",
+    "family": "adios",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0173",
+    "en": "please",
+    "es": "por favor",
+    "level": "a1",
+    "family": "por_favor",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0174",
+    "en": "thank you",
+    "es": "gracias",
+    "level": "a1",
+    "family": "gracias",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0175",
+    "en": "you're welcome",
+    "es": "de nada",
+    "level": "a1",
+    "family": "de_nada",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0176",
+    "en": "sorry",
+    "es": "lo siento",
+    "level": "a1",
+    "family": "lo_siento",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0177",
+    "en": "good morning",
+    "es": "buenos días",
+    "level": "a1",
+    "family": "buenos_dias",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0178",
+    "en": "good afternoon",
+    "es": "buenas tardes",
+    "level": "a1",
+    "family": "buenas_tardes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0179",
+    "en": "good night",
+    "es": "buenas noches",
+    "level": "a1",
+    "family": "buenas_noches",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0180",
+    "en": "soft",
+    "es": "suave",
+    "level": "a1",
+    "family": "suave",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0181",
+    "en": "fresh",
+    "es": "fresco",
+    "level": "a1",
+    "family": "fresco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0182",
+    "en": "street",
+    "es": "calle",
+    "level": "a1",
+    "family": "calle",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0183",
+    "en": "avenue",
+    "es": "avenida",
+    "level": "a1",
+    "family": "avenida",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0184",
+    "en": "plaza",
+    "es": "plaza",
+    "level": "a1",
+    "family": "plaza",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0185",
+    "en": "hallway",
+    "es": "pasillo",
+    "level": "a1",
+    "family": "pasillo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0186",
+    "en": "living room",
+    "es": "sala",
+    "level": "a1",
+    "family": "sala",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0187",
+    "en": "dining room",
+    "es": "comedor",
+    "level": "a1",
+    "family": "comedor",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0188",
+    "en": "bedroom",
+    "es": "habitación",
+    "level": "a1",
+    "family": "habitacion",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0189",
+    "en": "kitchen",
+    "es": "cocina",
+    "level": "a1",
+    "family": "cocina",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0190",
+    "en": "room",
+    "es": "cuarto",
+    "level": "a1",
+    "family": "cuarto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0191",
+    "en": "step",
+    "es": "paso",
+    "level": "a1",
+    "family": "paso",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0192",
+    "en": "stairs",
+    "es": "escalera",
+    "level": "a1",
+    "family": "escalera",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0193",
+    "en": "elevator",
+    "es": "ascensor",
+    "level": "a1",
+    "family": "ascensor",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0194",
+    "en": "pantry",
+    "es": "despensa",
+    "level": "a1",
+    "family": "despensa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0195",
+    "en": "t-shirt",
+    "es": "camiseta",
+    "level": "a1",
+    "family": "camiseta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0196",
+    "en": "pajamas",
+    "es": "pijama",
+    "level": "a1",
+    "family": "pijama",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0197",
+    "en": "boot",
+    "es": "bota",
+    "level": "a1",
+    "family": "bota",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0198",
+    "en": "sandal",
+    "es": "sandalia",
+    "level": "a1",
+    "family": "sandalia",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0199",
+    "en": "guava",
+    "es": "guayaba",
+    "level": "a1",
+    "family": "guayaba",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0200",
+    "en": "coconut",
+    "es": "coco",
+    "level": "a1",
+    "family": "coco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0201",
+    "en": "computer",
+    "es": "ordenador",
+    "level": "a1",
+    "family": "ordenador",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0202",
+    "en": "internet",
+    "es": "internet",
+    "level": "a1",
+    "family": "internet",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0203",
+    "en": "photo",
+    "es": "foto",
+    "level": "a1",
+    "family": "foto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0204",
+    "en": "camera",
+    "es": "cámara",
+    "level": "a1",
+    "family": "camara",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0205",
+    "en": "because",
+    "es": "porque",
+    "level": "a1",
+    "family": "porque",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0206",
+    "en": "but",
+    "es": "pero",
+    "level": "a1",
+    "family": "pero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0207",
+    "en": "more",
+    "es": "más",
+    "level": "a1",
+    "family": "mas",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0208",
+    "en": "less",
+    "es": "menos",
+    "level": "a1",
+    "family": "menos",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0209",
+    "en": "very",
+    "es": "muy",
+    "level": "a1",
+    "family": "muy",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0210",
+    "en": "little",
+    "es": "poco",
+    "level": "a1",
+    "family": "poco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0211",
+    "en": "yes",
+    "es": "sí",
+    "level": "a1",
+    "family": "si",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0212",
+    "en": "no",
+    "es": "no",
+    "level": "a1",
+    "family": "no",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0213",
+    "en": "then",
+    "es": "entonces",
+    "level": "a1",
+    "family": "entonces",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0214",
+    "en": "when",
+    "es": "cuando",
+    "level": "a1",
+    "family": "cuando",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0215",
+    "en": "where",
+    "es": "dónde",
+    "level": "a1",
+    "family": "donde",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0216",
+    "en": "what",
+    "es": "qué",
+    "level": "a1",
+    "family": "que",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0217",
+    "en": "who",
+    "es": "quién",
+    "level": "a1",
+    "family": "quien",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0218",
+    "en": "how",
+    "es": "cómo",
+    "level": "a1",
+    "family": "como",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0219",
+    "en": "why",
+    "es": "por qué",
+    "level": "a1",
+    "family": "por_que",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0220",
+    "en": "I",
+    "es": "yo",
+    "level": "a1",
+    "family": "yo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0221",
+    "en": "you (informal)",
+    "es": "tú",
+    "level": "a1",
+    "family": "tu",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0222",
+    "en": "he",
+    "es": "él",
+    "level": "a1",
+    "family": "el",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0223",
+    "en": "she",
+    "es": "ella",
+    "level": "a1",
+    "family": "ella",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0224",
+    "en": "we",
+    "es": "nosotros",
+    "level": "a1",
+    "family": "nosotros",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0225",
+    "en": "you (plural informal)",
+    "es": "vosotros",
+    "level": "a1",
+    "family": "vosotros",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0226",
+    "en": "they (masculine)",
+    "es": "ellos",
+    "level": "a1",
+    "family": "ellos",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0227",
+    "en": "they (feminine)",
+    "es": "ellas",
+    "level": "a1",
+    "family": "ellas",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0228",
+    "en": "you (formal)",
+    "es": "usted",
+    "level": "a1",
+    "family": "usted",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0229",
+    "en": "you (plural formal)",
+    "es": "ustedes",
+    "level": "a1",
+    "family": "ustedes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0230",
+    "en": "newspaper",
+    "es": "periódico",
+    "level": "a1",
+    "family": "periodico",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0231",
+    "en": "magazine",
+    "es": "revista",
+    "level": "a1",
+    "family": "revista",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0232",
+    "en": "letter",
+    "es": "carta",
+    "level": "a1",
+    "family": "carta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0233",
+    "en": "money",
+    "es": "dinero",
+    "level": "a1",
+    "family": "dinero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0234",
+    "en": "change",
+    "es": "cambio",
+    "level": "a1",
+    "family": "cambio",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0235",
+    "en": "time/weather",
+    "es": "tiempo",
+    "level": "a1",
+    "family": "tiempo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0236",
+    "en": "to work",
+    "es": "trabajar",
+    "level": "a1",
+    "family": "trabajar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0237",
+    "en": "to study",
+    "es": "estudiar",
+    "level": "a1",
+    "family": "estudiar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0238",
+    "en": "to cry",
+    "es": "llorar",
+    "level": "a1",
+    "family": "llorar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0239",
+    "en": "to laugh",
+    "es": "reír",
+    "level": "a1",
+    "family": "reir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0240",
+    "en": "to dance",
+    "es": "bailar",
+    "level": "a1",
+    "family": "bailar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0241",
+    "en": "to sing",
+    "es": "cantar",
+    "level": "a1",
+    "family": "cantar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0242",
+    "en": "to like",
+    "es": "gustar",
+    "level": "a1",
+    "family": "gustar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0243",
+    "en": "to search",
+    "es": "buscar",
+    "level": "a1",
+    "family": "buscar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0244",
+    "en": "to find",
+    "es": "encontrar",
+    "level": "a1",
+    "family": "encontrar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0245",
+    "en": "to change",
+    "es": "cambiar",
+    "level": "a1",
+    "family": "cambiar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0246",
+    "en": "to feel",
+    "es": "sentir",
+    "level": "a1",
+    "family": "sentir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0247",
+    "en": "to love",
+    "es": "amar",
+    "level": "a1",
+    "family": "amar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0248",
+    "en": "to open",
+    "es": "abrir",
+    "level": "a1",
+    "family": "abrir",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0249",
+    "en": "to close",
+    "es": "cerrar",
+    "level": "a1",
+    "family": "cerrar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0250",
+    "en": "to put",
+    "es": "poner",
+    "level": "a1",
+    "family": "poner",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0251",
+    "en": "to remove",
+    "es": "quitar",
+    "level": "a1",
+    "family": "quitar",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0252",
+    "en": "behind",
+    "es": "detrás",
+    "level": "a1",
+    "family": "detras",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0253",
+    "en": "in front of",
+    "es": "delante",
+    "level": "a1",
+    "family": "delante",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0254",
+    "en": "stone",
+    "es": "piedra",
+    "level": "a1",
+    "family": "piedra",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0255",
+    "en": "sand",
+    "es": "arena",
+    "level": "a1",
+    "family": "arena",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0256",
+    "en": "lake",
+    "es": "lago",
+    "level": "a1",
+    "family": "lago",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0257",
+    "en": "island",
+    "es": "isla",
+    "level": "a1",
+    "family": "isla",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0258",
+    "en": "beach",
+    "es": "playa",
+    "level": "a1",
+    "family": "playa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0259",
+    "en": "desert",
+    "es": "desierto",
+    "level": "a1",
+    "family": "desierto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0260",
+    "en": "butterfly",
+    "es": "mariposa",
+    "level": "a1",
+    "family": "mariposa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0261",
+    "en": "insect",
+    "es": "insecto",
+    "level": "a1",
+    "family": "insecto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0262",
+    "en": "fruit",
+    "es": "fruto",
+    "level": "a1",
+    "family": "fruto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0263",
+    "en": "seed",
+    "es": "semilla",
+    "level": "a1",
+    "family": "semilla",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0264",
+    "en": "root",
+    "es": "raíz",
+    "level": "a1",
+    "family": "raiz",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0265",
+    "en": "open (adj.)",
+    "es": "abierto",
+    "level": "a1",
+    "family": "abierto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0266",
+    "en": "dark",
+    "es": "oscuro",
+    "level": "a1",
+    "family": "oscuro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0267",
+    "en": "light/clear",
+    "es": "claro",
+    "level": "a1",
+    "family": "claro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0268",
+    "en": "hard",
+    "es": "duro",
+    "level": "a1",
+    "family": "duro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0269",
+    "en": "round",
+    "es": "redondo",
+    "level": "a1",
+    "family": "redondo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0270",
+    "en": "square",
+    "es": "cuadrado",
+    "level": "a1",
+    "family": "cuadrado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0271",
+    "en": "thick",
+    "es": "grueso",
+    "level": "a1",
+    "family": "grueso",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0272",
+    "en": "thin",
+    "es": "delgado",
+    "level": "a1",
+    "family": "delgado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0273",
+    "en": "light (weight)",
+    "es": "ligero",
+    "level": "a1",
+    "family": "ligero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0274",
+    "en": "heavy",
+    "es": "pesado",
+    "level": "a1",
+    "family": "pesado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0275",
+    "en": "fear",
+    "es": "miedo",
+    "level": "a1",
+    "family": "miedo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0276",
+    "en": "joy",
+    "es": "alegría",
+    "level": "a1",
+    "family": "alegria",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0277",
+    "en": "love",
+    "es": "amor",
+    "level": "a1",
+    "family": "amor",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0278",
+    "en": "surprise",
+    "es": "sorpresa",
+    "level": "a1",
+    "family": "sorpresa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0279",
+    "en": "tiredness",
+    "es": "cansancio",
+    "level": "a1",
+    "family": "cansancio",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0280",
+    "en": "patience",
+    "es": "paciencia",
+    "level": "a1",
+    "family": "paciencia",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0281",
+    "en": "hope",
+    "es": "esperanza",
+    "level": "a1",
+    "family": "esperanza",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0282",
+    "en": "rooster",
+    "es": "gallo",
+    "level": "a1",
+    "family": "gallo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0283",
+    "en": "chick",
+    "es": "pollito",
+    "level": "a1",
+    "family": "pollito",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0284",
+    "en": "hen",
+    "es": "gallina",
+    "level": "a1",
+    "family": "gallina",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0285",
+    "en": "duck",
+    "es": "pato",
+    "level": "a1",
+    "family": "pato",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0286",
+    "en": "kid (goat)",
+    "es": "cabrito",
+    "level": "a1",
+    "family": "cabrito",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0287",
+    "en": "music",
+    "es": "música",
+    "level": "a1",
+    "family": "musica",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0288",
+    "en": "song",
+    "es": "canción",
+    "level": "a1",
+    "family": "cancion",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0289",
+    "en": "movie",
+    "es": "película",
+    "level": "a1",
+    "family": "pelicula",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0290",
+    "en": "video",
+    "es": "video",
+    "level": "a1",
+    "family": "video",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0291",
+    "en": "museum",
+    "es": "museo",
+    "level": "a1",
+    "family": "museo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0292",
+    "en": "stop",
+    "es": "parada",
+    "level": "a1",
+    "family": "parada",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0293",
+    "en": "traffic light",
+    "es": "semáforo",
+    "level": "a1",
+    "family": "semaforo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0294",
+    "en": "bank (financial)",
+    "es": "banco",
+    "level": "a1",
+    "family": "banco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0295",
+    "en": "blanket",
+    "es": "manta",
+    "level": "a1",
+    "family": "manta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0296",
+    "en": "towel",
+    "es": "toalla",
+    "level": "a1",
+    "family": "toalla",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0297",
+    "en": "brush",
+    "es": "cepillo",
+    "level": "a1",
+    "family": "cepillo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0298",
+    "en": "comb",
+    "es": "peine",
+    "level": "a1",
+    "family": "peine",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0299",
+    "en": "soap",
+    "es": "jabón",
+    "level": "a1",
+    "family": "jabon",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0300",
+    "en": "shampoo",
+    "es": "shampoo",
+    "level": "a1",
+    "family": "shampoo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0301",
+    "en": "toothpaste",
+    "es": "pasta de dientes",
+    "level": "a1",
+    "family": "pasta_de_dientes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0302",
+    "en": "toothbrush",
+    "es": "cepillo de dientes",
+    "level": "a1",
+    "family": "cepillo_de_dientes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0303",
+    "en": "frying pan",
+    "es": "sartén",
+    "level": "a1",
+    "family": "sarten",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0304",
+    "en": "pot",
+    "es": "olla",
+    "level": "a1",
+    "family": "olla",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0305",
+    "en": "meat",
+    "es": "carne",
+    "level": "a1",
+    "family": "carne",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0306",
+    "en": "soup",
+    "es": "sopa",
+    "level": "a1",
+    "family": "sopa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0307",
+    "en": "party",
+    "es": "fiesta",
+    "level": "a1",
+    "family": "fiesta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0308",
+    "en": "clothes",
+    "es": "ropa",
+    "level": "a1",
+    "family": "ropa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0309",
+    "en": "shoes",
+    "es": "zapatos",
+    "level": "a1",
+    "family": "zapatos",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0310",
+    "en": "gloves",
+    "es": "guantes",
+    "level": "a1",
+    "family": "guantes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0311",
+    "en": "scarf",
+    "es": "bufanda",
+    "level": "a1",
+    "family": "bufanda",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0312",
+    "en": "belt",
+    "es": "cinturón",
+    "level": "a1",
+    "family": "cinturon",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0313",
+    "en": "pencil case",
+    "es": "lapicero",
+    "level": "a1",
+    "family": "lapicero",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0314",
+    "en": "wastebasket",
+    "es": "papelera",
+    "level": "a1",
+    "family": "papelera",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0315",
+    "en": "coffee maker",
+    "es": "cafetera",
+    "level": "a1",
+    "family": "cafetera",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0316",
+    "en": "toaster",
+    "es": "tostadora",
+    "level": "a1",
+    "family": "tostadora",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0317",
+    "en": "iron",
+    "es": "plancha",
+    "level": "a1",
+    "family": "plancha",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0318",
+    "en": "bowl",
+    "es": "bol",
+    "level": "a1",
+    "family": "bol",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0319",
+    "en": "jar",
+    "es": "tarro",
+    "level": "a1",
+    "family": "tarro",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0320",
+    "en": "calendar",
+    "es": "calendario",
+    "level": "a1",
+    "family": "calendario",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0321",
+    "en": "map",
+    "es": "mapa",
+    "level": "a1",
+    "family": "mapa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0322",
+    "en": "mobile phone",
+    "es": "teléfono móvil",
+    "level": "a1",
+    "family": "telefono_movil",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0323",
+    "en": "email",
+    "es": "correo electrónico",
+    "level": "a1",
+    "family": "correo_electronico",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0324",
+    "en": "library",
+    "es": "biblioteca",
+    "level": "a1",
+    "family": "biblioteca",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0325",
+    "en": "taxi",
+    "es": "taxi",
+    "level": "a1",
+    "family": "taxi",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0326",
+    "en": "bicycle",
+    "es": "bicicleta",
+    "level": "a1",
+    "family": "bicicleta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0327",
+    "en": "boat",
+    "es": "barco",
+    "level": "a1",
+    "family": "barco",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0328",
+    "en": "ship",
+    "es": "nave",
+    "level": "a1",
+    "family": "nave",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0329",
+    "en": "cloud",
+    "es": "nube",
+    "level": "a1",
+    "family": "nube",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0330",
+    "en": "rain",
+    "es": "lluvia",
+    "level": "a1",
+    "family": "lluvia",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0331",
+    "en": "snow",
+    "es": "nieve",
+    "level": "a1",
+    "family": "nieve",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0332",
+    "en": "flame",
+    "es": "llama",
+    "level": "a1",
+    "family": "llama",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0333",
+    "en": "smoke",
+    "es": "humo",
+    "level": "a1",
+    "family": "humo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0334",
+    "en": "rock",
+    "es": "roca",
+    "level": "a1",
+    "family": "roca",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0335",
+    "en": "branch",
+    "es": "rama",
+    "level": "a1",
+    "family": "rama",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0336",
+    "en": "soon",
+    "es": "pronto",
+    "level": "a1",
+    "family": "pronto",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0337",
+    "en": "yesterday",
+    "es": "ayer",
+    "level": "a1",
+    "family": "ayer",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0338",
+    "en": "today",
+    "es": "hoy",
+    "level": "a1",
+    "family": "hoy",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0339",
+    "en": "sometimes",
+    "es": "a veces",
+    "level": "a1",
+    "family": "a_veces",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0340",
+    "en": "frequently",
+    "es": "frecuentemente",
+    "level": "a1",
+    "family": "frecuentemente",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0341",
+    "en": "before",
+    "es": "antes",
+    "level": "a1",
+    "family": "antes",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0342",
+    "en": "early",
+    "es": "temprano",
+    "level": "a1",
+    "family": "temprano",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0343",
+    "en": "greeting",
+    "es": "saludo",
+    "level": "a1",
+    "family": "saludo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0344",
+    "en": "farewell",
+    "es": "despedida",
+    "level": "a1",
+    "family": "despedida",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0345",
+    "en": "question",
+    "es": "pregunta",
+    "level": "a1",
+    "family": "pregunta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0346",
+    "en": "answer",
+    "es": "respuesta",
+    "level": "a1",
+    "family": "respuesta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0347",
+    "en": "dictionary",
+    "es": "diccionario",
+    "level": "a1",
+    "family": "diccionario",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0348",
+    "en": "alley",
+    "es": "callejón",
+    "level": "a1",
+    "family": "callejon",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0349",
+    "en": "barbecue",
+    "es": "barbacoa",
+    "level": "a1",
+    "family": "barbacoa",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0350",
+    "en": "cafe",
+    "es": "cafetería",
+    "level": "a1",
+    "family": "cafeteria",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0351",
+    "en": "fruit",
+    "es": "fruta",
+    "level": "a1",
+    "family": "fruta",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0352",
+    "en": "vegetable",
+    "es": "verdura",
+    "level": "a1",
+    "family": "verdura",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0353",
+    "en": "sweet",
+    "es": "dulce",
+    "level": "a1",
+    "family": "dulce",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0354",
+    "en": "bitter",
+    "es": "amargo",
+    "level": "a1",
+    "family": "amargo",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0355",
+    "en": "sour",
+    "es": "ácido",
+    "level": "a1",
+    "family": "acido",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0356",
+    "en": "salty",
+    "es": "salado",
+    "level": "a1",
+    "family": "salado",
+    "topic": "core_vocab"
+  },
+  {
+    "id": "a1_0357",
+    "en": "juice",
+    "es": "jugo",
+    "level": "a1",
+    "family": "jugo",
+    "topic": "core_vocab"
+  }
+]

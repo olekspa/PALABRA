@@ -1,0 +1,802 @@
+[
+  {
+    "id": "b1_0001",
+    "en": "to tackle/approach",
+    "es": "abordar",
+    "level": "b1",
+    "family": "abordar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0002",
+    "en": "to take advantage of",
+    "es": "aprovechar",
+    "level": "b1",
+    "family": "aprovechar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0003",
+    "en": "to assume",
+    "es": "asumir",
+    "level": "b1",
+    "family": "asumir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0004",
+    "en": "to dare",
+    "es": "atreverse",
+    "level": "b1",
+    "family": "atreverse",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0005",
+    "en": "to commit (an error)",
+    "es": "cometer",
+    "level": "b1",
+    "family": "cometer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0006",
+    "en": "to obtain/achieve",
+    "es": "conseguir",
+    "level": "b1",
+    "family": "conseguir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0007",
+    "en": "to preserve",
+    "es": "conservar",
+    "level": "b1",
+    "family": "conservar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0008",
+    "en": "to define",
+    "es": "definir",
+    "level": "b1",
+    "family": "definir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0009",
+    "en": "to develop",
+    "es": "desarrollar",
+    "level": "b1",
+    "family": "desarrollar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0010",
+    "en": "to discuss",
+    "es": "discutir",
+    "level": "b1",
+    "family": "discutir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0011",
+    "en": "to confront/face",
+    "es": "enfrentar",
+    "level": "b1",
+    "family": "enfrentar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0012",
+    "en": "to experience/try",
+    "es": "experimentar",
+    "level": "b1",
+    "family": "experimentar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0013",
+    "en": "to explain",
+    "es": "explicar",
+    "level": "b1",
+    "family": "explicar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0014",
+    "en": "to form",
+    "es": "formar",
+    "level": "b1",
+    "family": "formar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0015",
+    "en": "to imagine",
+    "es": "imaginar",
+    "level": "b1",
+    "family": "imaginar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0016",
+    "en": "to include",
+    "es": "incluir",
+    "level": "b1",
+    "family": "incluir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0017",
+    "en": "to influence",
+    "es": "influir",
+    "level": "b1",
+    "family": "influir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0018",
+    "en": "to insist",
+    "es": "insistir",
+    "level": "b1",
+    "family": "insistir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0019",
+    "en": "to intervene",
+    "es": "intervenir",
+    "level": "b1",
+    "family": "intervenir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0020",
+    "en": "to interpret",
+    "es": "interpretar",
+    "level": "b1",
+    "family": "interpretar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0021",
+    "en": "to state/express",
+    "es": "manifestar",
+    "level": "b1",
+    "family": "manifestar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0022",
+    "en": "to mention",
+    "es": "mencionar",
+    "level": "b1",
+    "family": "mencionar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0023",
+    "en": "to observe",
+    "es": "observar",
+    "level": "b1",
+    "family": "observar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0024",
+    "en": "to participate",
+    "es": "participar",
+    "level": "b1",
+    "family": "participar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0025",
+    "en": "to allow",
+    "es": "permitir",
+    "level": "b1",
+    "family": "permitir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0026",
+    "en": "to perceive",
+    "es": "percibir",
+    "level": "b1",
+    "family": "percibir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0027",
+    "en": "to worry",
+    "es": "preocuparse",
+    "level": "b1",
+    "family": "preocuparse",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0028",
+    "en": "to propose",
+    "es": "proponer",
+    "level": "b1",
+    "family": "proponer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0029",
+    "en": "to react",
+    "es": "reaccionar",
+    "level": "b1",
+    "family": "reaccionar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0030",
+    "en": "to recognize",
+    "es": "reconocer",
+    "level": "b1",
+    "family": "reconocer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0031",
+    "en": "to reinforce",
+    "es": "reforzar",
+    "level": "b1",
+    "family": "reforzar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0032",
+    "en": "to relate",
+    "es": "relacionar",
+    "level": "b1",
+    "family": "relacionar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0033",
+    "en": "to represent",
+    "es": "representar",
+    "level": "b1",
+    "family": "representar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0034",
+    "en": "to turn out/be",
+    "es": "resultar",
+    "level": "b1",
+    "family": "resultar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0035",
+    "en": "to sustain/maintain",
+    "es": "sostener",
+    "level": "b1",
+    "family": "sostener",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0036",
+    "en": "to suppose",
+    "es": "suponer",
+    "level": "b1",
+    "family": "suponer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0037",
+    "en": "to take time/delay",
+    "es": "tardar",
+    "level": "b1",
+    "family": "tardar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0038",
+    "en": "to transform",
+    "es": "transformar",
+    "level": "b1",
+    "family": "transformar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0039",
+    "en": "to value/appreciate",
+    "es": "valorar",
+    "level": "b1",
+    "family": "valorar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0040",
+    "en": "to vary",
+    "es": "variar",
+    "level": "b1",
+    "family": "variar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0041",
+    "en": "to verify",
+    "es": "verificar",
+    "level": "b1",
+    "family": "verificar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0042",
+    "en": "to agree upon",
+    "es": "acordar",
+    "level": "b1",
+    "family": "acordar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0043",
+    "en": "to affirm",
+    "es": "afirmar",
+    "level": "b1",
+    "family": "afirmar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0044",
+    "en": "to alert",
+    "es": "alertar",
+    "level": "b1",
+    "family": "alertar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0045",
+    "en": "to announce",
+    "es": "anunciar",
+    "level": "b1",
+    "family": "anunciar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0046",
+    "en": "to appear",
+    "es": "aparecer",
+    "level": "b1",
+    "family": "aparecer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0047",
+    "en": "to amaze",
+    "es": "asombrar",
+    "level": "b1",
+    "family": "asombrar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0048",
+    "en": "to advance/progress",
+    "es": "avanzar",
+    "level": "b1",
+    "family": "avanzar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0049",
+    "en": "to calculate",
+    "es": "calcular",
+    "level": "b1",
+    "family": "calcular",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0050",
+    "en": "to capture",
+    "es": "capturar",
+    "level": "b1",
+    "family": "capturar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0051",
+    "en": "to quote",
+    "es": "citar",
+    "level": "b1",
+    "family": "citar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0052",
+    "en": "to share",
+    "es": "compartir",
+    "level": "b1",
+    "family": "compartir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0053",
+    "en": "to check/verify",
+    "es": "comprobar",
+    "level": "b1",
+    "family": "comprobar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0054",
+    "en": "to contribute",
+    "es": "contribuir",
+    "level": "b1",
+    "family": "contribuir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0055",
+    "en": "to convince",
+    "es": "convencer",
+    "level": "b1",
+    "family": "convencer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0056",
+    "en": "to convert",
+    "es": "convertir",
+    "level": "b1",
+    "family": "convertir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0057",
+    "en": "to declare",
+    "es": "declarar",
+    "level": "b1",
+    "family": "declarar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0058",
+    "en": "to discard",
+    "es": "descartar",
+    "level": "b1",
+    "family": "descartar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0059",
+    "en": "to highlight",
+    "es": "destacar",
+    "level": "b1",
+    "family": "destacar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0060",
+    "en": "to detect",
+    "es": "detectar",
+    "level": "b1",
+    "family": "detectar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0061",
+    "en": "to describe",
+    "es": "describir",
+    "level": "b1",
+    "family": "describir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0062",
+    "en": "to differ",
+    "es": "diferir",
+    "level": "b1",
+    "family": "diferir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0063",
+    "en": "to distribute",
+    "es": "distribuir",
+    "level": "b1",
+    "family": "distribuir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0064",
+    "en": "to divide",
+    "es": "dividir",
+    "level": "b1",
+    "family": "dividir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0065",
+    "en": "to elaborate/develop",
+    "es": "elaborar",
+    "level": "b1",
+    "family": "elaborar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0066",
+    "en": "to employ/use",
+    "es": "emplear",
+    "level": "b1",
+    "family": "emplear",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0067",
+    "en": "to enrich",
+    "es": "enriquecer",
+    "level": "b1",
+    "family": "enriquecer",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0068",
+    "en": "to demand",
+    "es": "exigir",
+    "level": "b1",
+    "family": "exigir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0069",
+    "en": "to extend",
+    "es": "extender",
+    "level": "b1",
+    "family": "extender",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0070",
+    "en": "to fix/set",
+    "es": "fijar",
+    "level": "b1",
+    "family": "fijar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0071",
+    "en": "to found",
+    "es": "fundar",
+    "level": "b1",
+    "family": "fundar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0072",
+    "en": "to generate",
+    "es": "generar",
+    "level": "b1",
+    "family": "generar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0073",
+    "en": "to guide",
+    "es": "guiar",
+    "level": "b1",
+    "family": "guiar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0074",
+    "en": "to illustrate",
+    "es": "ilustrar",
+    "level": "b1",
+    "family": "ilustrar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0075",
+    "en": "to involve",
+    "es": "implicar",
+    "level": "b1",
+    "family": "implicar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0076",
+    "en": "to indicate",
+    "es": "indicar",
+    "level": "b1",
+    "family": "indicar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0077",
+    "en": "to inform",
+    "es": "informar",
+    "level": "b1",
+    "family": "informar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0078",
+    "en": "to inspire",
+    "es": "inspirar",
+    "level": "b1",
+    "family": "inspirar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0079",
+    "en": "to install",
+    "es": "instalar",
+    "level": "b1",
+    "family": "instalar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0080",
+    "en": "to interest",
+    "es": "interesar",
+    "level": "b1",
+    "family": "interesar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0081",
+    "en": "to introduce",
+    "es": "introducir",
+    "level": "b1",
+    "family": "introducir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0082",
+    "en": "to justify",
+    "es": "justificar",
+    "level": "b1",
+    "family": "justificar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0083",
+    "en": "to motivate",
+    "es": "motivar",
+    "level": "b1",
+    "family": "motivar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0084",
+    "en": "to negotiate",
+    "es": "negociar",
+    "level": "b1",
+    "family": "negociar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0085",
+    "en": "to hinder",
+    "es": "obstaculizar",
+    "level": "b1",
+    "family": "obstaculizar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0086",
+    "en": "to progress",
+    "es": "progresar",
+    "level": "b1",
+    "family": "progresar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0087",
+    "en": "to promote",
+    "es": "promover",
+    "level": "b1",
+    "family": "promover",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0088",
+    "en": "to resort to",
+    "es": "recurrir",
+    "level": "b1",
+    "family": "recurrir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0089",
+    "en": "to reflect",
+    "es": "reflexionar",
+    "level": "b1",
+    "family": "reflexionar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0090",
+    "en": "to regulate",
+    "es": "regular",
+    "level": "b1",
+    "family": "regular",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0091",
+    "en": "to restrict",
+    "es": "restringir",
+    "level": "b1",
+    "family": "restringir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0092",
+    "en": "to remedy",
+    "es": "remediar",
+    "level": "b1",
+    "family": "remediar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0093",
+    "en": "to provoke/arouse",
+    "es": "suscitar",
+    "level": "b1",
+    "family": "suscitar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0094",
+    "en": "to treat/handle",
+    "es": "tratar",
+    "level": "b1",
+    "family": "tratar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0095",
+    "en": "to monitor/watch over",
+    "es": "vigilar",
+    "level": "b1",
+    "family": "vigilar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0096",
+    "en": "to glimpse/see faintly",
+    "es": "vislumbrar",
+    "level": "b1",
+    "family": "vislumbrar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0097",
+    "en": "to become (reflexive)",
+    "es": "volverse",
+    "level": "b1",
+    "family": "volverse",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0098",
+    "en": "to attend/go to",
+    "es": "acudir",
+    "level": "b1",
+    "family": "acudir",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0099",
+    "en": "to support",
+    "es": "apoyar",
+    "level": "b1",
+    "family": "apoyar",
+    "topic": "intermediate_concepts"
+  },
+  {
+    "id": "b1_0100",
+    "en": "to escape",
+    "es": "escapar",
+    "level": "b1",
+    "family": "escapar",
+    "topic": "intermediate_concepts"
+  }
+]

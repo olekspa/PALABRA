@@ -10,6 +10,8 @@ import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
+import 'package:palabra/feature_run/application/tts/run_tts_config.dart';
+import 'package:palabra/feature_run/application/tts/run_tts_service.dart';
 import 'package:palabra/feature_run/presentation/confetti_overlay.dart';
 
 /// Core timed run experience view backed by [RunController].
@@ -24,10 +26,13 @@ class RunScreen extends ConsumerStatefulWidget {
 class _RunScreenState extends ConsumerState<RunScreen> {
   bool _navigatedToFinish = false;
   late final ProviderSubscription<RunState> _runSubscription;
+  late final RunTtsService _ttsService;
+  DateTime? _lastTtsToastAt;
 
   @override
   void initState() {
     super.initState();
+    _ttsService = ref.read(runTtsServiceProvider);
     // React to completion so we can transition to the finish summary.
     _runSubscription = ref.listenManual<RunState>(
       runControllerProvider,
@@ -48,6 +53,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   @override
   void dispose() {
     _runSubscription.close();
+    unawaited(_ttsService.cancel());
     super.dispose();
   }
 
@@ -56,6 +62,10 @@ class _RunScreenState extends ConsumerState<RunScreen> {
     final runState = ref.watch(runControllerProvider);
     final controller = ref.read(runControllerProvider.notifier);
     final settings = ref.watch(runSettingsProvider);
+    final devPanelEnabled = ref.watch(runTtsDevPanelEnabledProvider);
+    final ttsConfig = ref.watch(runTtsConfigProvider);
+    final voiceLabel = ref.watch(runTtsVoiceLabelProvider);
+    final configNotifier = ref.read(runTtsConfigProvider.notifier);
 
     return GradientBackground(
       child: Scaffold(
@@ -68,15 +78,60 @@ class _RunScreenState extends ConsumerState<RunScreen> {
                 : _RunView(
                     state: runState,
                     settings: settings,
-                    onTileTap: controller.onTileTapped,
+                    onTileTap: (row, column) {
+                      if (!runState.inputLocked &&
+                          column == TileColumn.right &&
+                          runState.board.isNotEmpty) {
+                        final tile = runState.tileAt(row, column);
+                        unawaited(_handleSpanishTileTap(tile));
+                      }
+                      controller.onTileTapped(row, column);
+                    },
                     onResume: controller.resumeFromPause,
                     onAcceptTimeExtend: controller.acceptTimeExtend,
                     onDeclineTimeExtend: controller.declineTimeExtend,
+                    ttsDevPanelEnabled: devPanelEnabled,
+                    ttsConfig: ttsConfig,
+                    onRateChanged: configNotifier.setRate,
+                    onPitchChanged: configNotifier.setPitch,
+                    voiceLabel: voiceLabel,
                   ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _handleSpanishTileTap(BoardTile tile) async {
+    await _ttsService.onUserGesture();
+    final outcome = await _ttsService.speak(
+      text: tile.text,
+      itemId: tile.pairId.isEmpty ? null : tile.pairId,
+    );
+    if (outcome == RunTtsPlaybackOutcome.unavailable) {
+      _showTtsUnavailableToast();
+    }
+  }
+
+  void _showTtsUnavailableToast() {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) {
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastTtsToastAt != null &&
+        now.difference(_lastTtsToastAt!) < const Duration(seconds: 3)) {
+      return;
+    }
+    _lastTtsToastAt = now;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text('TTS unavailable in this browser.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
   }
 }
 
@@ -88,6 +143,11 @@ class _RunView extends StatelessWidget {
     required this.onResume,
     required this.onAcceptTimeExtend,
     required this.onDeclineTimeExtend,
+    required this.ttsDevPanelEnabled,
+    required this.ttsConfig,
+    required this.onRateChanged,
+    required this.onPitchChanged,
+    required this.voiceLabel,
   });
 
   final RunState state;
@@ -96,6 +156,11 @@ class _RunView extends StatelessWidget {
   final Future<void> Function() onResume;
   final Future<void> Function() onAcceptTimeExtend;
   final Future<void> Function() onDeclineTimeExtend;
+  final bool ttsDevPanelEnabled;
+  final RunTtsConfig ttsConfig;
+  final ValueChanged<double> onRateChanged;
+  final ValueChanged<double> onPitchChanged;
+  final String? voiceLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +213,17 @@ class _RunView extends StatelessWidget {
             extendSeconds: (settings.timeExtendDurationMs / 1000).round(),
             onAccept: onAcceptTimeExtend,
             onDecline: onDeclineTimeExtend,
+          ),
+        if (ttsDevPanelEnabled)
+          Positioned(
+            top: AppSpacing.md,
+            right: AppSpacing.md,
+            child: _TtsDevPanel(
+              config: ttsConfig,
+              onRateChanged: onRateChanged,
+              onPitchChanged: onPitchChanged,
+              voiceLabel: voiceLabel,
+            ),
           ),
       ],
     );
@@ -202,6 +278,81 @@ class _CelebrationOverlay extends StatelessWidget {
   }
 }
 
+class _TtsDevPanel extends StatelessWidget {
+  const _TtsDevPanel({
+    required this.config,
+    required this.onRateChanged,
+    required this.onPitchChanged,
+    required this.voiceLabel,
+  });
+
+  final RunTtsConfig config;
+  final ValueChanged<double> onRateChanged;
+  final ValueChanged<double> onPitchChanged;
+  final String? voiceLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final effectiveVoice = voiceLabel ?? 'Voice unavailable';
+    return Card(
+      color: AppColors.surfaceVariant.withValues(alpha: 0.9),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppColors.outline.withValues(alpha: 0.4)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 240, maxWidth: 280),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'TTS Dev Settings',
+                style: theme.textTheme.titleSmall,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                effectiveVoice,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textMuted,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Rate ${config.rate.toStringAsFixed(2)}',
+                style: theme.textTheme.bodyMedium,
+              ),
+              Slider(
+                value: config.rate,
+                min: 0.5,
+                max: 1.2,
+                divisions: 14,
+                onChanged: onRateChanged,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Pitch ${config.pitch.toStringAsFixed(2)}',
+                style: theme.textTheme.bodyMedium,
+              ),
+              Slider(
+                value: config.pitch,
+                min: 0.8,
+                max: 1.2,
+                divisions: 8,
+                onChanged: onPitchChanged,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _RunHeader extends StatelessWidget {
   const _RunHeader({
     required this.progress,
@@ -237,10 +388,9 @@ class _RunHeader extends StatelessWidget {
             ),
             Text(
               _timeLabel,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(color: AppColors.secondary),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(color: AppColors.secondary),
             ),
           ],
         ),
@@ -430,13 +580,13 @@ class _RunTileState extends State<_RunTile>
     final background = mismatch
         ? AppColors.danger.withValues(alpha: 0.18)
         : widget.isSelected
-            ? AppColors.secondary.withValues(alpha: 0.2)
-            : AppColors.surfaceVariant;
+        ? AppColors.secondary.withValues(alpha: 0.2)
+        : AppColors.surfaceVariant;
     final border = mismatch
         ? AppColors.danger
         : widget.isSelected
-            ? AppColors.secondary
-            : AppColors.outline;
+        ? AppColors.secondary
+        : AppColors.outline;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),
@@ -555,10 +705,9 @@ class _TierPauseOverlay extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     _subtitle,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: AppColors.textMuted),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.lg),

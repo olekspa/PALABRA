@@ -1,0 +1,802 @@
+[
+  {
+    "id": "b2_0001",
+    "en": "to abstract",
+    "es": "abstraer",
+    "level": "b2",
+    "family": "abstraer",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0002",
+    "en": "to accredit/validate",
+    "es": "acreditar",
+    "level": "b2",
+    "family": "acreditar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0003",
+    "en": "to award/assign",
+    "es": "adjudicar",
+    "level": "b2",
+    "family": "adjudicar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0004",
+    "en": "to secure/strengthen",
+    "es": "afianzar",
+    "level": "b2",
+    "family": "afianzar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0005",
+    "en": "to allege/claim",
+    "es": "alegar",
+    "level": "b2",
+    "family": "alegar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0006",
+    "en": "to analyze",
+    "es": "analizar",
+    "level": "b2",
+    "family": "analizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0007",
+    "en": "to apprehend or grasp",
+    "es": "aprehender",
+    "level": "b2",
+    "family": "aprehender",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0008",
+    "en": "to articulate",
+    "es": "articular",
+    "level": "b2",
+    "family": "articular",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0009",
+    "en": "to attribute",
+    "es": "atribuir",
+    "level": "b2",
+    "family": "atribuir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0010",
+    "en": "to endorse",
+    "es": "avalar",
+    "level": "b2",
+    "family": "avalar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0011",
+    "en": "to captivate",
+    "es": "cautivar",
+    "level": "b2",
+    "family": "cautivar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0012",
+    "en": "to conceive/formulate",
+    "es": "concebir",
+    "level": "b2",
+    "family": "concebir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0013",
+    "en": "to consolidate",
+    "es": "consolidar",
+    "level": "b2",
+    "family": "consolidar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0014",
+    "en": "to contrast",
+    "es": "contrastar",
+    "level": "b2",
+    "family": "contrastar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0015",
+    "en": "to contradict",
+    "es": "contradecir",
+    "level": "b2",
+    "family": "contradecir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0016",
+    "en": "to unravel/disentangle",
+    "es": "desentrañar",
+    "level": "b2",
+    "family": "desentranar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0017",
+    "en": "to perform/fulfill",
+    "es": "desempeñar",
+    "level": "b2",
+    "family": "desempenar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0018",
+    "en": "to elucidate",
+    "es": "dilucidar",
+    "level": "b2",
+    "family": "dilucidar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0019",
+    "en": "to disseminate",
+    "es": "diseminar",
+    "level": "b2",
+    "family": "diseminar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0020",
+    "en": "to energize/boost",
+    "es": "dinamizar",
+    "level": "b2",
+    "family": "dinamizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0021",
+    "en": "to clarify",
+    "es": "elucidar",
+    "level": "b2",
+    "family": "elucidar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0022",
+    "en": "to emphasize",
+    "es": "enfatizar",
+    "level": "b2",
+    "family": "enfatizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0023",
+    "en": "to equate/compare",
+    "es": "equiparar",
+    "level": "b2",
+    "family": "equiparar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0024",
+    "en": "to skimp/economize",
+    "es": "escatimar",
+    "level": "b2",
+    "family": "escatimar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0025",
+    "en": "to speculate",
+    "es": "especular",
+    "level": "b2",
+    "family": "especular",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0026",
+    "en": "to extrapolate",
+    "es": "extrapolar",
+    "level": "b2",
+    "family": "extrapolar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0027",
+    "en": "to facilitate",
+    "es": "facilitar",
+    "level": "b2",
+    "family": "facilitar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0028",
+    "en": "to foster/promote",
+    "es": "fomentar",
+    "level": "b2",
+    "family": "fomentar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0029",
+    "en": "to base/ground",
+    "es": "fundamentar",
+    "level": "b2",
+    "family": "fundamentar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0030",
+    "en": "to gesture",
+    "es": "gesticular",
+    "level": "b2",
+    "family": "gesticular",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0031",
+    "en": "to hypothesize",
+    "es": "hipotetizar",
+    "level": "b2",
+    "family": "hipotetizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0032",
+    "en": "to affect/influence",
+    "es": "incidir",
+    "level": "b2",
+    "family": "incidir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0033",
+    "en": "to increase",
+    "es": "incrementar",
+    "level": "b2",
+    "family": "incrementar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0034",
+    "en": "to induce",
+    "es": "inducir",
+    "level": "b2",
+    "family": "inducir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0035",
+    "en": "to interfere/meddle",
+    "es": "inmiscuir",
+    "level": "b2",
+    "family": "inmiscuir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0036",
+    "en": "to intensify",
+    "es": "intensificar",
+    "level": "b2",
+    "family": "intensificar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0037",
+    "en": "to challenge/address",
+    "es": "interpelar",
+    "level": "b2",
+    "family": "interpelar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0038",
+    "en": "to legitimize",
+    "es": "legitimar",
+    "level": "b2",
+    "family": "legitimar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0039",
+    "en": "to mediate",
+    "es": "mediar",
+    "level": "b2",
+    "family": "mediar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0040",
+    "en": "to mitigate",
+    "es": "mitigar",
+    "level": "b2",
+    "family": "mitigar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0041",
+    "en": "to modernize",
+    "es": "modernizar",
+    "level": "b2",
+    "family": "modernizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0042",
+    "en": "to modify",
+    "es": "modificar",
+    "level": "b2",
+    "family": "modificar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0043",
+    "en": "to object",
+    "es": "objetar",
+    "level": "b2",
+    "family": "objetar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0044",
+    "en": "to optimize",
+    "es": "optimizar",
+    "level": "b2",
+    "family": "optimizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0045",
+    "en": "to boost/enhance",
+    "es": "potenciar",
+    "level": "b2",
+    "family": "potenciar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0046",
+    "en": "to do without",
+    "es": "prescindir",
+    "level": "b2",
+    "family": "prescindir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0047",
+    "en": "to prioritize",
+    "es": "priorizar",
+    "level": "b2",
+    "family": "priorizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0048",
+    "en": "to deepen",
+    "es": "profundizar",
+    "level": "b2",
+    "family": "profundizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0049",
+    "en": "to prospect",
+    "es": "prospectar",
+    "level": "b2",
+    "family": "prospectar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0050",
+    "en": "to rationalize",
+    "es": "racionalizar",
+    "level": "b2",
+    "family": "racionalizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0051",
+    "en": "to gather/collect",
+    "es": "recabar",
+    "level": "b2",
+    "family": "recabar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0052",
+    "en": "to cut back/reduce",
+    "es": "recortar",
+    "level": "b2",
+    "family": "recortar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0053",
+    "en": "to refute",
+    "es": "refutar",
+    "level": "b2",
+    "family": "refutar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0054",
+    "en": "to regularize",
+    "es": "regularizar",
+    "level": "b2",
+    "family": "regularizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0055",
+    "en": "to restructure",
+    "es": "reestructurar",
+    "level": "b2",
+    "family": "reestructurar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0056",
+    "en": "to reformulate",
+    "es": "reformular",
+    "level": "b2",
+    "family": "reformular",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0057",
+    "en": "to revitalize",
+    "es": "revitalizar",
+    "level": "b2",
+    "family": "revitalizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0058",
+    "en": "to saturate",
+    "es": "saturar",
+    "level": "b2",
+    "family": "saturar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0059",
+    "en": "to underestimate",
+    "es": "subestimar",
+    "level": "b2",
+    "family": "subestimar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0060",
+    "en": "to overcome",
+    "es": "superar",
+    "level": "b2",
+    "family": "superar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0061",
+    "en": "to synthesize",
+    "es": "sintetizar",
+    "level": "b2",
+    "family": "sintetizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0062",
+    "en": "to transgress",
+    "es": "transgredir",
+    "level": "b2",
+    "family": "transgredir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0063",
+    "en": "to transform",
+    "es": "transformar",
+    "level": "b2",
+    "family": "transformar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0064",
+    "en": "to transmit",
+    "es": "transmitir",
+    "level": "b2",
+    "family": "transmitir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0065",
+    "en": "to transpose",
+    "es": "transponer",
+    "level": "b2",
+    "family": "transponer",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0066",
+    "en": "to urbanize",
+    "es": "urbanizar",
+    "level": "b2",
+    "family": "urbanizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0067",
+    "en": "to validate",
+    "es": "validar",
+    "level": "b2",
+    "family": "validar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0068",
+    "en": "plausible",
+    "es": "verosimilar",
+    "level": "b2",
+    "family": "verosimilar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0069",
+    "en": "to infringe/violate",
+    "es": "vulnerar",
+    "level": "b2",
+    "family": "vulnerar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0070",
+    "en": "to reiterate",
+    "es": "reiterar",
+    "level": "b2",
+    "family": "reiterar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0071",
+    "en": "to stand out",
+    "es": "sobresalir",
+    "level": "b2",
+    "family": "sobresalir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0072",
+    "en": "to overvalue",
+    "es": "sobrevalorar",
+    "level": "b2",
+    "family": "sobrevalorar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0073",
+    "en": "to underline/emphasize",
+    "es": "subrayar",
+    "level": "b2",
+    "family": "subrayar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0074",
+    "en": "to suppress",
+    "es": "suprimir",
+    "level": "b2",
+    "family": "suprimir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0075",
+    "en": "to evaluate",
+    "es": "evaluar",
+    "level": "b2",
+    "family": "evaluar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0076",
+    "en": "to state/enunciate",
+    "es": "enunciar",
+    "level": "b2",
+    "family": "enunciar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0077",
+    "en": "to argue",
+    "es": "argumentar",
+    "level": "b2",
+    "family": "argumentar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0078",
+    "en": "to debate",
+    "es": "debatir",
+    "level": "b2",
+    "family": "debatir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0079",
+    "en": "to discern",
+    "es": "discernir",
+    "level": "b2",
+    "family": "discernir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0080",
+    "en": "to delay/prolong",
+    "es": "dilatar",
+    "level": "b2",
+    "family": "dilatar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0081",
+    "en": "to expose/present",
+    "es": "exponer",
+    "level": "b2",
+    "family": "exponer",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0082",
+    "en": "to nuance",
+    "es": "matizar",
+    "level": "b2",
+    "family": "matizar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0083",
+    "en": "to bypass/avoid",
+    "es": "obviar",
+    "level": "b2",
+    "family": "obviar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0084",
+    "en": "to predict",
+    "es": "predecir",
+    "level": "b2",
+    "family": "predecir",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0085",
+    "en": "to outweigh",
+    "es": "preponderar",
+    "level": "b2",
+    "family": "preponderar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0086",
+    "en": "to procrastinate",
+    "es": "procrastinar",
+    "level": "b2",
+    "family": "procrastinar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0087",
+    "en": "to ramble",
+    "es": "divagar",
+    "level": "b2",
+    "family": "divagar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0088",
+    "en": "to attenuate/diminish",
+    "es": "atenuar",
+    "level": "b2",
+    "family": "atenuar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0089",
+    "en": "to conjecture",
+    "es": "conjeturar",
+    "level": "b2",
+    "family": "conjeturar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0090",
+    "en": "to outline",
+    "es": "delinear",
+    "level": "b2",
+    "family": "delinear",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0091",
+    "en": "to sketch/outlining",
+    "es": "esbozar",
+    "level": "b2",
+    "family": "esbozar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0092",
+    "en": "to expound/elaborate",
+    "es": "explayarse",
+    "level": "b2",
+    "family": "explayarse",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0093",
+    "en": "to incorporate",
+    "es": "incorporar",
+    "level": "b2",
+    "family": "incorporar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0094",
+    "en": "to integrate oneself",
+    "es": "integrarse",
+    "level": "b2",
+    "family": "integrarse",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0095",
+    "en": "to overcome/recover",
+    "es": "remontar",
+    "level": "b2",
+    "family": "remontar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0096",
+    "en": "to subjugate",
+    "es": "subyugar",
+    "level": "b2",
+    "family": "subyugar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0097",
+    "en": "to dive (figuratively, to plunge)",
+    "es": "zambullirse",
+    "level": "b2",
+    "family": "zambullirse",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0098",
+    "en": "to untangle/disentangle",
+    "es": "desenredar",
+    "level": "b2",
+    "family": "desenredar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0099",
+    "en": "to interlace/link",
+    "es": "entrelazar",
+    "level": "b2",
+    "family": "entrelazar",
+    "topic": "advanced_concepts"
+  },
+  {
+    "id": "b2_0100",
+    "en": "to trace/draw up",
+    "es": "trazar",
+    "level": "b2",
+    "family": "trazar",
+    "topic": "advanced_concepts"
+  }
+]

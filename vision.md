@@ -3,6 +3,8 @@ Project vision
 
 Build a fast, offline, Spanish-only matching game. Two fixed columns. Left shows English. Right shows Spanish. The player must reach 90 correct matches in 105 seconds. The timer hard-pauses at 20 and 50 correct. Correct pairs disappear in place and both empty slots refill from a prebuilt deck. No reshuffle. Wrong selections have no penalty. The board must always be solvable. The system promotes learned words and repeats trouble words. Powerups exist: Row Blaster reduces rows to four. Time Extend adds 60 seconds at timeout. All assets are local. All graphics are procedural.
 
+Pronunciation remains available offline. Web speech uses the browser API when possible, but every vocabulary item (and core number set 1–100) ships with Piper-generated MP3 fallbacks so learners still hear the word even when speech synthesis is unavailable.
+
 What the game is
 
 A timed EN↔ES word pairing challenge. Each board shows five rows by two columns by default. One English tile per row on the left. One Spanish tile per row on the right. Each English tile has exactly one Spanish match on the board at all times. The player taps one left tile and one right tile to resolve a match. Correct removes both. Wrong shakes both. The game rewards speed and accuracy. The game teaches by hiding mastered items and repeating items the player misses.

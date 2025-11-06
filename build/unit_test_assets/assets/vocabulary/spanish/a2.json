@@ -1,0 +1,1786 @@
+[
+  {
+    "id": "a2_0001",
+    "en": "travel",
+    "es": "viajar",
+    "level": "a2",
+    "family": "viajar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0002",
+    "en": "work/job",
+    "es": "trabajo",
+    "level": "a2",
+    "family": "trabajo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0003",
+    "en": "health",
+    "es": "salud",
+    "level": "a2",
+    "family": "salud",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0004",
+    "en": "sick",
+    "es": "enfermo",
+    "level": "a2",
+    "family": "enfermo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0005",
+    "en": "cook",
+    "es": "cocinar",
+    "level": "a2",
+    "family": "cocinar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0006",
+    "en": "recipe",
+    "es": "receta",
+    "level": "a2",
+    "family": "receta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0007",
+    "en": "buy",
+    "es": "comprar",
+    "level": "a2",
+    "family": "comprar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0008",
+    "en": "rent",
+    "es": "alquilar",
+    "level": "a2",
+    "family": "alquilar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0009",
+    "en": "sell",
+    "es": "vender",
+    "level": "a2",
+    "family": "vender",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0010",
+    "en": "price",
+    "es": "precio",
+    "level": "a2",
+    "family": "precio",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0011",
+    "en": "discount",
+    "es": "rebaja",
+    "level": "a2",
+    "family": "rebaja",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0012",
+    "en": "understand",
+    "es": "entender",
+    "level": "a2",
+    "family": "entender",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0013",
+    "en": "ask",
+    "es": "preguntar",
+    "level": "a2",
+    "family": "preguntar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0014",
+    "en": "answer",
+    "es": "responder",
+    "level": "a2",
+    "family": "responder",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0015",
+    "en": "converse",
+    "es": "conversar",
+    "level": "a2",
+    "family": "conversar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0016",
+    "en": "learn",
+    "es": "aprender",
+    "level": "a2",
+    "family": "aprender",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0017",
+    "en": "teach",
+    "es": "enseñar",
+    "level": "a2",
+    "family": "ensenar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0018",
+    "en": "discover",
+    "es": "descubrir",
+    "level": "a2",
+    "family": "descubrir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0019",
+    "en": "experience",
+    "es": "experiencia",
+    "level": "a2",
+    "family": "experiencia",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0020",
+    "en": "memory",
+    "es": "recuerdo",
+    "level": "a2",
+    "family": "recuerdo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0021",
+    "en": "think",
+    "es": "pensar",
+    "level": "a2",
+    "family": "pensar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0022",
+    "en": "know (people/places)",
+    "es": "conocer",
+    "level": "a2",
+    "family": "conocer",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0023",
+    "en": "forget",
+    "es": "olvidar",
+    "level": "a2",
+    "family": "olvidar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0024",
+    "en": "remember",
+    "es": "recordar",
+    "level": "a2",
+    "family": "recordar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0025",
+    "en": "journey",
+    "es": "viaje",
+    "level": "a2",
+    "family": "viaje",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0026",
+    "en": "adventure",
+    "es": "aventura",
+    "level": "a2",
+    "family": "aventura",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0027",
+    "en": "plan",
+    "es": "planear",
+    "level": "a2",
+    "family": "planear",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0028",
+    "en": "organize",
+    "es": "organizar",
+    "level": "a2",
+    "family": "organizar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0029",
+    "en": "meet",
+    "es": "reunirse",
+    "level": "a2",
+    "family": "reunirse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0030",
+    "en": "appointment",
+    "es": "cita",
+    "level": "a2",
+    "family": "cita",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0031",
+    "en": "go out",
+    "es": "salir",
+    "level": "a2",
+    "family": "salir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0032",
+    "en": "return",
+    "es": "volver",
+    "level": "a2",
+    "family": "volver",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0033",
+    "en": "arrive",
+    "es": "llegar",
+    "level": "a2",
+    "family": "llegar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0034",
+    "en": "leave",
+    "es": "partir",
+    "level": "a2",
+    "family": "partir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0035",
+    "en": "start",
+    "es": "empezar",
+    "level": "a2",
+    "family": "empezar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0036",
+    "en": "finish",
+    "es": "terminar",
+    "level": "a2",
+    "family": "terminar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0037",
+    "en": "rest",
+    "es": "descansar",
+    "level": "a2",
+    "family": "descansar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0038",
+    "en": "hardworking",
+    "es": "trabajador",
+    "level": "a2",
+    "family": "trabajador",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0039",
+    "en": "office",
+    "es": "oficina",
+    "level": "a2",
+    "family": "oficina",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0040",
+    "en": "meeting",
+    "es": "reunión",
+    "level": "a2",
+    "family": "reunion",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0041",
+    "en": "message",
+    "es": "mensaje",
+    "level": "a2",
+    "family": "mensaje",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0042",
+    "en": "call",
+    "es": "llamar",
+    "level": "a2",
+    "family": "llamar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0043",
+    "en": "connect",
+    "es": "conectar",
+    "level": "a2",
+    "family": "conectar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0044",
+    "en": "surf (internet)",
+    "es": "navegar",
+    "level": "a2",
+    "family": "navegar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0045",
+    "en": "mail",
+    "es": "correo",
+    "level": "a2",
+    "family": "correo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0046",
+    "en": "package",
+    "es": "paquete",
+    "level": "a2",
+    "family": "paquete",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0047",
+    "en": "deliver",
+    "es": "entregar",
+    "level": "a2",
+    "family": "entregar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0048",
+    "en": "pick up",
+    "es": "recoger",
+    "level": "a2",
+    "family": "recoger",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0049",
+    "en": "account/bill",
+    "es": "cuenta",
+    "level": "a2",
+    "family": "cuenta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0050",
+    "en": "balance",
+    "es": "saldo",
+    "level": "a2",
+    "family": "saldo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0051",
+    "en": "bank",
+    "es": "banco",
+    "level": "a2",
+    "family": "banco",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0052",
+    "en": "save money",
+    "es": "ahorrar",
+    "level": "a2",
+    "family": "ahorrar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0053",
+    "en": "spend",
+    "es": "gastar",
+    "level": "a2",
+    "family": "gastar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0054",
+    "en": "invite",
+    "es": "invitar",
+    "level": "a2",
+    "family": "invitar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0055",
+    "en": "celebrate",
+    "es": "celebrar",
+    "level": "a2",
+    "family": "celebrar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0056",
+    "en": "birthday",
+    "es": "cumpleaños",
+    "level": "a2",
+    "family": "cumpleanos",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0057",
+    "en": "gift",
+    "es": "regalo",
+    "level": "a2",
+    "family": "regalo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0058",
+    "en": "card",
+    "es": "tarjeta",
+    "level": "a2",
+    "family": "tarjeta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0059",
+    "en": "excursion",
+    "es": "excursión",
+    "level": "a2",
+    "family": "excursion",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0060",
+    "en": "stroll",
+    "es": "paseo",
+    "level": "a2",
+    "family": "paseo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0061",
+    "en": "park",
+    "es": "parque",
+    "level": "a2",
+    "family": "parque",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0062",
+    "en": "bicycle",
+    "es": "bicicleta",
+    "level": "a2",
+    "family": "bicicleta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0063",
+    "en": "bus",
+    "es": "autobús",
+    "level": "a2",
+    "family": "autobus",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0064",
+    "en": "subway",
+    "es": "metro",
+    "level": "a2",
+    "family": "metro",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0065",
+    "en": "jump",
+    "es": "salto",
+    "level": "a2",
+    "family": "salto",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0066",
+    "en": "play",
+    "es": "jugar",
+    "level": "a2",
+    "family": "jugar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0067",
+    "en": "sport",
+    "es": "deporte",
+    "level": "a2",
+    "family": "deporte",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0068",
+    "en": "team",
+    "es": "equipo",
+    "level": "a2",
+    "family": "equipo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0069",
+    "en": "train",
+    "es": "entrenar",
+    "level": "a2",
+    "family": "entrenar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0070",
+    "en": "competition",
+    "es": "competencia",
+    "level": "a2",
+    "family": "competencia",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0071",
+    "en": "victory",
+    "es": "victoria",
+    "level": "a2",
+    "family": "victoria",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0072",
+    "en": "defeat",
+    "es": "derrota",
+    "level": "a2",
+    "family": "derrota",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0073",
+    "en": "effort",
+    "es": "esfuerzo",
+    "level": "a2",
+    "family": "esfuerzo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0074",
+    "en": "goal",
+    "es": "meta",
+    "level": "a2",
+    "family": "meta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0075",
+    "en": "result",
+    "es": "resultado",
+    "level": "a2",
+    "family": "resultado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0076",
+    "en": "problem",
+    "es": "problema",
+    "level": "a2",
+    "family": "problema",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0077",
+    "en": "solution",
+    "es": "solución",
+    "level": "a2",
+    "family": "solucion",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0078",
+    "en": "decide",
+    "es": "decidir",
+    "level": "a2",
+    "family": "decidir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0079",
+    "en": "choose",
+    "es": "elegir",
+    "level": "a2",
+    "family": "elegir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0080",
+    "en": "change",
+    "es": "cambiar",
+    "level": "a2",
+    "family": "cambiar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0081",
+    "en": "improve",
+    "es": "mejorar",
+    "level": "a2",
+    "family": "mejorar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0082",
+    "en": "prepare",
+    "es": "preparar",
+    "level": "a2",
+    "family": "preparar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0083",
+    "en": "clean",
+    "es": "limpiar",
+    "level": "a2",
+    "family": "limpiar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0084",
+    "en": "tidy/arrange",
+    "es": "ordenar",
+    "level": "a2",
+    "family": "ordenar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0085",
+    "en": "decorate",
+    "es": "decorar",
+    "level": "a2",
+    "family": "decorar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0086",
+    "en": "cultivate",
+    "es": "cultivar",
+    "level": "a2",
+    "family": "cultivar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0087",
+    "en": "plant",
+    "es": "plantar",
+    "level": "a2",
+    "family": "plantar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0088",
+    "en": "enjoy",
+    "es": "disfrutar",
+    "level": "a2",
+    "family": "disfrutar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0089",
+    "en": "explore",
+    "es": "explorar",
+    "level": "a2",
+    "family": "explorar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0090",
+    "en": "collaborate",
+    "es": "colaborar",
+    "level": "a2",
+    "family": "colaborar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0091",
+    "en": "solve",
+    "es": "resolver",
+    "level": "a2",
+    "family": "resolver",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0092",
+    "en": "suggest",
+    "es": "sugerir",
+    "level": "a2",
+    "family": "sugerir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0093",
+    "en": "try/test",
+    "es": "probar",
+    "level": "a2",
+    "family": "probar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0094",
+    "en": "to wake up",
+    "es": "despertarse",
+    "level": "a2",
+    "family": "despertarse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0095",
+    "en": "to get up",
+    "es": "levantarse",
+    "level": "a2",
+    "family": "levantarse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0096",
+    "en": "to go to bed",
+    "es": "acostarse",
+    "level": "a2",
+    "family": "acostarse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0097",
+    "en": "to shower",
+    "es": "ducharse",
+    "level": "a2",
+    "family": "ducharse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0098",
+    "en": "to dress",
+    "es": "vestirse",
+    "level": "a2",
+    "family": "vestirse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0099",
+    "en": "to shave",
+    "es": "afeitarse",
+    "level": "a2",
+    "family": "afeitarse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0100",
+    "en": "to comb",
+    "es": "peinarse",
+    "level": "a2",
+    "family": "peinarse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0101",
+    "en": "to put on makeup",
+    "es": "maquillarse",
+    "level": "a2",
+    "family": "maquillarse",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0102",
+    "en": "angry",
+    "es": "enojado",
+    "level": "a2",
+    "family": "enojado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0103",
+    "en": "tired",
+    "es": "cansado",
+    "level": "a2",
+    "family": "cansado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0104",
+    "en": "stressed",
+    "es": "estresado",
+    "level": "a2",
+    "family": "estresado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0105",
+    "en": "busy",
+    "es": "ocupado",
+    "level": "a2",
+    "family": "ocupado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0106",
+    "en": "relaxed",
+    "es": "relajado",
+    "level": "a2",
+    "family": "relajado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0107",
+    "en": "fun/funny",
+    "es": "divertido",
+    "level": "a2",
+    "family": "divertido",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0108",
+    "en": "boring",
+    "es": "aburrido",
+    "level": "a2",
+    "family": "aburrido",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0109",
+    "en": "interesting",
+    "es": "interesante",
+    "level": "a2",
+    "family": "interesante",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0110",
+    "en": "explain",
+    "es": "explicar",
+    "level": "a2",
+    "family": "explicar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0111",
+    "en": "tell",
+    "es": "contar",
+    "level": "a2",
+    "family": "contar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0112",
+    "en": "show",
+    "es": "mostrar",
+    "level": "a2",
+    "family": "mostrar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0113",
+    "en": "reserve",
+    "es": "reservar",
+    "level": "a2",
+    "family": "reservar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0114",
+    "en": "cancel",
+    "es": "cancelar",
+    "level": "a2",
+    "family": "cancelar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0115",
+    "en": "itinerary",
+    "es": "itinerario",
+    "level": "a2",
+    "family": "itinerario",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0116",
+    "en": "dialogue",
+    "es": "diálogo",
+    "level": "a2",
+    "family": "dialogo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0117",
+    "en": "computer",
+    "es": "computadora",
+    "level": "a2",
+    "family": "computadora",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0118",
+    "en": "phone",
+    "es": "teléfono",
+    "level": "a2",
+    "family": "telefono",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0119",
+    "en": "app",
+    "es": "aplicación",
+    "level": "a2",
+    "family": "aplicacion",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0120",
+    "en": "send",
+    "es": "enviar",
+    "level": "a2",
+    "family": "enviar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0121",
+    "en": "receive",
+    "es": "recibir",
+    "level": "a2",
+    "family": "recibir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0122",
+    "en": "yesterday",
+    "es": "ayer",
+    "level": "a2",
+    "family": "ayer",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0123",
+    "en": "today",
+    "es": "hoy",
+    "level": "a2",
+    "family": "hoy",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0124",
+    "en": "soon",
+    "es": "pronto",
+    "level": "a2",
+    "family": "pronto",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0125",
+    "en": "left",
+    "es": "izquierda",
+    "level": "a2",
+    "family": "izquierda",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0126",
+    "en": "right",
+    "es": "derecha",
+    "level": "a2",
+    "family": "derecha",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0127",
+    "en": "straight",
+    "es": "recto",
+    "level": "a2",
+    "family": "recto",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0128",
+    "en": "uncle",
+    "es": "tío",
+    "level": "a2",
+    "family": "tio",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0129",
+    "en": "aunt",
+    "es": "tía",
+    "level": "a2",
+    "family": "tia",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0130",
+    "en": "cousin (male)",
+    "es": "primo",
+    "level": "a2",
+    "family": "primo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0131",
+    "en": "cousin (female)",
+    "es": "prima",
+    "level": "a2",
+    "family": "prima",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0132",
+    "en": "father-in-law",
+    "es": "suegro",
+    "level": "a2",
+    "family": "suegro",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0133",
+    "en": "mother-in-law",
+    "es": "suegra",
+    "level": "a2",
+    "family": "suegra",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0134",
+    "en": "dress",
+    "es": "vestido",
+    "level": "a2",
+    "family": "vestido",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0135",
+    "en": "skirt",
+    "es": "falda",
+    "level": "a2",
+    "family": "falda",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0136",
+    "en": "jacket",
+    "es": "chaqueta",
+    "level": "a2",
+    "family": "chaqueta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0137",
+    "en": "sweet",
+    "es": "dulce",
+    "level": "a2",
+    "family": "dulce",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0138",
+    "en": "salty",
+    "es": "salado",
+    "level": "a2",
+    "family": "salado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0139",
+    "en": "bitter",
+    "es": "amargo",
+    "level": "a2",
+    "family": "amargo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0140",
+    "en": "sour",
+    "es": "ácido",
+    "level": "a2",
+    "family": "acido",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0141",
+    "en": "tasty",
+    "es": "sabroso",
+    "level": "a2",
+    "family": "sabroso",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0142",
+    "en": "vegetable",
+    "es": "verdura",
+    "level": "a2",
+    "family": "verdura",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0143",
+    "en": "dessert",
+    "es": "postre",
+    "level": "a2",
+    "family": "postre",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0144",
+    "en": "salary",
+    "es": "salario",
+    "level": "a2",
+    "family": "salario",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0145",
+    "en": "boss",
+    "es": "jefe",
+    "level": "a2",
+    "family": "jefe",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0146",
+    "en": "employee",
+    "es": "empleado",
+    "level": "a2",
+    "family": "empleado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0147",
+    "en": "exam",
+    "es": "examen",
+    "level": "a2",
+    "family": "examen",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0148",
+    "en": "homework",
+    "es": "tarea",
+    "level": "a2",
+    "family": "tarea",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0149",
+    "en": "class",
+    "es": "clase",
+    "level": "a2",
+    "family": "clase",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0150",
+    "en": "study",
+    "es": "estudiar",
+    "level": "a2",
+    "family": "estudiar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0151",
+    "en": "dream",
+    "es": "soñar",
+    "level": "a2",
+    "family": "sonar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0152",
+    "en": "conference",
+    "es": "conferencia",
+    "level": "a2",
+    "family": "conferencia",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0153",
+    "en": "seminar",
+    "es": "seminario",
+    "level": "a2",
+    "family": "seminario",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0154",
+    "en": "sunny",
+    "es": "soleado",
+    "level": "a2",
+    "family": "soleado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0155",
+    "en": "cloudy",
+    "es": "nublado",
+    "level": "a2",
+    "family": "nublado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0156",
+    "en": "near",
+    "es": "cerca",
+    "level": "a2",
+    "family": "cerca",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0157",
+    "en": "far",
+    "es": "lejos",
+    "level": "a2",
+    "family": "lejos",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0158",
+    "en": "north",
+    "es": "norte",
+    "level": "a2",
+    "family": "norte",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0159",
+    "en": "south",
+    "es": "sur",
+    "level": "a2",
+    "family": "sur",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0160",
+    "en": "east",
+    "es": "este",
+    "level": "a2",
+    "family": "este",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0161",
+    "en": "west",
+    "es": "oeste",
+    "level": "a2",
+    "family": "oeste",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0162",
+    "en": "modern",
+    "es": "moderno",
+    "level": "a2",
+    "family": "moderno",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0163",
+    "en": "old/antique",
+    "es": "antiguo",
+    "level": "a2",
+    "family": "antiguo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0164",
+    "en": "fast",
+    "es": "rápido",
+    "level": "a2",
+    "family": "rapido",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0165",
+    "en": "slow",
+    "es": "lento",
+    "level": "a2",
+    "family": "lento",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0166",
+    "en": "famous",
+    "es": "famoso",
+    "level": "a2",
+    "family": "famoso",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0167",
+    "en": "popular",
+    "es": "popular",
+    "level": "a2",
+    "family": "popular",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0168",
+    "en": "safe/sure",
+    "es": "seguro",
+    "level": "a2",
+    "family": "seguro",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0169",
+    "en": "dangerous",
+    "es": "peligroso",
+    "level": "a2",
+    "family": "peligroso",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0170",
+    "en": "important",
+    "es": "importante",
+    "level": "a2",
+    "family": "importante",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0171",
+    "en": "wait",
+    "es": "esperar",
+    "level": "a2",
+    "family": "esperar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0172",
+    "en": "sincere",
+    "es": "sincero",
+    "level": "a2",
+    "family": "sincero",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0173",
+    "en": "kind",
+    "es": "amable",
+    "level": "a2",
+    "family": "amable",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0174",
+    "en": "to want",
+    "es": "querer",
+    "level": "a2",
+    "family": "querer",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0175",
+    "en": "to like",
+    "es": "gustar",
+    "level": "a2",
+    "family": "gustar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0176",
+    "en": "can, to be able to",
+    "es": "poder",
+    "level": "a2",
+    "family": "poder",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0177",
+    "en": "should, must",
+    "es": "deber",
+    "level": "a2",
+    "family": "deber",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0178",
+    "en": "to prefer",
+    "es": "preferir",
+    "level": "a2",
+    "family": "preferir",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0179",
+    "en": "to hate",
+    "es": "odiar",
+    "level": "a2",
+    "family": "odiar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0180",
+    "en": "friendly, nice",
+    "es": "simpático",
+    "level": "a2",
+    "family": "simpatico",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0181",
+    "en": "unfriendly",
+    "es": "antipático",
+    "level": "a2",
+    "family": "antipatico",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0182",
+    "en": "serious",
+    "es": "serio",
+    "level": "a2",
+    "family": "serio",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0183",
+    "en": "poor",
+    "es": "pobre",
+    "level": "a2",
+    "family": "pobre",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0184",
+    "en": "clean",
+    "es": "limpio",
+    "level": "a2",
+    "family": "limpio",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0185",
+    "en": "dirty",
+    "es": "sucio",
+    "level": "a2",
+    "family": "sucio",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0186",
+    "en": "to search, to look for",
+    "es": "buscar",
+    "level": "a2",
+    "family": "buscar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0187",
+    "en": "to find",
+    "es": "encontrar",
+    "level": "a2",
+    "family": "encontrar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0188",
+    "en": "passport",
+    "es": "pasaporte",
+    "level": "a2",
+    "family": "pasaporte",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0189",
+    "en": "ticket",
+    "es": "billete",
+    "level": "a2",
+    "family": "billete",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0190",
+    "en": "suitcase",
+    "es": "maleta",
+    "level": "a2",
+    "family": "maleta",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0191",
+    "en": "station",
+    "es": "estación",
+    "level": "a2",
+    "family": "estacion",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0192",
+    "en": "schedule",
+    "es": "horario",
+    "level": "a2",
+    "family": "horario",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0193",
+    "en": "employment/job",
+    "es": "empleo",
+    "level": "a2",
+    "family": "empleo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0194",
+    "en": "profession",
+    "es": "profesión",
+    "level": "a2",
+    "family": "profesion",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0195",
+    "en": "interview",
+    "es": "entrevista",
+    "level": "a2",
+    "family": "entrevista",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0196",
+    "en": "resume/CV",
+    "es": "currículum",
+    "level": "a2",
+    "family": "curriculum",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0197",
+    "en": "university",
+    "es": "universidad",
+    "level": "a2",
+    "family": "universidad",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0198",
+    "en": "student",
+    "es": "estudiante",
+    "level": "a2",
+    "family": "estudiante",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0199",
+    "en": "teacher",
+    "es": "profesor",
+    "level": "a2",
+    "family": "profesor",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0200",
+    "en": "breakfast",
+    "es": "desayuno",
+    "level": "a2",
+    "family": "desayuno",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0201",
+    "en": "lunch",
+    "es": "almuerzo",
+    "level": "a2",
+    "family": "almuerzo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0202",
+    "en": "dinner",
+    "es": "cena",
+    "level": "a2",
+    "family": "cena",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0203",
+    "en": "snack",
+    "es": "merienda",
+    "level": "a2",
+    "family": "merienda",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0204",
+    "en": "to sing",
+    "es": "cantar",
+    "level": "a2",
+    "family": "cantar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0205",
+    "en": "to dance",
+    "es": "bailar",
+    "level": "a2",
+    "family": "bailar",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0206",
+    "en": "email",
+    "es": "correo electrónico",
+    "level": "a2",
+    "family": "correo_electronico",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0207",
+    "en": "text message",
+    "es": "mensaje de texto",
+    "level": "a2",
+    "family": "mensaje_de_texto",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0208",
+    "en": "excited",
+    "es": "emocionado",
+    "level": "a2",
+    "family": "emocionado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0209",
+    "en": "worried",
+    "es": "preocupado",
+    "level": "a2",
+    "family": "preocupado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0210",
+    "en": "surprised",
+    "es": "sorprendido",
+    "level": "a2",
+    "family": "sorprendido",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0211",
+    "en": "thin",
+    "es": "delgado",
+    "level": "a2",
+    "family": "delgado",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0212",
+    "en": "fat",
+    "es": "gordo",
+    "level": "a2",
+    "family": "gordo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0213",
+    "en": "handsome",
+    "es": "guapo",
+    "level": "a2",
+    "family": "guapo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0214",
+    "en": "nice, pleasant",
+    "es": "agradable",
+    "level": "a2",
+    "family": "agradable",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0215",
+    "en": "unpleasant",
+    "es": "desagradable",
+    "level": "a2",
+    "family": "desagradable",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0216",
+    "en": "sometimes",
+    "es": "a veces",
+    "level": "a2",
+    "family": "a_veces",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0217",
+    "en": "frequently",
+    "es": "frecuentemente",
+    "level": "a2",
+    "family": "frecuentemente",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0218",
+    "en": "occasionally",
+    "es": "ocasionalmente",
+    "level": "a2",
+    "family": "ocasionalmente",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0219",
+    "en": "inside",
+    "es": "dentro",
+    "level": "a2",
+    "family": "dentro",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0220",
+    "en": "outside",
+    "es": "fuera",
+    "level": "a2",
+    "family": "fuera",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0221",
+    "en": "on top",
+    "es": "encima",
+    "level": "a2",
+    "family": "encima",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0222",
+    "en": "under",
+    "es": "debajo",
+    "level": "a2",
+    "family": "debajo",
+    "topic": "daily_life"
+  },
+  {
+    "id": "a2_0223",
+    "en": "around",
+    "es": "alrededor",
+    "level": "a2",
+    "family": "alrededor",
+    "topic": "daily_life"
+  }
+]
