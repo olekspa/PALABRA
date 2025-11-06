@@ -20,8 +20,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues(const <String, Object>{});
 
-  testWidgets('Gate → Pre-run → Run → Finish smoke flow (web)',
-      (WidgetTester tester) async {
+  testWidgets('Gate → Pre-run → Run → Finish smoke flow (web)', (
+    WidgetTester tester,
+  ) async {
     final fakeMeta = UserMeta()
       ..preferredRows = 4
       ..timeExtendTokens = 0
@@ -45,6 +46,7 @@ void main() {
             (ref) => const RunSettings(
               rows: 4,
               targetMatches: 1,
+              minTargetMatches: 1,
               runDurationMs: 60000,
               timeExtendDurationMs: 1000,
               maxTimeExtendsPerRun: 0,
@@ -97,11 +99,10 @@ void main() {
     final runContext = tester.element(find.byType(RunScreen));
     final container = ProviderScope.containerOf(runContext, listen: false);
     final runState = container.read(runControllerProvider);
-    final activeRow = runState.board
-        .firstWhere(
-          (row) => row.left.pairId.isNotEmpty,
-          orElse: () => throw StateError('No active rows'),
-        );
+    final activeRow = runState.board.firstWhere(
+      (row) => row.left.pairId.isNotEmpty,
+      orElse: () => throw StateError('No active rows'),
+    );
     final pairId = activeRow.left.pairId;
     final englishText = activeRow.left.text;
     final spanishText = runState.board
@@ -125,12 +126,12 @@ void main() {
 
 class _StaticDeckBuilderService extends DeckBuilderService {
   _StaticDeckBuilderService(this._items)
-      : super(
-          vocabularyFetcher: (_) async => const <VocabItem>[],
-          progressFetcher: (_) async => <String, UserItemState>{},
-          userMetaRepository: UserMetaRepository(),
-          config: DeckBuilderConfig(deckSize: 6),
-        );
+    : super(
+        vocabularyFetcher: (_) async => const <VocabItem>[],
+        progressFetcher: (_) async => <String, UserItemState>{},
+        userMetaRepository: UserMetaRepository(),
+        config: DeckBuilderConfig(deckSize: 6),
+      );
 
   final List<VocabItem> _items;
 
@@ -171,7 +172,10 @@ class _TestRunFeedbackService extends RunFeedbackService {
   Future<void> onTierPause({required int tier}) async {}
 
   @override
-  Future<void> onRunComplete({required int tierReached, required bool success}) async {}
+  Future<void> onRunComplete({
+    required int tierReached,
+    required bool success,
+  }) async {}
 }
 
 class _TestGateDetectionService extends GateDetectionService {

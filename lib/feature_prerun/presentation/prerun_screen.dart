@@ -90,15 +90,18 @@ class _PreRunContent extends ConsumerWidget {
     final rowBlasterEnabled = ref.read(_rowBlasterEnabledProvider);
     final rows = ref.read(runRowsProvider);
     final repository = ref.read(userMetaRepositoryProvider);
+    final baseRows = meta.preferredRows.clamp(4, 5);
+    final effectiveRows = rowBlasterEnabled ? 4 : rows;
 
     // Persist latest preferences and consume Row Blaster if toggled.
-    meta.preferredRows = rows;
+    meta.preferredRows = baseRows;
     if (rowBlasterEnabled && meta.rowBlasterCharges > 0) {
       meta.rowBlasterCharges -= 1;
+      meta.powerupInventory['rowBlaster'] = meta.rowBlasterCharges;
     }
 
+    ref.read(runRowsProvider.notifier).state = effectiveRows;
     await repository.save(meta);
-    ref.invalidate(userMetaFutureProvider);
     ref.read(_rowBlasterEnabledProvider.notifier).state = false;
 
     if (context.mounted) {
@@ -118,14 +121,15 @@ class _PreRunContent extends ConsumerWidget {
     final runDuration = Duration(milliseconds: runSettings.runDurationMs);
     final minutes = runDuration.inMinutes;
     final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
-    final objectiveText =
-        'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
     final levelProgress = meta.levelProgress[meta.level];
+    final targetMatches = runSettings.targetForProgress(levelProgress);
+    final objectiveText =
+        'Make $targetMatches correct matches in $minutes:$seconds.';
     final mastered = levelProgress?.matchesCleared ?? 0;
     final totalMatches = levelProgress?.totalMatches ?? 0;
     final progressText = totalMatches > 0
         ? '$mastered / $totalMatches words mastered'
-        : 'Progress data unavailable';
+        : '$mastered words mastered so far';
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 520),
@@ -167,6 +171,7 @@ class _PreRunContent extends ConsumerWidget {
                 _TierRewards(
                   theme: theme,
                   settings: runSettings,
+                  targetMatches: targetMatches,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 _RowBlasterToggle(
@@ -197,17 +202,22 @@ class _PreRunContent extends ConsumerWidget {
 }
 
 class _TierRewards extends StatelessWidget {
-  const _TierRewards({required this.theme, required this.settings});
+  const _TierRewards({
+    required this.theme,
+    required this.settings,
+    required this.targetMatches,
+  });
 
   final ThemeData theme;
   final RunSettings settings;
+  final int targetMatches;
 
   @override
   Widget build(BuildContext context) {
     final items = <(String, String)>[
       ('${settings.tierOneThreshold} matches', '+5 XP secured'),
       ('${settings.tierTwoThreshold} matches', '+10 XP secured'),
-      ('${settings.targetMatches} matches', '+25 XP secured'),
+      ('$targetMatches matches', '+25 XP secured'),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

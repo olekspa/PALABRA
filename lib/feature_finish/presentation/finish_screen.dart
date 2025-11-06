@@ -201,12 +201,18 @@ class _FinishSummary extends ConsumerWidget {
                   ],
                   const SizedBox(height: AppSpacing.xl),
                   ElevatedButton(
-                    onPressed: () => context.go(AppRoute.preRun.path),
+                    onPressed: () {
+                      ref.invalidate(userMetaFutureProvider);
+                      context.go(AppRoute.preRun.path);
+                    },
                     child: const Text('Play again'),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   TextButton(
-                    onPressed: () => context.go(AppRoute.gate.path),
+                    onPressed: () {
+                      ref.invalidate(userMetaFutureProvider);
+                      context.go(AppRoute.gate.path);
+                    },
                     child: const Text('Exit to gate'),
                   ),
                 ],

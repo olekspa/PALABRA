@@ -41,7 +41,7 @@ void main() {
     final minutes = runDuration.inMinutes;
     final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
     final expectedObjective =
-        'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
+        "Make ${runSettings.minTargetMatches} correct matches in $minutes:$seconds.";
 
     expect(find.text('Palabra'), findsOneWidget);
     expect(find.text(expectedObjective), findsOneWidget);

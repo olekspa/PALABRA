@@ -105,8 +105,9 @@ class _GateContent extends StatelessWidget {
     final runDuration = Duration(milliseconds: runSettings.runDurationMs);
     final minutes = runDuration.inMinutes;
     final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
+    final targetMatches = runSettings.minTargetMatches;
     final objectiveText =
-        'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
+        'Make $targetMatches correct matches in $minutes:$seconds.';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,

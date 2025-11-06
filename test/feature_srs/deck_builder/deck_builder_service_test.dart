@@ -170,4 +170,54 @@ void main() {
     expect(result.items.length, 6);
     expect(families.length, result.items.length);
   });
+
+  test('locks deck to the active level until each tier is completed', () async {
+    final items = <String, List<VocabItem>>{
+      'a1': List.generate(
+        4,
+        (index) => _item(
+          'a1_${(index + 1).toString().padLeft(4, '0')}',
+          'a1',
+          family: 'a1_family_$index',
+        ),
+      ),
+      'a2': List.generate(
+        4,
+        (index) => _item(
+          'a2_${(index + 1).toString().padLeft(4, '0')}',
+          'a2',
+          family: 'a2_family_$index',
+        ),
+      ),
+    };
+    final states = <String, UserItemState>{
+      for (final entry in items.entries)
+        for (final item in entry.value)
+          item.itemId: _state(itemId: item.itemId, seenCount: 0),
+    };
+
+    final meta = UserMeta();
+    final repository = _MemoryUserMetaRepository(meta);
+
+    final service = DeckBuilderService(
+      vocabularyFetcher: vocabularyFetcher(items),
+      progressFetcher: progressFetcher(states),
+      userMetaRepository: repository,
+      config: const DeckBuilderConfig(deckSize: 4),
+    );
+
+    final firstDeck = await service.buildDeck();
+    expect(firstDeck.items, isNotEmpty);
+    expect(firstDeck.items.every((item) => item.level == 'a1'), isTrue);
+
+    final persisted = await repository.getOrCreate();
+    persisted.levelProgress['a1']!
+      ..masteredItemIds = items['a1']!.map((item) => item.itemId).toList()
+      ..completedAt = DateTime.now();
+    await repository.save(persisted);
+
+    final secondDeck = await service.buildDeck();
+    expect(secondDeck.items, isNotEmpty);
+    expect(secondDeck.items.every((item) => item.level == 'a2'), isTrue);
+  });
 }

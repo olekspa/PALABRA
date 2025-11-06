@@ -43,7 +43,10 @@ class _FakeRunFeedbackService extends RunFeedbackService {
   Future<void> onTierPause({required int tier}) async {}
 
   @override
-  Future<void> onRunComplete({required int tierReached, required bool success}) async {}
+  Future<void> onRunComplete({
+    required int tierReached,
+    required bool success,
+  }) async {}
 }
 
 DeckBuilderService _buildDeckBuilder({int deckSize = 50}) {
@@ -85,10 +88,8 @@ DeckBuilderService _buildDeckBuilder({int deckSize = 50}) {
 
 Future<void> _matchPairById(RunController controller, String pairId) async {
   final state = controller.state;
-  final leftRow =
-      state.board.indexWhere((row) => row.left.pairId == pairId);
-  final rightRow =
-      state.board.indexWhere((row) => row.right.pairId == pairId);
+  final leftRow = state.board.indexWhere((row) => row.left.pairId == pairId);
+  final rightRow = state.board.indexWhere((row) => row.right.pairId == pairId);
 
   expect(leftRow, isNot(-1), reason: 'Left tile for $pairId not found');
   expect(rightRow, isNot(-1), reason: 'Right tile for $pairId not found');
@@ -102,8 +103,9 @@ Future<void> _matchPairById(RunController controller, String pairId) async {
 Future<void> _matchFirstPair(RunController controller) async {
   const maxAttempts = 40;
   for (var i = 0; i < maxAttempts; i++) {
-    final hasActiveRow = controller.state.board
-        .any((row) => row.left.pairId.isNotEmpty);
+    final hasActiveRow = controller.state.board.any(
+      (row) => row.left.pairId.isNotEmpty,
+    );
     if (hasActiveRow) {
       break;
     }
@@ -252,13 +254,13 @@ void main() {
       final metaRepository = _InMemoryUserMetaRepository(UserMeta());
       final controller = RunController(
         deckBuilderService: _buildDeckBuilder(deckSize: 20),
-        settings:
-            const RunSettings(
-              rows: 2,
-              targetMatches: 3,
-              refillBatchSize: 1,
-              refillStepDelayMs: 0,
-            ),
+        settings: const RunSettings(
+          rows: 2,
+          targetMatches: 3,
+          minTargetMatches: 3,
+          refillBatchSize: 1,
+          refillStepDelayMs: 0,
+        ),
         timerService: RunTimerService.fake(),
         fetchUserStates: fetchStates,
         saveUserStates: saveStates,
@@ -271,8 +273,9 @@ void main() {
       await controller.initialize();
 
       final initialState = controller.state;
-      final leftRow = initialState.board
-          .indexWhere((row) => row.left.pairId.isNotEmpty);
+      final leftRow = initialState.board.indexWhere(
+        (row) => row.left.pairId.isNotEmpty,
+      );
       expect(leftRow, isNot(-1));
       final leftId = initialState.board[leftRow].left.pairId;
       final wrongRightRow = initialState.board.indexWhere(
@@ -304,7 +307,7 @@ void main() {
       expect(meta.totalMatches, summary.matchesCompleted);
       expect(meta.totalAttempts, summary.attemptCount);
       expect(meta.currentStreak, 1);
-      expect(meta.bestStreak, 1);
+      expect(meta.bestStreak, summary.streakMax);
       expect(meta.lastTroubleDelta, summary.troubleDetected.length);
     });
 
@@ -405,13 +408,13 @@ void main() {
       await controller.initialize();
 
       final initialState = controller.state;
-      final leftRow = initialState.board
-          .indexWhere((row) => row.left.pairId.isNotEmpty);
+      final leftRow = initialState.board.indexWhere(
+        (row) => row.left.pairId.isNotEmpty,
+      );
       expect(leftRow, isNot(-1));
       final mismatchRightRow = initialState.board.indexWhere(
         (row) =>
-            row.right.pairId !=
-                initialState.board[leftRow].left.pairId &&
+            row.right.pairId != initialState.board[leftRow].left.pairId &&
             row.right.pairId.isNotEmpty,
       );
       expect(mismatchRightRow, isNot(-1));
@@ -424,60 +427,63 @@ void main() {
       expect(controller.state.mismatchEffect, isNull);
     });
 
-    test('matched pair is removed from the session deck after resolution',
-        () async {
-      final userStates = <String, UserItemState>{};
-      Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
-        return ids
-            .map(
-              (id) => userStates.putIfAbsent(
-                id,
-                () => UserItemState()..itemId = id,
-              ),
-            )
+    test(
+      'matched pair is removed from the session deck after resolution',
+      () async {
+        final userStates = <String, UserItemState>{};
+        Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+          return ids
+              .map(
+                (id) => userStates.putIfAbsent(
+                  id,
+                  () => UserItemState()..itemId = id,
+                ),
+              )
+              .toList();
+        }
+
+        Future<void> saveStates(List<UserItemState> states) async {}
+        Future<int> addRunLog(RunLog log) async => 1;
+        Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+        final controller = RunController(
+          deckBuilderService: _buildDeckBuilder(deckSize: 16),
+          settings: const RunSettings(
+            rows: 2,
+            refillBatchSize: 1,
+            refillStepDelayMs: 0,
+          ),
+          timerService: RunTimerService.fake(),
+          fetchUserStates: fetchStates,
+          saveUserStates: saveStates,
+          addRunLog: addRunLog,
+          addAttemptLogs: addAttempts,
+          userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+          feedbackService: const _FakeRunFeedbackService(),
+        );
+
+        await controller.initialize();
+
+        final firstPairId = controller.state.board[0].left.pairId;
+        final wrongRightRow = controller.state.board.indexWhere(
+          (row) =>
+              row.right.pairId != firstPairId && row.right.pairId.isNotEmpty,
+        );
+        expect(wrongRightRow, isNot(-1));
+
+        controller.onTileTapped(0, TileColumn.left);
+        controller.onTileTapped(wrongRightRow, TileColumn.right);
+
+        await _matchPairById(controller, firstPairId);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+
+        final currentPairs = controller.state.board
+            .expand((row) => [row.left.pairId, row.right.pairId])
             .toList();
-      }
 
-      Future<void> saveStates(List<UserItemState> states) async {}
-      Future<int> addRunLog(RunLog log) async => 1;
-      Future<void> addAttempts(List<AttemptLog> entries) async {}
-
-      final controller = RunController(
-        deckBuilderService: _buildDeckBuilder(deckSize: 16),
-        settings: const RunSettings(
-          rows: 2,
-          refillBatchSize: 1,
-          refillStepDelayMs: 0,
-        ),
-        timerService: RunTimerService.fake(),
-        fetchUserStates: fetchStates,
-        saveUserStates: saveStates,
-        addRunLog: addRunLog,
-        addAttemptLogs: addAttempts,
-        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
-        feedbackService: const _FakeRunFeedbackService(),
-      );
-
-      await controller.initialize();
-
-      final firstPairId = controller.state.board[0].left.pairId;
-      final wrongRightRow = controller.state.board.indexWhere(
-        (row) => row.right.pairId != firstPairId && row.right.pairId.isNotEmpty,
-      );
-      expect(wrongRightRow, isNot(-1));
-
-      controller.onTileTapped(0, TileColumn.left);
-      controller.onTileTapped(wrongRightRow, TileColumn.right);
-
-      await _matchPairById(controller, firstPairId);
-      await Future<void>.delayed(const Duration(milliseconds: 20));
-
-      final currentPairs = controller.state.board
-          .expand((row) => [row.left.pairId, row.right.pairId])
-          .toList();
-
-      expect(currentPairs, isNot(contains(firstPairId)));
-    });
+        expect(currentPairs, isNot(contains(firstPairId)));
+      },
+    );
 
     test('time extend offer consumes token and resumes the run', () async {
       final userStates = <String, UserItemState>{};
@@ -506,6 +512,7 @@ void main() {
         settings: const RunSettings(
           rows: 2,
           targetMatches: 3,
+          minTargetMatches: 3,
           runDurationMs: 200,
           timeExtendDurationMs: 60000,
           maxTimeExtendsPerRun: 2,
@@ -542,6 +549,113 @@ void main() {
 
       final persistedMeta = await metaRepository.getOrCreate();
       expect(persistedMeta.timeExtendTokens, 0);
+    });
+
+    test(
+      'manual time extend activation consumes a token and adds time',
+      () async {
+        final userStates = <String, UserItemState>{};
+        Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+          return ids
+              .map(
+                (id) => userStates.putIfAbsent(
+                  id,
+                  () => UserItemState()..itemId = id,
+                ),
+              )
+              .toList();
+        }
+
+        Future<void> saveStates(List<UserItemState> states) async {}
+        Future<int> addRunLog(RunLog log) async => 1;
+        Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+        final metaRepository = _InMemoryUserMetaRepository(
+          UserMeta()..timeExtendTokens = 2,
+        );
+        final controller = RunController(
+          deckBuilderService: _buildDeckBuilder(deckSize: 10),
+          settings: const RunSettings(
+            rows: 2,
+            runDurationMs: 1000,
+            timeExtendDurationMs: 30000,
+            refillStepDelayMs: 0,
+          ),
+          timerService: RunTimerService.fake(),
+          fetchUserStates: fetchStates,
+          saveUserStates: saveStates,
+          addRunLog: addRunLog,
+          addAttemptLogs: addAttempts,
+          userMetaRepository: metaRepository,
+          feedbackService: const _FakeRunFeedbackService(),
+        );
+
+        await controller.initialize();
+
+        final initialRemaining = controller.state.millisecondsRemaining;
+        controller.activatePowerup('timeExtend');
+        await Future<void>.delayed(Duration.zero);
+
+        expect(
+          controller.state.millisecondsRemaining,
+          initialRemaining + 30000,
+        );
+        expect(controller.state.timeExtendTokens, 1);
+        expect(controller.state.timeExtendsUsed, 1);
+        expect(controller.state.powerupInventory['timeExtend'], 1);
+
+        final meta = await metaRepository.getOrCreate();
+        expect(meta.timeExtendTokens, 1);
+        expect(meta.powerupInventory['timeExtend'], 1);
+      },
+    );
+
+    test('manual time extend does nothing when no tokens remain', () async {
+      final userStates = <String, UserItemState>{};
+      Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+        return ids
+            .map(
+              (id) => userStates.putIfAbsent(
+                id,
+                () => UserItemState()..itemId = id,
+              ),
+            )
+            .toList();
+      }
+
+      Future<void> saveStates(List<UserItemState> states) async {}
+      Future<int> addRunLog(RunLog log) async => 1;
+      Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+      final controller = RunController(
+        deckBuilderService: _buildDeckBuilder(deckSize: 10),
+        settings: const RunSettings(
+          rows: 2,
+          runDurationMs: 1000,
+          timeExtendDurationMs: 30000,
+          refillStepDelayMs: 0,
+        ),
+        timerService: RunTimerService.fake(),
+        fetchUserStates: fetchStates,
+        saveUserStates: saveStates,
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
+      );
+
+      await controller.initialize();
+
+      final initialState = controller.state;
+      controller.activatePowerup('timeExtend');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        controller.state.millisecondsRemaining,
+        initialState.millisecondsRemaining,
+      );
+      expect(controller.state.timeExtendTokens, 0);
+      expect(controller.state.timeExtendsUsed, 0);
     });
   });
 }

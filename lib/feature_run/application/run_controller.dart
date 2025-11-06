@@ -39,7 +39,12 @@ class RunController extends StateNotifier<RunState> {
        _addAttemptLogs = addAttemptLogs,
        _userMetaRepository = userMetaRepository,
        _feedbackService = feedbackService,
-       super(RunState.loading(rows: settings.rows));
+       super(
+         RunState.loading(
+           rows: settings.rows,
+           targetMatches: settings.targetMatches,
+         ),
+       );
 
   final DeckBuilderService _deckBuilderService;
   final RunSettings _settings;
@@ -84,13 +89,19 @@ class RunController extends StateNotifier<RunState> {
   int _timeExtendsUsed = 0;
   bool _runFinished = false;
   UserMeta? _userMeta;
+  int _targetMatches = 50;
 
   Future<void> initialize() async {
-    state = RunState.loading(rows: _settings.rows);
+    state = RunState.loading(
+      rows: _settings.rows,
+      targetMatches: _settings.targetMatches,
+    );
     _resetSession();
 
     await _loadUserMeta();
     _activeLevelId = _userMeta?.activeLevel ?? UserMeta.levelOrder.first;
+    final levelProgress = _userMeta?.levelProgress[_activeLevelId];
+    _targetMatches = _settings.targetForProgress(levelProgress);
     if (_userMeta != null) {
       _userMeta!.level = _activeLevelId;
     }
@@ -126,6 +137,7 @@ class RunController extends StateNotifier<RunState> {
       board: balancedBoard,
       deckRemaining: _remainingPairs,
       millisecondsRemaining: _settings.runDurationMs,
+      targetMatches: _targetMatches,
       timeExtendTokens: _userMeta?.timeExtendTokens ?? 0,
       timeExtendsUsed: _timeExtendsUsed,
       powerupInventory: initialInventory,
@@ -316,14 +328,15 @@ class RunController extends StateNotifier<RunState> {
     final itemState = _ensureItemState(itemId)
       ..seenCount += 1
       ..correctStreak += 1
+      ..totalCorrect += 1
       ..lastSeenAt = DateTime.now();
 
     final wasLearned = itemState.learnedAt != null;
-    if (itemState.wrongCount == 0 && itemState.correctStreak >= 3) {
-      if (!wasLearned) {
-        itemState.learnedAt = DateTime.now();
-      }
-      if (!wasLearned && !_learnedPromotions.contains(itemId)) {
+    final learnedThresholdMet =
+        itemState.totalCorrect >= _settings.matchesToLearn;
+    if (learnedThresholdMet && !wasLearned) {
+      itemState.learnedAt = DateTime.now();
+      if (!_learnedPromotions.contains(itemId)) {
         _learnedPromotions.add(itemId);
       }
     }
@@ -377,8 +390,8 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void activatePowerup(String powerupId) {
-    final normalized = powerupId.toLowerCase();
-    if (normalized == 'timeextend' || normalized == 'time_extend') {
+    final canonicalId = _canonicalizePowerupId(powerupId);
+    if (canonicalId == 'timeExtend') {
       _applyManualTimeExtend();
     }
   }
@@ -395,10 +408,11 @@ class RunController extends StateNotifier<RunState> {
       return;
     }
     meta.timeExtendTokens -= 1;
+    _setInventoryCount(meta, 'timeExtend', meta.timeExtendTokens);
     _timeExtendsUsed += 1;
+    final baseRemaining = max(0, state.millisecondsRemaining);
     _timerService.extendBy(_settings.timeExtendDurationMs);
-    final updatedRemaining =
-        max(0, state.millisecondsRemaining) + _settings.timeExtendDurationMs;
+    final updatedRemaining = baseRemaining + _settings.timeExtendDurationMs;
     final updatedInventory = Map<String, int>.from(state.powerupInventory);
     updatedInventory['timeExtend'] = max(
       0,
@@ -410,6 +424,7 @@ class RunController extends StateNotifier<RunState> {
       timeExtendsUsed: _timeExtendsUsed,
       powerupInventory: updatedInventory,
     );
+    unawaited(_userMetaRepository.save(meta));
   }
 
   void _markStateDirty(String itemId) {
@@ -580,7 +595,7 @@ class RunController extends StateNotifier<RunState> {
     if (meta == null) {
       return false;
     }
-    if (state.progress >= _settings.targetMatches) {
+    if (state.progress >= _targetMatches) {
       return false;
     }
     if (_timeExtendsUsed >= _settings.maxTimeExtendsPerRun) {
@@ -600,6 +615,7 @@ class RunController extends StateNotifier<RunState> {
     }
 
     meta.timeExtendTokens -= 1;
+    _setInventoryCount(meta, 'timeExtend', meta.timeExtendTokens);
     _timeExtendsUsed += 1;
 
     final baseRemaining = max(0, state.millisecondsRemaining);
@@ -648,7 +664,7 @@ class RunController extends StateNotifier<RunState> {
     } else if (!state.pausedAtTierTwo &&
         state.progress == _settings.tierTwoThreshold) {
       _enterPause(pausedAtTierTwo: true);
-    } else if (state.progress >= _settings.targetMatches) {
+    } else if (state.progress >= _targetMatches) {
       unawaited(_completeRun());
     }
   }
@@ -773,40 +789,62 @@ class RunController extends StateNotifier<RunState> {
     if (powerupId.isEmpty) {
       return;
     }
-    final normalized = powerupId.toLowerCase();
-    String canonicalId;
-    switch (normalized) {
-      case 'timeextend':
-      case 'time_extend':
-      case 'timeextendtoken':
-        canonicalId = 'timeExtend';
+    final canonicalId = _canonicalizePowerupId(powerupId);
+    switch (canonicalId) {
+      case 'timeExtend':
         meta.timeExtendTokens += 1;
+        _setInventoryCount(meta, canonicalId, meta.timeExtendTokens);
         break;
-      case 'rowblaster':
-      case 'row_blaster':
-        canonicalId = 'rowBlaster';
+      case 'rowBlaster':
         meta.rowBlasterCharges += 1;
+        _setInventoryCount(meta, canonicalId, meta.rowBlasterCharges);
         break;
       default:
-        canonicalId = normalized;
+        meta.powerupInventory[canonicalId] =
+            (meta.powerupInventory[canonicalId] ?? 0) + 1;
         break;
     }
 
-    meta.powerupInventory[canonicalId] =
-        (meta.powerupInventory[canonicalId] ?? 0) + 1;
     meta.unlockedPowerups.add(canonicalId);
     _powerupsEarnedThisRun.add(canonicalId);
 
     final updatedInventory = Map<String, int>.from(state.powerupInventory);
-    updatedInventory[canonicalId] = (updatedInventory[canonicalId] ?? 0) + 1;
-
     if (canonicalId == 'timeExtend') {
+      updatedInventory[canonicalId] = meta.timeExtendTokens;
       state = state.copyWith(
         timeExtendTokens: meta.timeExtendTokens,
         powerupInventory: updatedInventory,
       );
-    } else {
+    } else if (canonicalId == 'rowBlaster') {
+      updatedInventory[canonicalId] = meta.rowBlasterCharges;
       state = state.copyWith(powerupInventory: updatedInventory);
+    } else {
+      updatedInventory[canonicalId] = (updatedInventory[canonicalId] ?? 0) + 1;
+      state = state.copyWith(powerupInventory: updatedInventory);
+    }
+  }
+
+  String _canonicalizePowerupId(String id) {
+    final normalized = id.toLowerCase();
+    switch (normalized) {
+      case 'timeextend':
+      case 'time_extend':
+      case 'timeextendtoken':
+      case 'timeextendpowerup':
+        return 'timeExtend';
+      case 'rowblaster':
+      case 'row_blaster':
+        return 'rowBlaster';
+      default:
+        return id;
+    }
+  }
+
+  void _setInventoryCount(UserMeta meta, String id, int count) {
+    if (count <= 0) {
+      meta.powerupInventory.remove(id);
+    } else {
+      meta.powerupInventory[id] = count;
     }
   }
 
@@ -832,7 +870,7 @@ class RunController extends StateNotifier<RunState> {
   }
 
   int _tierForProgress(int progress) {
-    if (progress >= _settings.targetMatches) {
+    if (progress >= _targetMatches) {
       return 3;
     }
     if (progress >= _settings.tierTwoThreshold) {
@@ -961,7 +999,7 @@ class RunController extends StateNotifier<RunState> {
     final updatedBoard = List<BoardRow>.from(state.board);
     _pendingRefillRows.removeAt(0);
     updatedBoard[rowIndex] = _createRow(item);
-    _randomizeRightColumn(updatedBoard);
+    _scatterRightTile(updatedBoard, rowIndex);
     final balancedBoard = _ensureBoardInvariant(updatedBoard);
 
     state = state.copyWith(
@@ -1058,6 +1096,51 @@ class RunController extends StateNotifier<RunState> {
       );
     }
     return updated;
+  }
+
+  void _scatterRightTile(List<BoardRow> board, int sourceRowIndex) {
+    if (sourceRowIndex < 0 || sourceRowIndex >= board.length) {
+      return;
+    }
+    final sourceTile = board[sourceRowIndex].right;
+    if (sourceTile.pairId.isEmpty) {
+      return;
+    }
+    final activeRows = <int>[];
+    for (var i = 0; i < board.length; i++) {
+      if (board[i].right.pairId.isNotEmpty) {
+        activeRows.add(i);
+      }
+    }
+    if (activeRows.length <= 1) {
+      return;
+    }
+    var targetRowIndex = sourceRowIndex;
+    var attempts = 0;
+    while (attempts < 5 && targetRowIndex == sourceRowIndex) {
+      targetRowIndex = activeRows[_random.nextInt(activeRows.length)];
+      attempts += 1;
+    }
+    if (targetRowIndex == sourceRowIndex) {
+      targetRowIndex = activeRows.firstWhere(
+        (index) => index != sourceRowIndex,
+        orElse: () => sourceRowIndex,
+      );
+    }
+    if (targetRowIndex == sourceRowIndex ||
+        board[targetRowIndex].right.pairId.isEmpty) {
+      return;
+    }
+    final source = board[sourceRowIndex].right;
+    final target = board[targetRowIndex].right;
+    board[sourceRowIndex] = board[sourceRowIndex].replaceTile(
+      TileColumn.right,
+      target,
+    );
+    board[targetRowIndex] = board[targetRowIndex].replaceTile(
+      TileColumn.right,
+      source,
+    );
   }
 
   void _randomizeRightColumn(List<BoardRow> board) {

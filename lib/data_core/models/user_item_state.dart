@@ -5,16 +5,25 @@ class UserItemState {
 
   /// Vocabulary item identifier tracked by this state entry.
   String itemId;
+
   /// Number of times the item has been surfaced.
   int seenCount = 0;
+
   /// Current correct streak for the item.
   int correctStreak = 0;
+
+  /// Total correct matches across all runs.
+  int totalCorrect = 0;
+
   /// Number of wrong attempts recorded for the item.
   int wrongCount = 0;
+
   /// Timestamp when the item was last seen.
   DateTime? lastSeenAt;
+
   /// Timestamp when the item was promoted to learned.
   DateTime? learnedAt;
+
   /// Timestamp when the item was flagged as trouble.
   DateTime? troubleAt;
 
@@ -23,6 +32,7 @@ class UserItemState {
     return UserItemState(itemId: json['itemId'] as String? ?? '')
       ..seenCount = json['seenCount'] as int? ?? 0
       ..correctStreak = json['correctStreak'] as int? ?? 0
+      ..totalCorrect = json['totalCorrect'] as int? ?? 0
       ..wrongCount = json['wrongCount'] as int? ?? 0
       ..lastSeenAt = _parseTimestamp(json['lastSeenAt'])
       ..learnedAt = _parseTimestamp(json['learnedAt'])
@@ -35,6 +45,7 @@ class UserItemState {
       'itemId': itemId,
       'seenCount': seenCount,
       'correctStreak': correctStreak,
+      'totalCorrect': totalCorrect,
       'wrongCount': wrongCount,
       'lastSeenAt': lastSeenAt?.toIso8601String(),
       'learnedAt': learnedAt?.toIso8601String(),

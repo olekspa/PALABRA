@@ -14,6 +14,9 @@ import 'package:palabra/feature_run/application/tts/run_tts_config.dart';
 import 'package:palabra/feature_run/application/tts/run_tts_service.dart';
 import 'package:palabra/feature_run/presentation/confetti_overlay.dart';
 
+const _tileSwapDuration = Duration(milliseconds: 240);
+const double _tileMinHeight = 78;
+
 /// Core timed run experience view backed by [RunController].
 class RunScreen extends ConsumerStatefulWidget {
   /// Creates a [RunScreen].
@@ -167,6 +170,9 @@ class _RunView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasActivatablePowerups = state.powerupInventory.entries.any(
+      (entry) => entry.value > 0 && _isRunActivatablePowerup(entry.key),
+    );
     return Stack(
       children: [
         Column(
@@ -174,7 +180,7 @@ class _RunView extends StatelessWidget {
           children: [
             _RunHeader(
               progress: state.progress,
-              target: settings.targetMatches,
+              target: state.targetMatches,
               millisecondsRemaining: state.millisecondsRemaining,
               deckRemaining: state.deckRemaining,
               xpEarned: state.xpEarned,
@@ -182,7 +188,7 @@ class _RunView extends StatelessWidget {
               streakCurrent: state.streakCurrent,
               streakBest: state.streakBest,
             ),
-            if (state.powerupInventory.values.any((count) => count > 0)) ...[
+            if (hasActivatablePowerups) ...[
               const SizedBox(height: AppSpacing.sm),
               _PowerupToolbar(
                 inventory: state.powerupInventory,
@@ -476,7 +482,9 @@ class _PowerupToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final entries = inventory.entries
-        .where((entry) => entry.value > 0)
+        .where(
+          (entry) => entry.value > 0 && _isRunActivatablePowerup(entry.key),
+        )
         .toList(growable: false);
     if (entries.isEmpty) {
       return const SizedBox.shrink();
@@ -520,6 +528,18 @@ class _PowerupToolbar extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+bool _isRunActivatablePowerup(String id) {
+  switch (id.toLowerCase()) {
+    case 'timeextend':
+    case 'time_extend':
+    case 'timeextendtoken':
+    case 'timeextendpowerup':
+      return true;
+    default:
+      return false;
   }
 }
 
@@ -585,31 +605,63 @@ class _BoardRowView extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _RunTile(
-            text: row.left.text,
-            isSelected: _isSelected(TileColumn.left),
-            isMismatch:
-                mismatchEffect?.involves(index, TileColumn.left) ?? false,
-            mismatchToken: mismatchEffect?.token ?? 0,
-            onTap: () => onTileTap(index, TileColumn.left),
-            enabled: !inputLocked && row.left.pairId.isNotEmpty,
+          child: AnimatedSwitcher(
+            duration: _tileSwapDuration,
+            transitionBuilder: _tileTransitionBuilder,
+            child: KeyedSubtree(
+              key: ValueKey(row.left.id),
+              child: _RunTile(
+                text: row.left.text,
+                isSelected: _isSelected(TileColumn.left),
+                isMismatch:
+                    mismatchEffect?.involves(index, TileColumn.left) ?? false,
+                mismatchToken: mismatchEffect?.token ?? 0,
+                onTap: () => onTileTap(index, TileColumn.left),
+                enabled: !inputLocked && row.left.pairId.isNotEmpty,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: _RunTile(
-            text: row.right.text,
-            isSelected: _isSelected(TileColumn.right),
-            isMismatch:
-                mismatchEffect?.involves(index, TileColumn.right) ?? false,
-            mismatchToken: mismatchEffect?.token ?? 0,
-            onTap: () => onTileTap(index, TileColumn.right),
-            enabled: !inputLocked && row.right.pairId.isNotEmpty,
+          child: AnimatedSwitcher(
+            duration: _tileSwapDuration,
+            transitionBuilder: _tileTransitionBuilder,
+            child: KeyedSubtree(
+              key: ValueKey(row.right.id),
+              child: _RunTile(
+                text: row.right.text,
+                isSelected: _isSelected(TileColumn.right),
+                isMismatch:
+                    mismatchEffect?.involves(index, TileColumn.right) ?? false,
+                mismatchToken: mismatchEffect?.token ?? 0,
+                onTap: () => onTileTap(index, TileColumn.right),
+                enabled: !inputLocked && row.right.pairId.isNotEmpty,
+              ),
+            ),
           ),
         ),
       ],
     );
   }
+}
+
+Widget _tileTransitionBuilder(Widget child, Animation<double> animation) {
+  final curved = CurvedAnimation(
+    parent: animation,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+  return FadeTransition(
+    opacity: curved,
+    child: SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, 0.12),
+        end: Offset.zero,
+      ).animate(curved),
+      child: child,
+    ),
+  );
 }
 
 class _RunTile extends StatefulWidget {
@@ -715,21 +767,26 @@ class _RunTileState extends State<_RunTile>
           splashColor: mismatch
               ? AppColors.danger.withValues(alpha: 0.1)
               : AppColors.secondary.withValues(alpha: 0.1),
-          child: Ink(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: border),
-            ),
-            child: Text(
-              widget.text,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: mismatch ? AppColors.danger : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: _tileMinHeight),
+            child: Ink(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: background,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: border),
+              ),
+              child: Center(
+                child: Text(
+                  widget.text,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: mismatch ? AppColors.danger : null,
+                  ),
+                ),
               ),
             ),
           ),

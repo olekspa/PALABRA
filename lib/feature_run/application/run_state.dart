@@ -88,6 +88,7 @@ class RunState {
     required this.rows,
     required this.board,
     required this.progress,
+    required this.targetMatches,
     required this.selection,
     required this.mismatchEffect,
     required this.celebrationEffect,
@@ -109,12 +110,16 @@ class RunState {
     required this.powerupInventory,
   });
 
-  factory RunState.loading({required int rows}) {
+  factory RunState.loading({
+    required int rows,
+    int targetMatches = 50,
+  }) {
     return RunState(
       phase: RunPhase.loading,
       rows: rows,
       board: const <BoardRow>[],
       progress: 0,
+      targetMatches: targetMatches,
       selection: null,
       mismatchEffect: null,
       celebrationEffect: null,
@@ -142,6 +147,7 @@ class RunState {
     required List<BoardRow> board,
     required int deckRemaining,
     required int millisecondsRemaining,
+    required int targetMatches,
     int timeExtendTokens = 0,
     int timeExtendsUsed = 0,
     Map<String, int>? powerupInventory,
@@ -151,6 +157,7 @@ class RunState {
       rows: rows,
       board: List<BoardRow>.unmodifiable(board),
       progress: 0,
+      targetMatches: targetMatches,
       selection: null,
       mismatchEffect: null,
       celebrationEffect: null,
@@ -179,6 +186,7 @@ class RunState {
   final int rows;
   final List<BoardRow> board;
   final int progress;
+  final int targetMatches;
   final TileSelection? selection;
   final MismatchEffect? mismatchEffect;
   final CelebrationEffect? celebrationEffect;
@@ -209,6 +217,7 @@ class RunState {
     RunPhase? phase,
     List<BoardRow>? board,
     int? progress,
+    int? targetMatches,
     TileSelection? selection,
     bool clearSelection = false,
     MismatchEffect? mismatchEffect,
@@ -238,6 +247,7 @@ class RunState {
       rows: rows,
       board: board != null ? List<BoardRow>.unmodifiable(board) : this.board,
       progress: progress ?? this.progress,
+      targetMatches: targetMatches ?? this.targetMatches,
       selection: clearSelection ? null : selection ?? this.selection,
       mismatchEffect: clearMismatch
           ? null
