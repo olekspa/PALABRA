@@ -1,12 +1,19 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palabra/app/app.dart';
+import 'package:palabra/data_core/models/number_drill_progress.dart';
 import 'package:palabra/data_core/models/user_item_state.dart';
 import 'package:palabra/data_core/models/user_meta.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/data_core/providers/repository_providers.dart';
 import 'package:palabra/feature_gate/application/gate_detection_service.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:palabra/feature_numbers/application/number_drill_controller.dart';
+import 'package:palabra/feature_numbers/services/number_audio_service.dart';
+import 'package:palabra/feature_numbers/services/number_pool_service.dart';
+import 'package:palabra/feature_numbers/models/number_drill_models.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
 import 'package:palabra/feature_run/application/run_feedback_service.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
@@ -14,6 +21,8 @@ import 'package:palabra/feature_run/application/timer_service.dart';
 import 'package:palabra/feature_run/presentation/run_screen.dart';
 import 'package:palabra/feature_srs/deck_builder/deck_builder_providers.dart';
 import 'package:palabra/feature_srs/deck_builder/deck_builder_service.dart';
+import 'package:palabra/feature_run/application/tts/run_tts_service.dart'
+    as run_tts;
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -60,6 +69,12 @@ void main() {
           runTimerServiceProvider.overrideWithValue(RunTimerService.fake()),
           runFeedbackServiceProvider.overrideWithValue(
             const _TestRunFeedbackService(),
+          ),
+          numberPoolServiceProvider.overrideWithValue(
+            _StubNumberPoolService(),
+          ),
+          numberAudioServiceProvider.overrideWithValue(
+            _StubNumberAudioService(),
           ),
           deckBuilderServiceProvider.overrideWithValue(
             _StaticDeckBuilderService(deckItems),
@@ -114,8 +129,36 @@ void main() {
     await tester.pump();
     await tester.tap(find.text(spanishText));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
-    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Number drill should appear.
+    expect(find.text('Number drill'), findsOneWidget);
+    final drillContext = tester.element(find.text('Number drill'));
+    final drillContainer = ProviderScope.containerOf(
+      drillContext,
+      listen: false,
+    );
+
+    for (var i = 0; i < 5; i++) {
+      final drillState = drillContainer.read(numberDrillControllerProvider);
+      final active = drillState.activeNumber;
+      expect(active, isNotNull);
+      final tileFinder = find.descendant(
+        of: find.byType(GridView),
+        matching: find.text('${active!}'),
+      );
+      expect(tileFinder, findsWidgets);
+      await tester.tap(tileFinder.first);
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+    expect(find.text('Bonus complete!'), findsOneWidget);
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Finish screen should be displayed.
     expect(find.text('Goal achieved!'), findsOneWidget);
@@ -157,6 +200,57 @@ class _TestUserMetaRepository extends UserMetaRepository {
   Future<void> save(UserMeta meta) async {
     _meta = meta;
   }
+}
+
+class _StubNumberPoolService extends NumberPoolService {
+  _StubNumberPoolService() : super();
+
+  @override
+  NumberDrillSeed buildSeed({
+    required NumberDrillProgress progress,
+    required String levelId,
+  }) {
+    return NumberDrillSeed(
+      gridNumbers: List<int>.generate(16, (index) => index + 1),
+      promptQueue: const <int>[1, 2, 3, 4, 5],
+    );
+  }
+}
+
+class _StubNumberAudioService extends NumberAudioService {
+  _StubNumberAudioService()
+    : super(
+        audioPlayer: AudioPlayer(),
+        ttsService: _StubRunTtsService(),
+      );
+
+  @override
+  Future<bool> play(int value) async => true;
+
+  @override
+  Future<void> stop() async {}
+}
+
+class _StubRunTtsService extends run_tts.RunTtsService {
+  @override
+  bool get isSupported => false;
+
+  @override
+  Future<void> onUserGesture() async {}
+
+  @override
+  Future<run_tts.RunTtsPlaybackOutcome> speak({
+    required String text,
+    String? itemId,
+  }) async {
+    return run_tts.RunTtsPlaybackOutcome.audioAsset;
+  }
+
+  @override
+  Future<void> cancel() async {}
+
+  @override
+  void dispose() {}
 }
 
 class _TestRunFeedbackService extends RunFeedbackService {

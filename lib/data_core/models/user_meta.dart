@@ -1,4 +1,5 @@
 import 'package:palabra/data_core/models/level_progress.dart';
+import 'package:palabra/data_core/models/number_drill_progress.dart';
 
 /// Persistent metadata for the prototype user profile across sessions.
 class UserMeta {
@@ -73,6 +74,9 @@ class UserMeta {
   /// Set of powerups the player has unlocked at least once.
   Set<String> unlockedPowerups = <String>{};
 
+  /// Progress tracking for the number drill bonus game.
+  NumberDrillProgress numberDrillProgress = NumberDrillProgress();
+
   /// Hydrates metadata from persisted JSON.
   factory UserMeta.fromJson(Map<String, dynamic> json) {
     final meta = UserMeta()
@@ -119,6 +123,11 @@ class UserMeta {
       meta.unlockedPowerups = unlockedJson.map((e) => e.toString()).toSet();
     }
 
+    final numberDrillJson = json['numberDrillProgress'];
+    if (numberDrillJson is Map<String, dynamic>) {
+      meta.numberDrillProgress = NumberDrillProgress.fromJson(numberDrillJson);
+    }
+
     meta._ensureLevelProgress();
     return meta;
   }
@@ -149,6 +158,7 @@ class UserMeta {
       ),
       'powerupInventory': powerupInventory,
       'unlockedPowerups': unlockedPowerups.toList(),
+      'numberDrillProgress': numberDrillProgress.toJson(),
     };
   }
 

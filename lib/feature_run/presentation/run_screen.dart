@@ -28,6 +28,7 @@ class RunScreen extends ConsumerStatefulWidget {
 
 class _RunScreenState extends ConsumerState<RunScreen> {
   bool _navigatedToFinish = false;
+  bool _launchedNumberDrill = false;
   late final ProviderSubscription<RunState> _runSubscription;
   late final RunTtsService _ttsService;
   DateTime? _lastTtsToastAt;
@@ -40,14 +41,28 @@ class _RunScreenState extends ConsumerState<RunScreen> {
     _runSubscription = ref.listenManual<RunState>(
       runControllerProvider,
       (previous, next) {
-        if (next.phase == RunPhase.completed && !_navigatedToFinish) {
-          _navigatedToFinish = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) {
-              return;
-            }
-            context.go(AppRoute.finish.path);
-          });
+        if (next.phase == RunPhase.completed) {
+          final success = next.progress >= next.targetMatches;
+          if (success && !_launchedNumberDrill) {
+            _launchedNumberDrill = true;
+            _navigatedToFinish = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) {
+                return;
+              }
+              context.go(AppRoute.numberDrill.path);
+            });
+            return;
+          }
+          if (!_navigatedToFinish) {
+            _navigatedToFinish = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) {
+                return;
+              }
+              context.go(AppRoute.finish.path);
+            });
+          }
         }
       },
     );

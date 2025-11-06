@@ -58,10 +58,10 @@ flutter test           # Widget + unit tests
 - A developer-only tuning panel (rate, pitch, current voice label) can be enabled with `--dart-define=PALABRA_TTS_DEV_PANEL=true` when running the app on web.
 
 ## Prototype persistence & telemetry
-- User metadata, run logs, and item states persist locally via `shared_preferences` (in-memory fallback on unsupported platforms).
-- Clearing app storage resets progress; migrations, multi-profile support, and remote sync are still in planning.
-- RunController now records streaks, averages, inventory deltas, and run durations. The Finish screen surfaces these stats for QA.
-- A manual reset helper lives in `StorePersistence.clear()` while the settings/debug UI is pending.
+- User metadata, run logs, number-drill progress, and item states persist locally via `shared_preferences` (in-memory fallback on unsupported platforms).
+- Clearing app storage resets the active profile; profile switching and remote sync are scoped for an upcoming milestone.
+- RunController tracks streaks, XP, inventory deltas, run duration, and now chains into the number drill for bonus XP. The Finish screen surfaces the combined stats for QA.
+- A manual reset helper lives in `StorePersistence.clear()` while the profile selector/debug UI is pending.
 - Future milestone: host a central persistence + telemetry service on the Proxmox LXC cluster (static web + API). Docs will be updated once that pipeline ships.
 
 ## Versioning
@@ -75,6 +75,7 @@ flutter test           # Widget + unit tests
 - Finish screen conveys per-run inventory changes alongside lifetime streak/accuracy stats.
 - Sequential CEFR progression keeps learners on a single deck (A1 → B2) until every pair in that tier is mastered, and the HUD now surfaces live XP, streak, and deck depth readouts.
 - Clean runs award bonus XP and unlock powerups; the in-run toolbar exposes available boosts (time extend today, more coming) with inventory counts that persist across sessions.
+- Successful runs automatically launch a 4×4 number listening drill that plays from bundled `spanish_numbers` audio, awards bonus XP based on time/mistakes, and updates number mastery per profile.
 - CI runs static analysis, unit/widget/integration tests (`.github/workflows/ci.yml`).
 
 ## Near-term roadmap

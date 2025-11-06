@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:palabra/feature_finish/presentation/finish_screen.dart';
 import 'package:palabra/feature_gate/presentation/gate_screen.dart';
 import 'package:palabra/feature_prerun/presentation/prerun_screen.dart';
+import 'package:palabra/feature_numbers/presentation/number_drill_screen.dart';
 import 'package:palabra/feature_run/presentation/run_screen.dart';
 
 /// Declarative identifiers for app navigation targets.
@@ -16,6 +17,9 @@ enum AppRoute {
 
   /// Active run route.
   run('/mm/run'),
+
+  /// Bonus number drill route.
+  numberDrill('/mm/number-drill'),
 
   /// Run completion summary route.
   finish('/mm/finish');
@@ -50,6 +54,13 @@ final goRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoute.run.name,
         builder: (BuildContext context, GoRouterState state) {
           return const RunScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoute.numberDrill.path,
+        name: AppRoute.numberDrill.name,
+        builder: (BuildContext context, GoRouterState state) {
+          return const NumberDrillScreen();
         },
       ),
       GoRoute(

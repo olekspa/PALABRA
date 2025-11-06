@@ -58,6 +58,7 @@ flutter:
   assets:
     - assets/vocabulary/spanish/
     - assets/audio/spanish/
+    - assets/audio/spanish_numbers/
 
   fonts:
     - family: NotoSans
