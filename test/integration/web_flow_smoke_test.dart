@@ -194,7 +194,7 @@ class _TestUserMetaRepository extends UserMetaRepository {
   UserMeta _meta;
 
   @override
-  Future<UserMeta> getOrCreate() async => _meta;
+  Future<UserMeta> getOrCreate({String? profileId}) async => _meta;
 
   @override
   Future<void> save(UserMeta meta) async {

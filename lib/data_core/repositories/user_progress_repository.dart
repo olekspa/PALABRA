@@ -11,7 +11,8 @@ class UserProgressRepository {
 
   /// Returns stored progress states for the provided item IDs.
   Future<List<UserItemState>> getStates(Iterable<String> itemIds) async {
-    final store = _store.userStates;
+    final id = _store.ensureActiveProfile();
+    final store = _store.userStatesFor(id);
     return itemIds
         .map((id) => store[id])
         .whereType<UserItemState>()
@@ -20,14 +21,17 @@ class UserProgressRepository {
 
   /// Writes the provided states and persists the store snapshot.
   Future<void> upsertStates(List<UserItemState> states) async {
+    final id = _store.ensureActiveProfile();
+    final store = _store.userStatesFor(id);
     for (final state in states) {
-      _store.userStates[state.itemId] = state;
+      store[state.itemId] = state;
     }
     await _store.persist();
   }
 
   /// Returns the stored state for a single item, if any.
   Future<UserItemState?> getState(String itemId) async {
-    return _store.userStates[itemId];
+    final id = _store.ensureActiveProfile();
+    return _store.userStatesFor(id)[itemId];
   }
 }

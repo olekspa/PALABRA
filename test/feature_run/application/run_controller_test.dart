@@ -22,12 +22,21 @@ class _InMemoryUserMetaRepository implements UserMetaRepository {
   UserMeta _meta;
 
   @override
-  Future<UserMeta> getOrCreate() async => _meta;
+  Future<UserMeta> getOrCreate({String? profileId}) async => _meta;
 
   @override
   Future<void> save(UserMeta meta) async {
     _meta = meta;
   }
+
+  @override
+  Future<void> deleteProfile(String profileId) async {}
+
+  @override
+  Future<List<String>> listProfileIds() async => const <String>[];
+
+  @override
+  Future<void> switchProfile(String profileId) async {}
 }
 
 class _FakeRunFeedbackService extends RunFeedbackService {

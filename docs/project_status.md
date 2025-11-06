@@ -107,3 +107,4 @@
 - [ ] Documentation: update README, guides, and vision with Beta 2 scope & timelines.
 - [ ] Release gating: automate beta build pipeline (CI artifact, change log, smoke tests).
 - [ ] Risk tracking: maintain issue list for Beta 2 blockers with owners/ETAs.
+- [ ] Automate version bumping (today: manually increment `kAppVersion` in `lib/app/app_constants.dart` on every change so Gate screen displays deployed build).

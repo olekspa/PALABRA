@@ -11,7 +11,8 @@ class AttemptLogRepository {
 
   /// Appends attempt logs and persists the snapshot.
   Future<void> addAll(List<AttemptLog> attempts) async {
-    _store.attemptLogs.addAll(attempts);
+    final id = _store.ensureActiveProfile();
+    _store.attemptLogsFor(id).addAll(attempts);
     await _store.persist();
   }
 }

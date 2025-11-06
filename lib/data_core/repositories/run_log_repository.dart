@@ -11,16 +11,20 @@ class RunLogRepository {
 
   /// Inserts a new run log at the head of the history and persists it.
   Future<int> add(RunLog runLog) async {
-    _store.runLogs.insert(0, runLog);
+    final id = _store.ensureActiveProfile();
+    final logs = _store.runLogsFor(id);
+    logs.insert(0, runLog);
     await _store.persist();
-    return _store.runLogs.length;
+    return logs.length;
   }
 
   /// Returns the most recent run log if one exists.
   Future<RunLog?> latest() async {
-    if (_store.runLogs.isEmpty) {
+    final id = _store.ensureActiveProfile();
+    final logs = _store.runLogsFor(id);
+    if (logs.isEmpty) {
       return null;
     }
-    return _store.runLogs.first;
+    return logs.first;
   }
 }

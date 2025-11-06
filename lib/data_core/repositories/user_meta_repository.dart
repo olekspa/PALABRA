@@ -10,13 +10,27 @@ class UserMetaRepository {
   final InMemoryStore _store;
 
   /// Returns the existing metadata or initializes defaults.
-  Future<UserMeta> getOrCreate() async {
-    return _store.userMeta;
+  Future<UserMeta> getOrCreate({String? profileId}) async {
+    final id = _store.ensureActiveProfile(profileId: profileId);
+    return _store.profileMeta(id);
   }
 
   /// Persists the provided metadata snapshot.
   Future<void> save(UserMeta meta) async {
-    _store.userMeta = meta;
+    final id = _store.ensureActiveProfile();
+    _store.upsertProfile(id, meta);
+    await _store.persist();
+  }
+
+  Future<List<String>> listProfileIds() async => _store.profileIds;
+
+  Future<void> switchProfile(String profileId) async {
+    _store.ensureActiveProfile(profileId: profileId);
+    await _store.persist();
+  }
+
+  Future<void> deleteProfile(String profileId) async {
+    _store.deleteProfile(profileId);
     await _store.persist();
   }
 }

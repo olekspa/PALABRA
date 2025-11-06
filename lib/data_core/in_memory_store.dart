@@ -18,14 +18,97 @@ class InMemoryStore {
   static final InMemoryStore instance = InMemoryStore._();
 
   final Map<String, VocabItem> _vocabulary = <String, VocabItem>{};
-  /// Runtime user item state keyed by vocabulary ID.
-  final Map<String, UserItemState> userStates = <String, UserItemState>{};
-  /// Persisted user metadata snapshot.
-  UserMeta userMeta = UserMeta();
-  /// Chronological run logs with the most recent first.
-  final List<RunLog> runLogs = <RunLog>[];
-  /// Attempt-level logs accumulated during runs.
-  final List<AttemptLog> attemptLogs = <AttemptLog>[];
+
+  /// Runtime user item state keyed by active profile and vocabulary ID.
+  final Map<String, Map<String, UserItemState>> _profileUserStates =
+      <String, Map<String, UserItemState>>{};
+
+  /// Persisted metadata per profile id.
+  final Map<String, UserMeta> _profiles = <String, UserMeta>{};
+
+  /// Chronological run logs grouped by profile id.
+  final Map<String, List<RunLog>> _profileRunLogs = <String, List<RunLog>>{};
+
+  /// Attempt-level logs grouped by profile id.
+  final Map<String, List<AttemptLog>> _profileAttemptLogs =
+      <String, List<AttemptLog>>{};
+
+  /// Currently selected profile id.
+  String? activeProfileId;
+
+  /// Returns the active profile id, creating a default profile as needed.
+  String ensureActiveProfile({String? profileId}) {
+    final requested = profileId ?? activeProfileId;
+    if (requested != null && _profiles.containsKey(requested)) {
+      activeProfileId = requested;
+      return requested;
+    }
+    if (activeProfileId != null && _profiles.containsKey(activeProfileId)) {
+      return activeProfileId!;
+    }
+    final id = _generateDefaultProfileId();
+    _profiles.putIfAbsent(id, UserMeta.new);
+    _profileUserStates.putIfAbsent(id, () => <String, UserItemState>{});
+    _profileRunLogs.putIfAbsent(id, () => <RunLog>[]);
+    _profileAttemptLogs.putIfAbsent(id, () => <AttemptLog>[]);
+    activeProfileId = id;
+    return id;
+  }
+
+  /// Returns the metadata for the profile.
+  UserMeta profileMeta(String profileId) {
+    return _profiles.putIfAbsent(profileId, UserMeta.new);
+  }
+
+  /// Updates or inserts the provided profile metadata.
+  void upsertProfile(String profileId, UserMeta meta) {
+    _profiles[profileId] = meta;
+  }
+
+  /// Returns all known profile ids.
+  List<String> get profileIds => _profiles.keys.toList(growable: false);
+
+  /// Deletes the profile and associated state.
+  void deleteProfile(String profileId) {
+    _profiles.remove(profileId);
+    _profileUserStates.remove(profileId);
+    _profileRunLogs.remove(profileId);
+    _profileAttemptLogs.remove(profileId);
+    if (activeProfileId == profileId) {
+      activeProfileId = _profiles.isEmpty ? null : _profiles.keys.first;
+    }
+  }
+
+  Map<String, UserItemState> userStatesFor(String profileId) {
+    return _profileUserStates.putIfAbsent(
+      profileId,
+      () => <String, UserItemState>{},
+    );
+  }
+
+  List<RunLog> runLogsFor(String profileId) {
+    return _profileRunLogs.putIfAbsent(profileId, () => <RunLog>[]);
+  }
+
+  List<AttemptLog> attemptLogsFor(String profileId) {
+    return _profileAttemptLogs.putIfAbsent(profileId, () => <AttemptLog>[]);
+  }
+
+  /// Convenience getter for the active profile metadata.
+  UserMeta get userMeta => profileMeta(ensureActiveProfile());
+
+  /// Convenience setter for the active profile metadata.
+  set userMeta(UserMeta value) => upsertProfile(ensureActiveProfile(), value);
+
+  /// Convenience getter for active profile user states.
+  Map<String, UserItemState> get userStates =>
+      userStatesFor(ensureActiveProfile());
+
+  /// Convenience getter for active profile run logs.
+  List<RunLog> get runLogs => runLogsFor(ensureActiveProfile());
+
+  /// Convenience getter for active profile attempt logs.
+  List<AttemptLog> get attemptLogs => attemptLogsFor(ensureActiveProfile());
 
   bool _vocabularyLoaded = false;
 
@@ -75,59 +158,107 @@ class InMemoryStore {
   }
 
   Map<String, dynamic> _toJson() {
-    final states = <String, dynamic>{
-      for (final entry in userStates.entries) entry.key: entry.value.toJson(),
+    final profilesJson = <String, dynamic>{
+      for (final entry in _profiles.entries)
+        entry.key: entry.value.toJson(),
     };
+    final userStatesJson = _profileUserStates.map(
+      (profileId, map) => MapEntry(
+        profileId,
+        <String, dynamic>{
+          for (final entry in map.entries) entry.key: entry.value.toJson(),
+        },
+      ),
+    );
+    final runLogsJson = _profileRunLogs.map(
+      (key, value) => MapEntry(key, value.map((log) => log.toJson()).toList()),
+    );
+    final attemptLogsJson = _profileAttemptLogs.map(
+      (key, value) => MapEntry(key, value.map((log) => log.toJson()).toList()),
+    );
     return <String, dynamic>{
-      'userMeta': userMeta.toJson(),
-      'userStates': states,
-      'runLogs': runLogs.map((log) => log.toJson()).toList(),
-      'attemptLogs': attemptLogs.map((log) => log.toJson()).toList(),
+      'activeProfileId': activeProfileId,
+      'profiles': profilesJson,
+      'userStates': userStatesJson,
+      'runLogs': runLogsJson,
+      'attemptLogs': attemptLogsJson,
     };
   }
 
   void _loadFromJson(Map<String, dynamic> json) {
-    final metaJson = json['userMeta'];
-    if (metaJson is Map<String, dynamic>) {
-      userMeta = UserMeta.fromJson(metaJson);
+    activeProfileId = json['activeProfileId'] as String?;
+
+    final profilesJson = json['profiles'];
+    if (profilesJson is Map) {
+      _profiles.clear();
+      profilesJson.forEach((key, value) {
+        if (value is Map) {
+          _profiles[key.toString()] = UserMeta.fromJson(
+            Map<String, dynamic>.from(value.cast<String, dynamic>()),
+          );
+        }
+      });
     }
 
     final statesJson = json['userStates'];
     if (statesJson is Map) {
-      userStates.clear();
-      statesJson.forEach((key, value) {
-        if (value is Map) {
-          final map = Map<String, dynamic>.from(value);
-          map['itemId'] ??= key.toString();
-          final state = UserItemState.fromJson(map);
-          if (state.itemId.isNotEmpty) {
-            userStates[state.itemId] = state;
-          }
+      _profileUserStates.clear();
+      statesJson.forEach((profileKey, mapValue) {
+        if (mapValue is Map) {
+          final states = <String, UserItemState>{};
+          mapValue.forEach((key, value) {
+            if (value is Map) {
+              final map = Map<String, dynamic>.from(value);
+              map['itemId'] ??= key.toString();
+              final state = UserItemState.fromJson(map);
+              if (state.itemId.isNotEmpty) {
+                states[state.itemId] = state;
+              }
+            }
+          });
+          _profileUserStates[profileKey.toString()] = states;
         }
       });
     }
 
     final runLogsJson = json['runLogs'];
-    if (runLogsJson is List) {
-      runLogs
-        ..clear()
-        ..addAll(
-          runLogsJson
+    if (runLogsJson is Map) {
+      _profileRunLogs.clear();
+      runLogsJson.forEach((profileKey, listValue) {
+        if (listValue is List) {
+          final logs = listValue
               .whereType<Map<String, dynamic>>()
-              .map(RunLog.fromJson),
-        );
+              .map(RunLog.fromJson)
+              .toList();
+          _profileRunLogs[profileKey.toString()] = logs;
+        }
+      });
     }
 
     final attemptsJson = json['attemptLogs'];
-    if (attemptsJson is List) {
-      attemptLogs
-        ..clear()
-        ..addAll(
-          attemptsJson
+    if (attemptsJson is Map) {
+      _profileAttemptLogs.clear();
+      attemptsJson.forEach((profileKey, listValue) {
+        if (listValue is List) {
+          final logs = listValue
               .whereType<Map<String, dynamic>>()
-              .map(AttemptLog.fromJson),
-        );
+              .map(AttemptLog.fromJson)
+              .toList();
+          _profileAttemptLogs[profileKey.toString()] = logs;
+        }
+      });
     }
+
+    ensureActiveProfile();
+  }
+
+  String _generateDefaultProfileId() {
+    const base = 'profile';
+    var suffix = 1;
+    while (_profiles.containsKey('$base$suffix')) {
+      suffix += 1;
+    }
+    return '$base$suffix';
   }
 
   Future<void> _loadLevel({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:palabra/app/app_constants.dart';
 import 'package:palabra/app/router/app_router.dart';
 import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
@@ -161,6 +162,12 @@ class _GateContent extends StatelessWidget {
             style: textTheme.bodySmall?.copyWith(color: Colors.white70),
           ),
         ],
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'Version $kAppVersion',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(color: Colors.white54),
+        ),
       ],
     );
   }
