@@ -75,18 +75,22 @@ void main() {
     };
 
     final states = <String, UserItemState>{
-      for (var i = 0; i < 20; i++)
-        'a1_${(i + 1).toString().padLeft(4, '0')}': _state(
-          itemId: 'a1_${(i + 1).toString().padLeft(4, '0')}',
-          seenCount: 5,
-        ),
-      for (var i = 0; i < 10; i++)
-        'a2_${(i + 1).toString().padLeft(4, '0')}': _state(
-          itemId: 'a2_${(i + 1).toString().padLeft(4, '0')}',
-          seenCount: 3,
-        ),
+      for (final entry in items.entries)
+        for (final vocab in entry.value)
+          vocab.itemId: _state(
+            itemId: vocab.itemId,
+            seenCount: 4,
+            correctStreak: 2,
+          ),
       'a1_0001': _state(itemId: 'a1_0001', seenCount: 5, wrongCount: 2),
-      'a1_0003': _state(itemId: 'a1_0003', seenCount: 10, correctStreak: 3),
+      'a1_0002': _state(itemId: 'a1_0002', seenCount: 0),
+      'a1_0003': _state(itemId: 'a1_0003', seenCount: 0),
+      'a1_0004': _state(itemId: 'a1_0004', seenCount: 0),
+      'a1_0005': _state(itemId: 'a1_0005', seenCount: 0),
+      'a2_0001': _state(itemId: 'a2_0001', seenCount: 0),
+      'a2_0002': _state(itemId: 'a2_0002', seenCount: 0),
+      'a2_0003': _state(itemId: 'a2_0003', seenCount: 0),
+      'a2_0004': _state(itemId: 'a2_0004', seenCount: 0),
     };
 
     final service = DeckBuilderService(
@@ -126,5 +130,40 @@ void main() {
     // Since only one non-learned family exists, duplicates should appear.
     final families = result.items.map((item) => item.family).toSet();
     expect(families.length, lessThan(result.items.length));
+  });
+
+  test('avoids duplicate families when supply is sufficient', () async {
+    final items = <String, List<VocabItem>>{
+      'a1': List.generate(6, (index) {
+        final suffix = (index + 1).toString().padLeft(4, '0');
+        return _item('a1_$suffix', 'a1', family: 'a1_family_$suffix');
+      }),
+      'a2': List.generate(6, (index) {
+        final suffix = (index + 1).toString().padLeft(4, '0');
+        return _item('a2_$suffix', 'a2', family: 'a2_family_$suffix');
+      }),
+    };
+
+    final states = <String, UserItemState>{
+      for (final entry in items.entries)
+        for (final item in entry.value)
+          item.itemId: _state(
+            itemId: item.itemId,
+            seenCount: item.itemId.endsWith('1') ? 0 : 2,
+          ),
+    };
+
+    final service = DeckBuilderService(
+      vocabularyFetcher: vocabularyFetcher(items),
+      progressFetcher: progressFetcher(states),
+      userMetaRepository: _MemoryUserMetaRepository(UserMeta()),
+      config: const DeckBuilderConfig(deckSize: 6),
+    );
+
+    final result = await service.buildDeck();
+
+    final families = result.items.map((item) => item.family).toSet();
+    expect(result.items.length, 6);
+    expect(families.length, result.items.length);
   });
 }

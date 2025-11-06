@@ -13,7 +13,7 @@ class GateScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final access = ref.watch(gateAccessProvider);
+    final accessAsync = ref.watch(gateAccessProvider);
     final requiredCourseId = ref.watch(gateRequiredCourseProvider);
     final flags = ref.watch(gateFeatureFlagsProvider);
 
@@ -33,66 +33,16 @@ class GateScreen extends ConsumerWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Palabra',
-                          style: Theme.of(context).textTheme.displaySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'Make 90 correct matches in 1:45.',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        _GateStatusRow(
-                          label: 'Device',
-                          value: access.device.value,
-                          isOk: access.device.allowed,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        _GateStatusRow(
-                          label: 'Course',
-                          value: access.course.value,
-                          isOk: access.course.allowed,
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                        ElevatedButton(
-                          onPressed: access.canProceed
-                              ? () => context.go(AppRoute.preRun.path)
-                              : null,
-                          child: const Text('Continue'),
-                        ),
-                        if (_shouldShowOverrideNote(access, flags)) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            'Override flags granted access on this device. '
-                            'Disable the PALABRA_* feature flags to restore '
-                            'production gating.',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: Colors.white70),
-                          ),
-                        ] else if (!access.canProceed) ...[
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            'Palabra is currently limited to '
-                            '${_formatCourseName(requiredCourseId)} learners '
-                            'on iPhone.',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: Colors.white70),
-                          ),
-                        ],
-                      ],
+                    child: accessAsync.when(
+                      data: (access) => _GateContent(
+                        access: access,
+                        flags: flags,
+                        requiredCourseId: requiredCourseId,
+                      ),
+                      error: (error, stack) => _GateError(
+                        message: 'Unable to evaluate device access.',
+                      ),
+                      loading: () => const _GateLoading(),
                     ),
                   ),
                 ),
@@ -130,6 +80,127 @@ class _GateStatusRow extends StatelessWidget {
             textAlign: TextAlign.right,
             style: theme.textTheme.bodyMedium?.copyWith(color: color),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GateContent extends StatelessWidget {
+  const _GateContent({
+    required this.access,
+    required this.flags,
+    required this.requiredCourseId,
+  });
+
+  final GateAccessStatus access;
+  final GateFeatureFlags flags;
+  final String requiredCourseId;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Palabra',
+          style: textTheme.displaySmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'Make 90 correct matches in 1:45.',
+          style: textTheme.bodyLarge,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        _GateStatusRow(
+          label: 'Device',
+          value: access.device.value,
+          isOk: access.device.allowed,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _GateStatusRow(
+          label: 'Course',
+          value: access.course.value,
+          isOk: access.course.allowed,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        ElevatedButton(
+          onPressed: access.canProceed
+              ? () => GoRouter.of(context).go(AppRoute.preRun.path)
+              : null,
+          child: const Text('Continue'),
+        ),
+        if (_shouldShowOverrideNote(access, flags)) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Override flags granted access on this device. '
+            'Disable the PALABRA_* feature flags to restore '
+            'production gating.',
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+          ),
+        ] else if (!access.canProceed) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Palabra is currently limited to '
+            '${_formatCourseName(requiredCourseId)} learners '
+            'on supported devices.',
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _GateLoading extends StatelessWidget {
+  const _GateLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: SizedBox(
+        height: 48,
+        width: 48,
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
+class _GateError extends StatelessWidget {
+  const _GateError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Palabra',
+          style: textTheme.displaySmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: textTheme.bodyLarge,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          'Check your connection or restart the app.',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(color: Colors.white70),
         ),
       ],
     );

@@ -4,7 +4,7 @@ Palabra is a high-speed, offline-first Spanish vocabulary trainer built with Flu
 
 ## Repo layout
 - `lib/app` — bootstrap, theming, navigation via `go_router` + Riverpod.
-- `lib/design_system` — tokens and shared widgets (gradient backgrounds, typography, spacing).
+- `lib/design_system` — tokens and shared widgets (animated backgrounds, typography, spacing).
 - `lib/data_core` — in-memory models, repositories, and store helpers for vocabulary + progress state.
 - `lib/feature_*` — feature-specific presentation layers (Gate, Pre-run, Run, Finish now interactive; Pause, Powerups, SRS, Vocabulary in progress).
 - `assets/vocabulary` — leveled EN↔ES term lists (to be normalized to the Palabra schema).
@@ -48,12 +48,26 @@ flutter analyze        # Static analysis using very_good_analysis
 flutter test           # Widget + unit tests
 ```
 
+## Prototype persistence & telemetry
+- User metadata, run logs, and item states persist locally via `shared_preferences` (in-memory fallback on unsupported platforms).
+- Clearing app storage resets progress; migrations, multi-profile support, and remote sync are still in planning.
+- RunController now records streaks, averages, inventory deltas, and run durations. The Finish screen surfaces these stats for QA.
+- A manual reset helper lives in `StorePersistence.clear()` while the settings/debug UI is pending.
+- Future milestone: host a central persistence + telemetry service on the Proxmox LXC cluster (static web + API). Docs will be updated once that pipeline ships.
+
 ## Versioning
 - Current app version: **7.0.0+1**
 - Use Conventional Commits (`feat:`, `fix:`, etc.) and follow trunk-based flow with feature branches (`feat/<ticket>`).
 
-## Next steps
-- Stay aligned with the feature brief in `vision.md` and the working backlog in `docs/project_status.md`.
-- Finalise the web in-memory data layer and prepare beta instructions.
-- Expand widget/state tests (especially around the run controller and deck builder) once the new screens settle.
-- When adding modules, keep files under 1,000 LOC and favor additional sub-packages where necessary.
+## Current highlights
+- Animated gradient background with sparkle layer for richer presentation.
+- Run loop delivers audio/haptic feedback (where supported), pulse/shake mismatch cues, and celebration overlays.
+- Finish screen conveys per-run inventory changes alongside lifetime streak/accuracy stats.
+- CI runs static analysis, unit/widget/integration tests (`.github/workflows/ci.yml`).
+
+## Near-term roadmap
+1. Confetti/tier celebration FX and power-up visuals.
+2. Tile interaction polish (glows, hover states, mismatch pulses).
+3. Real LMS/device gating integration.
+4. Persistence migration tooling + debug/reset UI.
+5. Powerups store UX, content validation, and LXC-hosted persistence pilot.

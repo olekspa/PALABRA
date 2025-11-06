@@ -9,6 +9,7 @@ import 'package:palabra/data_core/models/user_meta.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
+import 'package:palabra/feature_run/application/run_feedback_service.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
 import 'package:palabra/feature_run/application/timer_service.dart';
@@ -27,6 +28,22 @@ class _InMemoryUserMetaRepository implements UserMetaRepository {
   Future<void> save(UserMeta meta) async {
     _meta = meta;
   }
+}
+
+class _FakeRunFeedbackService extends RunFeedbackService {
+  const _FakeRunFeedbackService();
+
+  @override
+  Future<void> onMatch({required int tier}) async {}
+
+  @override
+  Future<void> onMismatch() async {}
+
+  @override
+  Future<void> onTierPause({required int tier}) async {}
+
+  @override
+  Future<void> onRunComplete({required int tierReached, required bool success}) async {}
 }
 
 DeckBuilderService _buildDeckBuilder({int deckSize = 50}) {
@@ -83,6 +100,19 @@ Future<void> _matchPairById(RunController controller, String pairId) async {
 }
 
 Future<void> _matchFirstPair(RunController controller) async {
+  const maxAttempts = 40;
+  for (var i = 0; i < maxAttempts; i++) {
+    final hasActiveRow = controller.state.board
+        .any((row) => row.left.pairId.isNotEmpty);
+    if (hasActiveRow) {
+      break;
+    }
+    if (i == maxAttempts - 1) {
+      fail('Expected an active row on the board.');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
+
   final pairId = controller.state.board
       .firstWhere((row) => row.left.pairId.isNotEmpty)
       .left
@@ -135,6 +165,7 @@ void main() {
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
       );
 
       await controller.initialize();
@@ -176,6 +207,7 @@ void main() {
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
       );
 
       await controller.initialize();
@@ -217,16 +249,23 @@ void main() {
         attempts.addAll(entries);
       }
 
+      final metaRepository = _InMemoryUserMetaRepository(UserMeta());
       final controller = RunController(
         deckBuilderService: _buildDeckBuilder(deckSize: 20),
         settings:
-            const RunSettings(rows: 2, targetMatches: 3, refillStepDelayMs: 0),
+            const RunSettings(
+              rows: 2,
+              targetMatches: 3,
+              refillBatchSize: 1,
+              refillStepDelayMs: 0,
+            ),
         timerService: RunTimerService.fake(),
         fetchUserStates: fetchStates,
         saveUserStates: saveStates,
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
-        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        userMetaRepository: metaRepository,
+        feedbackService: const _FakeRunFeedbackService(),
       );
 
       await controller.initialize();
@@ -252,9 +291,21 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(runLogs, isNotEmpty);
+      final summary = runLogs.first;
       expect(attempts.length, greaterThanOrEqualTo(3));
       expect(userStates[leftId]?.wrongCount, greaterThanOrEqualTo(1));
-      expect(runLogs.first.troubleDetected, contains(leftId));
+      expect(summary.troubleDetected, contains(leftId));
+      expect(summary.matchesCompleted, greaterThanOrEqualTo(3));
+      expect(summary.attemptCount, attempts.length);
+      expect(summary.durationMs, greaterThan(0));
+
+      final meta = await metaRepository.getOrCreate();
+      expect(meta.totalRuns, 1);
+      expect(meta.totalMatches, summary.matchesCompleted);
+      expect(meta.totalAttempts, summary.attemptCount);
+      expect(meta.currentStreak, 1);
+      expect(meta.bestStreak, 1);
+      expect(meta.lastTroubleDelta, summary.troubleDetected.length);
     });
 
     test('refills pending rows sequentially after batch threshold', () async {
@@ -292,6 +343,7 @@ void main() {
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
       );
 
       await controller.initialize();
@@ -347,6 +399,7 @@ void main() {
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
       );
 
       await controller.initialize();
@@ -402,6 +455,7 @@ void main() {
         addRunLog: addRunLog,
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
       );
 
       await controller.initialize();
@@ -423,6 +477,71 @@ void main() {
           .toList();
 
       expect(currentPairs, isNot(contains(firstPairId)));
+    });
+
+    test('time extend offer consumes token and resumes the run', () async {
+      final userStates = <String, UserItemState>{};
+      Future<List<UserItemState>> fetchStates(Iterable<String> ids) async {
+        return ids
+            .map(
+              (id) => userStates.putIfAbsent(
+                id,
+                () => UserItemState()..itemId = id,
+              ),
+            )
+            .toList();
+      }
+
+      Future<void> saveStates(List<UserItemState> states) async {}
+      Future<int> addRunLog(RunLog log) async => 1;
+      Future<void> addAttempts(List<AttemptLog> entries) async {}
+
+      final metaRepository = _InMemoryUserMetaRepository(
+        UserMeta()..timeExtendTokens = 1,
+      );
+      final fakeTimer = RunTimerService.fake();
+
+      final controller = RunController(
+        deckBuilderService: _buildDeckBuilder(deckSize: 12),
+        settings: const RunSettings(
+          rows: 2,
+          targetMatches: 3,
+          runDurationMs: 200,
+          timeExtendDurationMs: 60000,
+          maxTimeExtendsPerRun: 2,
+          refillStepDelayMs: 0,
+        ),
+        timerService: fakeTimer,
+        fetchUserStates: fetchStates,
+        saveUserStates: saveStates,
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: metaRepository,
+        feedbackService: const _FakeRunFeedbackService(),
+      );
+
+      await controller.initialize();
+
+      fakeTimer.tickFake(decrementMs: 200);
+      await Future<void>.delayed(Duration.zero);
+
+      final offerState = controller.state;
+      expect(offerState.showingTimeExtendOffer, isTrue);
+      expect(offerState.inputLocked, isTrue);
+      expect(offerState.timeExtendTokens, 1);
+
+      await controller.acceptTimeExtend();
+      await Future<void>.delayed(Duration.zero);
+
+      final resumedState = controller.state;
+      expect(resumedState.showingTimeExtendOffer, isFalse);
+      expect(resumedState.inputLocked, isFalse);
+      expect(resumedState.timeExtendTokens, 0);
+      expect(resumedState.timeExtendsUsed, 1);
+      expect(resumedState.millisecondsRemaining, 60000);
+
+      final persistedMeta = await metaRepository.getOrCreate();
+      expect(persistedMeta.timeExtendTokens, 0);
     });
   });
 }

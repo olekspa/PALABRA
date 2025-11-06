@@ -9,6 +9,7 @@ import 'package:palabra/data_core/data_core.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
 import 'package:palabra/feature_run/application/timer_service.dart';
+import 'package:palabra/feature_run/application/run_feedback_service.dart';
 import 'package:palabra/feature_srs/deck_builder/deck_builder_providers.dart';
 import 'package:palabra/feature_srs/deck_builder/deck_builder_service.dart';
 
@@ -28,6 +29,7 @@ class RunController extends StateNotifier<RunState> {
     required AddRunLog addRunLog,
     required AddAttemptLogs addAttemptLogs,
     required UserMetaRepository userMetaRepository,
+    required RunFeedbackService feedbackService,
   }) : _deckBuilderService = deckBuilderService,
        _settings = settings,
        _timerService = timerService,
@@ -36,6 +38,7 @@ class RunController extends StateNotifier<RunState> {
        _addRunLog = addRunLog,
        _addAttemptLogs = addAttemptLogs,
        _userMetaRepository = userMetaRepository,
+       _feedbackService = feedbackService,
        super(RunState.loading(rows: settings.rows));
 
   final DeckBuilderService _deckBuilderService;
@@ -46,6 +49,7 @@ class RunController extends StateNotifier<RunState> {
   final AddRunLog _addRunLog;
   final AddAttemptLogs _addAttemptLogs;
   final UserMetaRepository _userMetaRepository;
+  final RunFeedbackService _feedbackService;
 
   final List<VocabItem> _deckQueue = <VocabItem>[];
   final Map<String, VocabItem> _vocabLookup = <String, VocabItem>{};
@@ -109,6 +113,31 @@ class RunController extends StateNotifier<RunState> {
       timeExtendsUsed: _timeExtendsUsed,
     );
     _startTimer(_settings.runDurationMs);
+  }
+
+  Future<void> _updateMetaAfterRun({required RunLog runLog, required bool success}) async {
+    final meta = _userMeta ?? await _userMetaRepository.getOrCreate();
+    meta.totalRuns += 1;
+    meta.totalMatches += runLog.matchesCompleted;
+    meta.totalAttempts += runLog.attemptCount;
+    meta.totalTimeMs += runLog.durationMs;
+    meta.lastRunAt = runLog.completedAt ?? DateTime.now();
+    meta.lastLearnedDelta = runLog.learnedPromoted.length;
+    meta.lastTroubleDelta = runLog.troubleDetected.length;
+    if (meta.lastLearnedDelta > 0) {
+      meta.learnedCount += meta.lastLearnedDelta;
+    }
+    if (meta.lastTroubleDelta > 0) {
+      meta.troubleCount += meta.lastTroubleDelta;
+    }
+    if (success) {
+      meta.currentStreak += 1;
+      meta.bestStreak = max(meta.bestStreak, meta.currentStreak);
+    } else {
+      meta.currentStreak = 0;
+    }
+    _userMeta = meta;
+    await _userMetaRepository.save(meta);
   }
 
   void onTileTapped(int row, TileColumn column) {
@@ -228,9 +257,12 @@ class RunController extends StateNotifier<RunState> {
       ..correctStreak += 1
       ..lastSeenAt = DateTime.now();
 
+    final wasLearned = state.learnedAt != null;
     if (state.wrongCount == 0 && state.correctStreak >= 3) {
-      if (!_learnedPromotions.contains(itemId)) {
+      if (!wasLearned) {
         state.learnedAt = DateTime.now();
+      }
+      if (!wasLearned && !_learnedPromotions.contains(itemId)) {
         _learnedPromotions.add(itemId);
       }
     }
@@ -247,6 +279,7 @@ class RunController extends StateNotifier<RunState> {
 
     _troubleDetected.add(itemId);
     _markStateDirty(itemId);
+    unawaited(_feedbackService.onMismatch());
   }
 
   void _applyMismatchPenalty() {
@@ -311,14 +344,20 @@ class RunController extends StateNotifier<RunState> {
     _pendingRefillRows.add(leftSelection.row);
     final balancedBoard = _ensureBoardInvariant(updatedBoard);
 
+    final nextProgress = state.progress + 1;
     final celebration = CelebrationEffect(token: ++_celebrationSalt);
     _cancelCelebrationTimer();
     state = state.copyWith(
       board: balancedBoard,
-      progress: state.progress + 1,
+      progress: nextProgress,
       clearSelection: true,
       deckRemaining: _remainingPairs,
       celebrationEffect: celebration,
+    );
+    unawaited(
+      _feedbackService.onMatch(
+        tier: _tierForProgress(nextProgress),
+      ),
     );
     _scheduleCelebrationClear(celebration);
     _maybeRefillPending();
@@ -493,6 +532,8 @@ class RunController extends StateNotifier<RunState> {
       pausedAtTier20: pausedAt20 || state.pausedAtTier20,
       pausedAtTier50: pausedAt50 || state.pausedAtTier50,
     );
+    final tier = pausedAt50 ? 2 : 1;
+    unawaited(_feedbackService.onTierPause(tier: tier));
   }
 
   Future<void> _completeRun() async {
@@ -513,12 +554,17 @@ class RunController extends StateNotifier<RunState> {
     _clearMismatchEffect();
     _clearCelebrationEffect();
     await _flushPendingProgress();
+    final completedAt = DateTime.now();
+    final durationMs = completedAt.difference(_runStartedAt).inMilliseconds;
     final runLog = RunLog()
       ..startedAt = _runStartedAt
-      ..completedAt = DateTime.now()
+      ..completedAt = completedAt
       ..tierReached = _tierForProgress(state.progress)
       ..rowsUsed = _settings.rows
       ..timeExtendsUsed = _timeExtendsUsed
+      ..matchesCompleted = state.progress
+      ..attemptCount = _attempts.length
+      ..durationMs = durationMs < 0 ? 0 : durationMs
       ..deckComposition = _buildDeckComposition()
       ..learnedPromoted = _learnedPromotions.toSet().toList()
       ..troubleDetected = _troubleDetected.toList();
@@ -532,6 +578,13 @@ class RunController extends StateNotifier<RunState> {
     }
 
     await _saveUserStates(_itemStates.values.toList());
+    await _updateMetaAfterRun(runLog: runLog, success: success);
+    unawaited(
+      _feedbackService.onRunComplete(
+        tierReached: runLog.tierReached,
+        success: success,
+      ),
+    );
   }
 
   List<DeckLevelCount> _buildDeckComposition() {
@@ -821,6 +874,7 @@ final runControllerProvider =
       final attemptRepo = ref.watch(attemptLogRepositoryProvider);
       final userMetaRepo = ref.watch(userMetaRepositoryProvider);
       final timerService = ref.watch(runTimerServiceProvider);
+      final feedbackService = ref.watch(runFeedbackServiceProvider);
 
       final RunController controller = RunController(
         deckBuilderService: deckBuilder,
@@ -831,6 +885,7 @@ final runControllerProvider =
         addRunLog: runLogRepo.add,
         addAttemptLogs: attemptRepo.addAll,
         userMetaRepository: userMetaRepo,
+        feedbackService: feedbackService,
       );
 
       unawaited(controller.initialize());

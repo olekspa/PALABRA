@@ -45,13 +45,13 @@ Visit `http://localhost:8080/` in Chrome/Edge. For LAN testing, replace `localho
 3. **Run loop**: Match tiles until at least three pairs resolve, ensuring the board refills gradually and always offers valid matches.
 4. **Tier pause**: Reach 20 matches using the debug deck (if available) and confirm the pause overlay appearance and resume behavior.
 5. **Finish screen**: Let the timer expire or reach the target; verify the summary pulls the latest run log.
-6. **Refresh**: Reload the page to confirm that state resets (in-memory only).
+6. **Refresh**: Reload the page and confirm that run history and settings persist (SharedPreferences-backed). Clear browser storage to simulate a fresh profile until in-app reset tooling lands or the hosted persistence service is ready.
 
 Record findings (pass/fail, device/browser, timestamp) in `docs/daily.md` or the project tracker.
 
 ## Known Limitations
-- Data persistence is in-memory; closing the tab or refreshing clears progress.
-- Audio and haptic feedback are not yet implemented.
+- Persistence relies on `shared_preferences`; schema migrations and multi-profile handling are not yet implemented. Clearing site data resets progress. An LXC-hosted service is on the roadmap but not yet available.
+- Confetti/tier celebration FX and power-up art are still in progress (audio/haptics exist but are platform-dependent).
 - Course/device gating relies on stubbed values until LMS integration lands.
 
 ## Troubleshooting

@@ -19,6 +19,22 @@ class UserMeta {
   int rowBlasterCharges = 0;
   /// Available time-extend tokens.
   int timeExtendTokens = 0;
+  /// Total number of runs completed.
+  int totalRuns = 0;
+  /// Aggregate correct matches across all runs.
+  int totalMatches = 0;
+  /// Aggregate attempt count across all runs.
+  int totalAttempts = 0;
+  /// Aggregate time spent in milliseconds.
+  int totalTimeMs = 0;
+  /// Current streak of successful runs.
+  int currentStreak = 0;
+  /// Best streak of successful runs.
+  int bestStreak = 0;
+  /// Learned promotions captured from the last run.
+  int lastLearnedDelta = 0;
+  /// Trouble items flagged during the last run.
+  int lastTroubleDelta = 0;
 
   /// Hydrates metadata from persisted JSON.
   factory UserMeta.fromJson(Map<String, dynamic> json) {
@@ -30,7 +46,15 @@ class UserMeta {
       ..troubleCount = json['troubleCount'] as int? ?? 0
       ..lastRunAt = _parseTimestamp(json['lastRunAt'])
       ..rowBlasterCharges = json['rowBlasterCharges'] as int? ?? 0
-      ..timeExtendTokens = json['timeExtendTokens'] as int? ?? 0;
+      ..timeExtendTokens = json['timeExtendTokens'] as int? ?? 0
+      ..totalRuns = json['totalRuns'] as int? ?? 0
+      ..totalMatches = json['totalMatches'] as int? ?? 0
+      ..totalAttempts = json['totalAttempts'] as int? ?? 0
+      ..totalTimeMs = json['totalTimeMs'] as int? ?? 0
+      ..currentStreak = json['currentStreak'] as int? ?? 0
+      ..bestStreak = json['bestStreak'] as int? ?? 0
+      ..lastLearnedDelta = json['lastLearnedDelta'] as int? ?? 0
+      ..lastTroubleDelta = json['lastTroubleDelta'] as int? ?? 0;
   }
 
   /// Serializes metadata to a JSON-compatible map.
@@ -44,6 +68,14 @@ class UserMeta {
       'lastRunAt': lastRunAt?.toIso8601String(),
       'rowBlasterCharges': rowBlasterCharges,
       'timeExtendTokens': timeExtendTokens,
+      'totalRuns': totalRuns,
+      'totalMatches': totalMatches,
+      'totalAttempts': totalAttempts,
+      'totalTimeMs': totalTimeMs,
+      'currentStreak': currentStreak,
+      'bestStreak': bestStreak,
+      'lastLearnedDelta': lastLearnedDelta,
+      'lastTroubleDelta': lastTroubleDelta,
     };
   }
 

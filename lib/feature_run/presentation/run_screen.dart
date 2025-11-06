@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palabra/app/router/app_router.dart';
@@ -24,7 +23,6 @@ class RunScreen extends ConsumerStatefulWidget {
 class _RunScreenState extends ConsumerState<RunScreen> {
   bool _navigatedToFinish = false;
   late final ProviderSubscription<RunState> _runSubscription;
-  int? _lastCelebrationToken;
 
   @override
   void initState() {
@@ -42,11 +40,6 @@ class _RunScreenState extends ConsumerState<RunScreen> {
             context.go(AppRoute.finish.path);
           });
         }
-        final celebration = next.celebrationEffect;
-        if (celebration != null && celebration.token != _lastCelebrationToken) {
-          _lastCelebrationToken = celebration.token;
-          _playCelebrationSound();
-        }
       },
     );
   }
@@ -55,14 +48,6 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   void dispose() {
     _runSubscription.close();
     super.dispose();
-  }
-
-  void _playCelebrationSound() {
-    try {
-      SystemSound.play(SystemSoundType.click);
-    } catch (_) {
-      // Ignore sound failures in unsupported environments (tests/web shell).
-    }
   }
 
   @override

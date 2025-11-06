@@ -11,6 +11,9 @@ class RunLog {
       ..tierReached = json['tierReached'] as int? ?? 1
       ..rowsUsed = json['rowsUsed'] as int? ?? 5
       ..timeExtendsUsed = json['timeExtendsUsed'] as int? ?? 0
+      ..matchesCompleted = json['matchesCompleted'] as int? ?? 0
+      ..attemptCount = json['attemptCount'] as int? ?? 0
+      ..durationMs = json['durationMs'] as int? ?? 0
       ..deckComposition = _decodeDeck(json['deckComposition'])
       ..learnedPromoted = _stringList(json['learnedPromoted'])
       ..troubleDetected = _stringList(json['troubleDetected']);
@@ -26,6 +29,12 @@ class RunLog {
   int rowsUsed = 5;
   /// Number of time-extend powerups consumed.
   int timeExtendsUsed = 0;
+  /// Total matches completed during the run.
+  int matchesCompleted = 0;
+  /// Total attempts logged during the run.
+  int attemptCount = 0;
+  /// Duration of the run in milliseconds.
+  int durationMs = 0;
   /// Deck composition snapshot (counts by level).
   List<DeckLevelCount> deckComposition = <DeckLevelCount>[];
   /// Identifiers promoted to the learned bucket.
@@ -41,6 +50,9 @@ class RunLog {
       'tierReached': tierReached,
       'rowsUsed': rowsUsed,
       'timeExtendsUsed': timeExtendsUsed,
+      'matchesCompleted': matchesCompleted,
+      'attemptCount': attemptCount,
+      'durationMs': durationMs,
       'deckComposition': deckComposition
           .map((entry) => entry.toJson())
           .toList(),

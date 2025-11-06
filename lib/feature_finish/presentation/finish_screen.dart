@@ -81,6 +81,17 @@ class _FinishSummary extends ConsumerWidget {
     final troubleCount = run?.troubleDetected.length ?? 0;
     final rows = run?.rowsUsed ?? ref.watch(runRowsProvider);
     final timeExtends = run?.timeExtendsUsed ?? 0;
+    final meta = ref.watch(userMetaFutureProvider).maybeWhen(
+          data: (value) => value,
+          orElse: () => null,
+        );
+    final inventoryChange = _formatInventoryChange(
+      meta: meta,
+      run: run,
+    );
+    final avgMatches = _formatAverageMatches(meta);
+    final avgAccuracy = _formatAverageAccuracy(meta);
+    final avgDuration = _formatAverageDuration(meta);
 
     return Center(
       child: ConstrainedBox(
@@ -92,10 +103,11 @@ class _FinishSummary extends ConsumerWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 Text(
                   _headline,
                   style: theme.textTheme.headlineMedium,
@@ -130,6 +142,10 @@ class _FinishSummary extends ConsumerWidget {
                   label: 'Trouble items flagged',
                   value: '$troubleCount',
                 ),
+                _FinishStatRow(
+                  label: 'Inventory change',
+                  value: inventoryChange,
+                ),
                 if (deckMix.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(
@@ -143,6 +159,38 @@ class _FinishSummary extends ConsumerWidget {
                       value: '${entry.count}',
                     ),
                 ],
+                if (meta != null && meta.totalRuns > 0) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Lifetime stats',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  _FinishStatRow(
+                    label: 'Runs played',
+                    value: '${meta.totalRuns}',
+                  ),
+                  _FinishStatRow(
+                    label: 'Current streak',
+                    value: '${meta.currentStreak}',
+                  ),
+                  _FinishStatRow(
+                    label: 'Best streak',
+                    value: '${meta.bestStreak}',
+                  ),
+                  _FinishStatRow(
+                    label: 'Avg matches/run',
+                    value: avgMatches,
+                  ),
+                  _FinishStatRow(
+                    label: 'Avg accuracy',
+                    value: avgAccuracy,
+                  ),
+                  _FinishStatRow(
+                    label: 'Avg time/run',
+                    value: avgDuration,
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 ElevatedButton(
                   onPressed: () => context.go(AppRoute.preRun.path),
@@ -153,13 +201,64 @@ class _FinishSummary extends ConsumerWidget {
                   onPressed: () => context.go(AppRoute.gate.path),
                   child: const Text('Exit to gate'),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+String _formatInventoryChange({UserMeta? meta, RunLog? run}) {
+  final learned = meta?.lastLearnedDelta ?? run?.learnedPromoted.length ?? 0;
+  final trouble = meta?.lastTroubleDelta ?? run?.troubleDetected.length ?? 0;
+  final learnedLabel = _formatSignedDelta(learned);
+  final troubleLabel = _formatSignedDelta(trouble);
+  return 'Learned $learnedLabel / Trouble $troubleLabel';
+}
+
+String _formatAverageMatches(UserMeta? meta) {
+  if (meta == null || meta.totalRuns == 0) {
+    return '—';
+  }
+  final average = meta.totalMatches / meta.totalRuns;
+  return average.toStringAsFixed(1);
+}
+
+String _formatAverageAccuracy(UserMeta? meta) {
+  if (meta == null || meta.totalAttempts == 0) {
+    return '—';
+  }
+  final accuracy = (meta.totalMatches / meta.totalAttempts) * 100;
+  return '${accuracy.toStringAsFixed(1)}%';
+}
+
+String _formatAverageDuration(UserMeta? meta) {
+  if (meta == null || meta.totalRuns == 0) {
+    return '—';
+  }
+  final averageMs = meta.totalTimeMs ~/ meta.totalRuns;
+  return _formatDuration(averageMs);
+}
+
+String _formatSignedDelta(int value) {
+  final prefix = value >= 0 ? '+' : '';
+  return '$prefix$value';
+}
+
+String _formatDuration(int milliseconds) {
+  if (milliseconds <= 0) {
+    return '—';
+  }
+  final duration = Duration(milliseconds: milliseconds);
+  final minutes = duration.inMinutes;
+  final seconds = duration.inSeconds.remainder(60);
+  if (minutes == 0) {
+    return '${seconds}s';
+  }
+  return '${minutes}m ${seconds.toString().padLeft(2, '0')}s';
 }
 
 class _FinishStatRow extends StatelessWidget {
@@ -177,13 +276,17 @@ class _FinishStatRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: theme.textTheme.bodyMedium),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: AppColors.secondary),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.secondary),
+            ),
           ),
         ],
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palabra/feature_gate/application/gate_detection_service.dart';
+import 'package:palabra/feature_gate/application/gate_detection_service.dart';
 
 /// Compile-time feature switches used to evaluate gate access.
 class GateFeatureFlags {
@@ -46,8 +48,6 @@ const bool _allowDebugDeviceOverrideFlag =
     bool.fromEnvironment('PALABRA_ALLOW_DEBUG_DEVICE', defaultValue: true);
 const String _forcedCourseFlag =
     String.fromEnvironment('PALABRA_FORCE_COURSE', defaultValue: '');
-const String _detectedCourseFlag =
-    String.fromEnvironment('PALABRA_CURRENT_COURSE', defaultValue: '');
 const String _requiredCourseFlag =
     String.fromEnvironment('PALABRA_REQUIRED_COURSE', defaultValue: 'spanish');
 
@@ -60,38 +60,37 @@ final gateFeatureFlagsProvider = Provider<GateFeatureFlags>((ref) {
   );
 });
 
-/// Provides the detected course identifier from the host platform, if any.
-final gateDetectedCourseProvider = Provider<String?>((ref) {
-  return _normalizeId(_detectedCourseFlag);
-});
-
 /// Provides the course identifier required for access.
 final gateRequiredCourseProvider = Provider<String>((ref) {
   return _normalizeId(_requiredCourseFlag) ?? 'spanish';
 });
 
+/// Resolves the latest detection result from the platform service.
+final gateDetectionFutureProvider =
+    FutureProvider<GateDetectionResult>((ref) async {
+      final service = ref.watch(gateDetectionServiceProvider);
+      return service.detect();
+    });
+
 /// Evaluates the device and course gate checks using feature flags.
-final gateAccessProvider = Provider<GateAccessStatus>((ref) {
+final gateAccessProvider = FutureProvider<GateAccessStatus>((ref) async {
   final flags = ref.watch(gateFeatureFlagsProvider);
-  final detectedCourseId = ref.watch(gateDetectedCourseProvider);
   final requiredCourseId = ref.watch(gateRequiredCourseProvider);
+  final detection = await ref.watch(gateDetectionFutureProvider.future);
 
-  final isIos = defaultTargetPlatform == TargetPlatform.iOS;
-  final isWeb = kIsWeb;
-  final allowsWeb = flags.allowWebBeta && isWeb;
   final allowsDebug = flags.allowDebugDeviceOverride && kDebugMode;
+  final allowsWebBeta = flags.allowWebBeta && kIsWeb;
 
-  final deviceAllowed = isIos || allowsWeb || allowsDebug;
-  final deviceOverrideApplied = !isIos && (allowsWeb || allowsDebug);
-  final deviceValue = _describeDevice(
-    isIos: isIos,
-    isWeb: isWeb,
-    allowsWeb: allowsWeb,
-    allowsDebug: allowsDebug,
-  );
+  final deviceAllowed =
+      detection.isSupportedDevice || allowsDebug || allowsWebBeta;
+  final deviceOverrideApplied =
+      !detection.isSupportedDevice && (allowsDebug || allowsWebBeta);
+  final deviceValue = deviceOverrideApplied
+      ? '${detection.deviceLabel} (override)'
+      : detection.deviceLabel;
 
   final forcedCourseId = flags.forceCourseId;
-  final effectiveCourseId = forcedCourseId ?? detectedCourseId;
+  final effectiveCourseId = forcedCourseId ?? detection.courseId;
   final normalizedCourseId = effectiveCourseId?.toLowerCase();
   final hasCourse =
       normalizedCourseId != null && normalizedCourseId.isNotEmpty;
@@ -120,25 +119,6 @@ final gateAccessProvider = Provider<GateAccessStatus>((ref) {
     ),
   );
 });
-
-String _describeDevice({
-  required bool isIos,
-  required bool isWeb,
-  required bool allowsWeb,
-  required bool allowsDebug,
-}) {
-  if (isIos) {
-    return 'iPhone detected';
-  }
-  if (isWeb) {
-    return allowsWeb ? 'Web beta enabled' : 'Web not supported';
-  }
-  if (allowsDebug) {
-    return 'Debug override active';
-  }
-  final platformLabel = describeEnum(defaultTargetPlatform).toUpperCase();
-  return '$platformLabel not supported';
-}
 
 String _describeCourse({
   required String? courseId,

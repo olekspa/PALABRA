@@ -7,6 +7,7 @@ import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/data_core/providers/repository_providers.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
+import 'package:palabra/feature_run/application/run_feedback_service.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/timer_service.dart';
 import 'package:palabra/feature_run/presentation/run_screen.dart';
@@ -54,6 +55,9 @@ void main() {
             _TestUserMetaRepository(fakeMeta),
           ),
           runTimerServiceProvider.overrideWithValue(RunTimerService.fake()),
+          runFeedbackServiceProvider.overrideWithValue(
+            const _TestRunFeedbackService(),
+          ),
           deckBuilderServiceProvider.overrideWithValue(
             _StaticDeckBuilderService(deckItems),
           ),
@@ -62,18 +66,21 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     // Gate screen → Pre-run.
     expect(find.text('Palabra'), findsOneWidget);
     await tester.tap(find.text('Continue'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     // Pre-run → Run.
     expect(find.text('Ready to run?'), findsOneWidget);
     await tester.ensureVisible(find.text('Start'));
     await tester.tap(find.text('Start'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     // Match the first pair to complete the run.
     expect(find.byType(RunScreen), findsOneWidget);
@@ -95,7 +102,9 @@ void main() {
     await tester.tap(find.text(englishText));
     await tester.pump();
     await tester.tap(find.text(spanishText));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump(const Duration(milliseconds: 600));
 
     // Finish screen should be displayed.
     expect(find.text('Nice work!'), findsOneWidget);
@@ -137,4 +146,20 @@ class _TestUserMetaRepository extends UserMetaRepository {
   Future<void> save(UserMeta meta) async {
     _meta = meta;
   }
+}
+
+class _TestRunFeedbackService extends RunFeedbackService {
+  const _TestRunFeedbackService();
+
+  @override
+  Future<void> onMatch({required int tier}) async {}
+
+  @override
+  Future<void> onMismatch() async {}
+
+  @override
+  Future<void> onTierPause({required int tier}) async {}
+
+  @override
+  Future<void> onRunComplete({required int tierReached, required bool success}) async {}
 }
