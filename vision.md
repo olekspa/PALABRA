@@ -7,7 +7,7 @@ Palabra is a browser-friendly, mobile-ready Spanish vocabulary trainer designed 
 - **Fast on every device.** Sessions start instantly, remain responsive in the browser, and survive flaky networks thanks to local storage and offline audio.
 - **Mastery over memorization.** The system continually promotes learned words, surfaces trouble items, and adjusts match targets so proficiency grows level by level.
 - **Confidence through feedback.** XP, streak indicators, celebrations, and post-run stats make improvement obvious and motivate another attempt.
-- **Inclusive audio.** Web Speech API provides native voices when possible; high-quality Piper clips for every vocabulary item ensure pronunciation never disappears.
+- **Inclusive audio.** Piper clips ship for every vocabulary item and number; Web Speech serves purely as a fallback so pronunciation stays consistent even on constrained browsers.
 
 ### Experience Pillars
 1. **Match:** Five-row dual-column boards highlight clear pairings, predictable gestures, and immediate confirmation or correction.
@@ -19,7 +19,7 @@ Palabra is a browser-friendly, mobile-ready Spanish vocabulary trainer designed 
 - XP, streak, and powerup systems with clean-run rewards and manual activations (time extend available today).
 - Bonus number drill mini-game using pre-generated Spanish audio for numbers 1–100 and speed-based scoring.
 - Full offline audio library with Piper-generated clips; automatic Web Speech fallback and voice caching on supported browsers.
-- Profile selector for local multi-learner households; each profile keeps its own progression, XP, inventories, and drill history.
+- Profile selector for local multi-learner households with optional remote sync so learners can pick up progress on any browser tied to the LXC backend.
 - Web-first deployment workflow targeting an LXC-hosted nginx origin, with a simple CLI deploy script.
 
 ### Design Principles

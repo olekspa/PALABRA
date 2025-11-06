@@ -36,7 +36,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   @override
   void initState() {
     super.initState();
-    _ttsService = ref.read(runTtsServiceProvider);
+    _ttsService = ref.refresh(runTtsServiceProvider);
     // React to completion so we can transition to the finish summary.
     _runSubscription = ref.listenManual<RunState>(
       runControllerProvider,
@@ -489,6 +489,14 @@ class _PowerupToolbar extends StatelessWidget {
         return '+60s';
       case 'rowBlaster':
         return 'Row Blaster';
+      case 'hintGlow':
+        return 'Hint Glow';
+      case 'freezeTimer':
+        return 'Freeze';
+      case 'autoMatch':
+        return 'Auto-Match';
+      case 'audioEcho':
+        return 'Audio Echo';
       default:
         return id;
     }
@@ -845,20 +853,20 @@ class _TierPauseOverlay extends StatelessWidget {
   final Future<void> Function() onResume;
 
   String get _title {
-    if (state.pausedAtTierTwo && state.progress >= settings.tierTwoThreshold) {
+    if (state.pausedAtTierTwo && state.progress >= state.tierTwoThreshold) {
       return 'Tier 2 complete';
     }
-    if (state.pausedAtTierOne && state.progress >= settings.tierOneThreshold) {
+    if (state.pausedAtTierOne && state.progress >= state.tierOneThreshold) {
       return 'Tier 1 complete';
     }
     return 'Paused';
   }
 
   String get _subtitle {
-    if (state.pausedAtTierTwo && state.progress >= settings.tierTwoThreshold) {
+    if (state.pausedAtTierTwo && state.progress >= state.tierTwoThreshold) {
       return '+10 XP secured • Total +15 XP';
     }
-    if (state.pausedAtTierOne && state.progress >= settings.tierOneThreshold) {
+    if (state.pausedAtTierOne && state.progress >= state.tierOneThreshold) {
       return '+5 XP secured';
     }
     return 'Catch your breath and resume when ready.';

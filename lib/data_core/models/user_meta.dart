@@ -6,7 +6,17 @@ class UserMeta {
   /// Creates prototype metadata with default values.
   UserMeta() {
     _ensureLevelProgress();
+    _ensurePowerupInventory();
   }
+
+  static const List<String> defaultPowerupIds = <String>[
+    'timeExtend',
+    'rowBlaster',
+    'hintGlow',
+    'freezeTimer',
+    'autoMatch',
+    'audioEcho',
+  ];
 
   /// Ordered list of CEFR levels supported by the app.
   static const List<String> levelOrder = <String>['a1', 'a2', 'b1', 'b2'];
@@ -145,6 +155,7 @@ class UserMeta {
     }
 
     meta._ensureLevelProgress();
+    meta._ensurePowerupInventory();
     return meta;
   }
 
@@ -203,7 +214,12 @@ class UserMeta {
     if (profileName.trim().isEmpty) {
       profileName = 'Player';
     }
-    createdAt = createdAt;
+  }
+
+  void _ensurePowerupInventory() {
+    for (final id in defaultPowerupIds) {
+      powerupInventory.putIfAbsent(id, () => 0);
+    }
   }
 
   static DateTime? _parseTimestamp(Object? raw) {

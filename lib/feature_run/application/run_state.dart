@@ -89,6 +89,8 @@ class RunState {
     required this.board,
     required this.progress,
     required this.targetMatches,
+    required this.tierOneThreshold,
+    required this.tierTwoThreshold,
     required this.selection,
     required this.mismatchEffect,
     required this.celebrationEffect,
@@ -120,6 +122,8 @@ class RunState {
       board: const <BoardRow>[],
       progress: 0,
       targetMatches: targetMatches,
+      tierOneThreshold: 0,
+      tierTwoThreshold: 0,
       selection: null,
       mismatchEffect: null,
       celebrationEffect: null,
@@ -148,6 +152,8 @@ class RunState {
     required int deckRemaining,
     required int millisecondsRemaining,
     required int targetMatches,
+    required int tierOneThreshold,
+    required int tierTwoThreshold,
     int timeExtendTokens = 0,
     int timeExtendsUsed = 0,
     Map<String, int>? powerupInventory,
@@ -158,6 +164,8 @@ class RunState {
       board: List<BoardRow>.unmodifiable(board),
       progress: 0,
       targetMatches: targetMatches,
+      tierOneThreshold: tierOneThreshold,
+      tierTwoThreshold: tierTwoThreshold,
       selection: null,
       mismatchEffect: null,
       celebrationEffect: null,
@@ -187,6 +195,8 @@ class RunState {
   final List<BoardRow> board;
   final int progress;
   final int targetMatches;
+  final int tierOneThreshold;
+  final int tierTwoThreshold;
   final TileSelection? selection;
   final MismatchEffect? mismatchEffect;
   final CelebrationEffect? celebrationEffect;
@@ -218,6 +228,8 @@ class RunState {
     List<BoardRow>? board,
     int? progress,
     int? targetMatches,
+    int? tierOneThreshold,
+    int? tierTwoThreshold,
     TileSelection? selection,
     bool clearSelection = false,
     MismatchEffect? mismatchEffect,
@@ -248,6 +260,8 @@ class RunState {
       board: board != null ? List<BoardRow>.unmodifiable(board) : this.board,
       progress: progress ?? this.progress,
       targetMatches: targetMatches ?? this.targetMatches,
+      tierOneThreshold: tierOneThreshold ?? this.tierOneThreshold,
+      tierTwoThreshold: tierTwoThreshold ?? this.tierTwoThreshold,
       selection: clearSelection ? null : selection ?? this.selection,
       mismatchEffect: clearMismatch
           ? null

@@ -7,6 +7,7 @@ import 'package:palabra/design_system/tokens/color_tokens.dart';
 import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
+import 'package:palabra/feature_run/application/powerups/powerup_definitions.dart';
 
 final _rowBlasterEnabledProvider = StateProvider.autoDispose<bool>(
   (ref) => false,
@@ -181,6 +182,8 @@ class _PreRunContent extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 _TimeExtendInfo(tokens: meta.timeExtendTokens),
+                const SizedBox(height: AppSpacing.md),
+                _PowerupIdeas(inventory: meta.powerupInventory),
                 const SizedBox(height: AppSpacing.xl),
                 ElevatedButton(
                   onPressed: isStarting ? null : () => _startRun(context, ref),
@@ -214,9 +217,11 @@ class _TierRewards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tierOne = settings.tierOneThresholdFor(targetMatches);
+    final tierTwo = settings.tierTwoThresholdFor(targetMatches);
     final items = <(String, String)>[
-      ('${settings.tierOneThreshold} matches', '+5 XP secured'),
-      ('${settings.tierTwoThreshold} matches', '+10 XP secured'),
+      ('$tierOne matches', '+5 XP secured'),
+      ('$tierTwo matches', '+10 XP secured'),
       ('$targetMatches matches', '+25 XP secured'),
     ];
     return Column(
@@ -344,6 +349,88 @@ class _TimeExtendInfo extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PowerupIdeas extends ConsumerWidget {
+  const _PowerupIdeas({required this.inventory});
+
+  final Map<String, int> inventory;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final catalog = ref.watch(powerupDefinitionsProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Powerups',
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        ...catalog.map((definition) {
+          final count = inventory[definition.id] ?? 0;
+          final status = definition.available
+              ? '${count.clamp(0, 99)} in inventory'
+              : 'Coming soon';
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: definition.available
+                      ? AppColors.secondary.withValues(alpha: 0.4)
+                      : Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        definition.name,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      Text(
+                        status,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: definition.available
+                              ? AppColors.secondary
+                              : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    definition.effect,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    definition.usage,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    definition.limits,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }

@@ -86,6 +86,8 @@ class RunController extends StateNotifier<RunState> {
   int _confettiSalt = 0;
   Timer? _confettiTimer;
   String _activeLevelId = 'a1';
+  int _tierOneThreshold = 1;
+  int _tierTwoThreshold = 1;
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
@@ -106,6 +108,16 @@ class RunController extends StateNotifier<RunState> {
     _activeLevelId = _userMeta?.activeLevel ?? UserMeta.levelOrder.first;
     final levelProgress = _userMeta?.levelProgress[_activeLevelId];
     _targetMatches = _settings.targetForProgress(levelProgress);
+    _tierOneThreshold = _clampThreshold(
+      _settings.tierOneThresholdFor(_targetMatches),
+      1,
+      _targetMatches,
+    );
+    _tierTwoThreshold = _clampThreshold(
+      _settings.tierTwoThresholdFor(_targetMatches),
+      _tierOneThreshold + 1,
+      max(_targetMatches - 1, _tierOneThreshold + 1),
+    );
     if (_userMeta != null) {
       _userMeta!.level = _activeLevelId;
     }
@@ -142,6 +154,8 @@ class RunController extends StateNotifier<RunState> {
       deckRemaining: _remainingPairs,
       millisecondsRemaining: _settings.runDurationMs,
       targetMatches: _targetMatches,
+      tierOneThreshold: _tierOneThreshold,
+      tierTwoThreshold: _tierTwoThreshold,
       timeExtendTokens: _userMeta?.timeExtendTokens ?? 0,
       timeExtendsUsed: _timeExtendsUsed,
       powerupInventory: initialInventory,
@@ -662,11 +676,9 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void _checkTierPause() {
-    if (!state.pausedAtTierOne &&
-        state.progress == _settings.tierOneThreshold) {
+    if (!state.pausedAtTierOne && state.progress == _tierOneThreshold) {
       _enterPause(pausedAtTierOne: true);
-    } else if (!state.pausedAtTierTwo &&
-        state.progress == _settings.tierTwoThreshold) {
+    } else if (!state.pausedAtTierTwo && state.progress == _tierTwoThreshold) {
       _enterPause(pausedAtTierTwo: true);
     } else if (state.progress >= _targetMatches) {
       unawaited(_completeRun());
@@ -878,7 +890,7 @@ class RunController extends StateNotifier<RunState> {
     if (progress >= _targetMatches) {
       return 3;
     }
-    if (progress >= _settings.tierTwoThreshold) {
+    if (progress >= _tierTwoThreshold) {
       return 2;
     }
     return 1;
@@ -1172,6 +1184,17 @@ class RunController extends StateNotifier<RunState> {
         tiles[i],
       );
     }
+  }
+
+  int _clampThreshold(int value, int minValue, int maxValue) {
+    if (maxValue < minValue) {
+      return minValue;
+    }
+    final clamped = value.clamp(minValue, maxValue);
+    if (clamped is int) {
+      return clamped;
+    }
+    return clamped.round();
   }
 }
 

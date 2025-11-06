@@ -6,7 +6,7 @@ _Last updated: 2025-11-06_
 - **Build target:** Web-first Spanish vocabulary trainer with timed matching, streak XP, powerups, and a number-listening drill.
 - **Current release:** 7.345 (forced Spanish course, multi-profile selector, offline audio library, optional remote profile sync).
 - **Deployment:** Static web bundle served from the Proxmox LXC (nginx). `deploy_palabra_web` handles fetch, build, rsync, and reload.
-- **Persistence:** In-memory store persisted to shared_preferences; Piper-generated audio assets bundled in `assets/audio`.
+- **Persistence:** In-memory store persisted to shared_preferences; optional FastAPI profile sync (`/api`) keeps profiles consistent across devices; Piper-generated audio assets bundled in `assets/audio`.
 
 ## Recent Highlights
 - Added a multi-profile selector with create/rename/delete flows and HUD polish.
@@ -15,6 +15,7 @@ _Last updated: 2025-11-06_
 - Bundled Piper `es_MX-claude-high` audio for vocabulary and numbers 1–100 as default fallbacks.
 - Implemented web speech + asset tiered TTS with caching, unlock gestures, and Safari-friendly flow.
 - Deployed a lightweight FastAPI profile service plus web client sync so profiles follow the learner across devices when configured.
+- Changed the run-time TTS flow to prefer bundled MP3 assets for every vocabulary item before falling back to Web Speech so pronunciation quality stays consistent across runs.
 
 ## Active Focus
 1. **Profile polish:** Improve list handling, add deletion safeguards, and surface deep links back into Gate/Run.
@@ -26,7 +27,7 @@ _Last updated: 2025-11-06_
 2. Ship row blaster + new powerups with art, tuning, and tests.
 3. Add accessibility passes (focus order, semantic labels, high-contrast tweaks).
 4. Automate smoke tests in CI and document QA sign-off.
-5. Draft cloud sync design (API contract, migration story, opt-in toggle).
+5. Draft telemetry + cloud sync design (payload schema, API contract, opt-in toggle).
 
 ## Backlog Themes
 - Celebration visuals and audio stingers for tier checkpoints and finish screens.

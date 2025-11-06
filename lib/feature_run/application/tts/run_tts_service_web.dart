@@ -141,10 +141,13 @@ class _RunTtsServiceWeb implements RunTtsService {
       return RunTtsPlaybackOutcome.debounced;
     }
 
-    final utterance = _QueuedUtterance(
-      text: text,
-      itemId: itemId,
-    );
+    final utterance = _QueuedUtterance(text: text, itemId: itemId);
+
+    final assetOutcome = await _playAssetIfAvailable(utterance);
+    if (assetOutcome == RunTtsPlaybackOutcome.audioAsset) {
+      _logTelemetryOnce(assetOutcome);
+      return assetOutcome;
+    }
 
     if (!isSupported) {
       final fallbackOutcome = await _attemptAssetOrToast(utterance);

@@ -10,15 +10,15 @@ class RunSettings {
   const RunSettings({
     this.rows = 5,
     this.targetMatches = 50,
-    this.minTargetMatches = 15,
+    this.minTargetMatches = 5,
     this.runDurationMs = 60000,
     this.timeExtendDurationMs = 60000,
     this.maxTimeExtendsPerRun = 2,
     this.refillBatchSize = 3,
     this.refillStepDelayMs = 320,
     this.mismatchPenaltyMs = 1000,
-    this.tierOneThreshold = 12,
-    this.tierTwoThreshold = 30,
+    this.tierOneRatio = 0.3,
+    this.tierTwoRatio = 0.65,
     this.baseMatchXp = 10,
     this.streakBonusTable = const {3: 5, 6: 10, 9: 15},
     this.powerupXpThresholds = const {'timeExtend': 120, 'rowBlaster': 600},
@@ -35,8 +35,8 @@ class RunSettings {
   final int refillBatchSize;
   final int refillStepDelayMs;
   final int mismatchPenaltyMs;
-  final int tierOneThreshold;
-  final int tierTwoThreshold;
+  final double tierOneRatio;
+  final double tierTwoRatio;
   final int baseMatchXp;
   final Map<int, int> streakBonusTable;
   final Map<String, int> powerupXpThresholds;
@@ -46,16 +46,19 @@ class RunSettings {
   int targetForProgress(LevelProgress? progress) {
     final minTarget = minTargetMatches;
     final maxTarget = targetMatches;
-    if (progress == null || progress.totalMatches <= 0) {
-      return minTarget;
-    }
-    final mastered = progress.matchesCleared.clamp(0, progress.totalMatches);
-    final ratio = progress.totalMatches == 0
-        ? 0.0
-        : mastered / progress.totalMatches;
-    final span = max(0, maxTarget - minTarget);
-    final interpolated = (minTarget + span * ratio).round();
-    return interpolated.clamp(minTarget, maxTarget);
+    final mastered = progress?.matchesCleared ?? 0;
+    final target = minTarget + mastered;
+    return target.clamp(minTarget, maxTarget);
+  }
+
+  int tierOneThresholdFor(int target) => _scaledThreshold(tierOneRatio, target);
+
+  int tierTwoThresholdFor(int target) => _scaledThreshold(tierTwoRatio, target);
+
+  int _scaledThreshold(double ratio, int target) {
+    final clampedRatio = ratio.clamp(0.0, 1.0);
+    final scaled = max(1, (target * clampedRatio).round());
+    return min(scaled, max(target - 1, 1));
   }
 }
 
