@@ -20,14 +20,20 @@ void main() {
   }
 
   group('FinishScreen', () {
-    testWidgets('renders latest run summary when run log exists',
-        (WidgetTester tester) async {
+    testWidgets('renders latest run summary when run log exists', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(1280, 2000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       final store = InMemoryStore.instance;
       final log = RunLog()
         ..tierReached = 3
+        ..xpEarned = 40
+        ..xpBonus = 10
+        ..streakMax = 12
+        ..cleanRun = true
+        ..powerupsEarned = ['timeExtend']
         ..rowsUsed = 4
         ..timeExtendsUsed = 1
         ..matchesCompleted = 90
@@ -57,15 +63,17 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.text('Goal achieved!'), findsOneWidget);
-      expect(find.text('You earned 40 XP.'), findsOneWidget);
+      expect(find.text('You earned 40 XP (+10 bonus).'), findsOneWidget);
       expect(find.text('Tier reached'), findsOneWidget);
       expect(find.text('3'), findsWidgets);
       expect(find.text('Rows used'), findsOneWidget);
       expect(find.text('4'), findsWidgets);
       expect(find.text('A1'), findsOneWidget);
       expect(find.text('10'), findsWidgets);
-      expect(find.text('Inventory change'), findsOneWidget);
+      expect(find.text('Learned/Trouble delta'), findsOneWidget);
       expect(find.text('Learned +1 / Trouble +1'), findsOneWidget);
+      expect(find.text('Powerups earned'), findsOneWidget);
+      expect(find.text('Time Extend ×1'), findsOneWidget);
       expect(find.text('Lifetime stats'), findsOneWidget);
       expect(find.text('Runs played'), findsOneWidget);
       expect(find.text('12'), findsWidgets);
@@ -81,8 +89,9 @@ void main() {
       expect(find.text('30s'), findsOneWidget);
     });
 
-    testWidgets('shows fallback view when no runs exist',
-        (WidgetTester tester) async {
+    testWidgets('shows fallback view when no runs exist', (
+      WidgetTester tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(1280, 2000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -91,7 +100,7 @@ void main() {
 
       expect(find.text('Run complete'), findsOneWidget);
       expect(find.text('You earned 0 XP.'), findsOneWidget);
-      expect(find.text('Inventory change'), findsOneWidget);
+      expect(find.text('Learned/Trouble delta'), findsOneWidget);
       expect(find.text('Learned +0 / Trouble +0'), findsOneWidget);
       expect(find.text('Lifetime stats'), findsNothing);
     });

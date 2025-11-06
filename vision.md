@@ -1,13 +1,13 @@
 
 Project vision
 
-Build a fast, offline, Spanish-only matching game. Two fixed columns. Left shows English. Right shows Spanish. The player must reach 50 correct matches in 60 seconds. The timer hard-pauses at 12 and 30 correct. Correct pairs disappear in place and both empty slots refill from a prebuilt deck. No reshuffle. Wrong selections have no penalty. The board must always be solvable. The system promotes learned words and repeats trouble words. Powerups exist: Row Blaster reduces rows to four. Time Extend adds 60 seconds at timeout. All assets are local. All graphics are procedural.
+Build a fast, offline, Spanish-only matching game with sequential CEFR progression. Two fixed columns. Left shows English. Right shows Spanish. Each run targets 50 correct matches in 60 seconds with hard pauses at 12 and 30 correct. Correct pairs disappear in place and both empty slots refill from a prebuilt deck. No reshuffle. Wrong selections shave one second off the clock to keep tension high. The board must always be solvable. The system promotes learned words, repeats trouble words, and tracks mastery per level so learners must complete A1 before seeing A2, and so on. Powerups exist: Row Blaster reduces rows to four for the next run; Time Extend adds 60 seconds mid-run. Powerups drop from clean runs or hitting XP thresholds, and the XP HUD tracks base + streak bonuses in real time. All assets are local. All graphics are procedural.
 
 Pronunciation remains available offline. Web speech uses the browser API when possible, but every vocabulary item (and core number set 1–100) ships with Piper-generated MP3 fallbacks so learners still hear the word even when speech synthesis is unavailable.
 
 What the game is
 
-A timed EN↔ES word pairing challenge. Each board shows five rows by two columns by default. One English tile per row on the left. One Spanish tile per row on the right. Each English tile has exactly one Spanish match on the board at all times. The player taps one left tile and one right tile to resolve a match. Correct removes both. Wrong shakes both. The game rewards speed and accuracy. The game teaches by hiding mastered items and repeating items the player misses.
+A timed EN↔ES word pairing challenge with visible XP and streak tracking. Each board shows five rows by two columns by default. One English tile per row on the left. One Spanish tile per row on the right. Each English tile has exactly one Spanish match on the board at all times. The player taps one left tile and one right tile to resolve a match. Correct removes both. Wrong shakes both, breaks the streak, flags the item as trouble, and removes one second from the timer. The game rewards speed, accuracy, and consistency. The game teaches by hiding mastered items, repeating trouble pairs, and locking each learner into their current CEFR tier until every vocabulary item in that level is mastered.
 
 Player journey: end-to-end steps
 
@@ -69,7 +69,7 @@ Repair until each left id has its matching right id on board. No orphan tiles.
 Running state
 Timer starts at 60 seconds.
 
-Progress starts at 0 of 90. Markers at 20, 50, and 90.
+Progress starts at 0 of 50. Markers at 12, 30, and 50.
 
 The grid shows N rows with two tiles per row.
 
@@ -118,7 +118,7 @@ The multiset of pairIds on the left equals the multiset on the right.
 If a refill would insert only one side, cancel that insert and wait for the next complete pair.
 
 Tier pauses
-At 20 correct:
+At 12 correct:
 
 Freeze timer. Freeze board input. Dim board.
 
@@ -126,7 +126,7 @@ Show “Tier 1 complete. +5 XP secured.”
 
 On Continue, undim, resume timer. Board stays identical. No refill occurs.
 
-At 50 correct:
+At 30 correct:
 
 Same behavior.
 
@@ -139,7 +139,7 @@ At 50 correct, stop timer.
 
 Show “You earned 40 XP.” Show learned promotions. Show “Practice again.”
 
-Timeout without 90:
+Timeout without 50:
 
 If Time Extend inventory >0:
 
@@ -165,23 +165,23 @@ Update powerup inventory based on earn rules.
 Sample playthrough timeline
 Perfect five-row run without powerups
 
-00:00 Start. Rows=5. Progress 0/90.
+00:00 Start. Rows=5. Progress 0/50.
 
-00:23 Reach 20. Pause. Show +5 XP. Resume.
+00:12 Reach 12. Pause. Show +5 XP. Resume.
 
-00:58 Reach 50. Pause. Show +15 XP total. Resume.
+00:30 Reach 30. Pause. Show +15 XP total. Resume.
 
-01:22 Reach 90. Success. Award +40 XP. Show learned list.
+00:46 Reach 50. Success. Award +40 XP. Show learned list.
 
 Timeout with extend
 
 00:00 Start. Rows=5.
 
-01:45 Progress at 74. Time hits zero. Offer +60 s.
+01:00 Progress at 38. Time hits zero. Offer +60 s.
 
 Player accepts. Timer becomes 01:00. Resume.
 
-00:38 later reach 90. Success. Inventory reduced by one extend token.
+00:32 later reach 50. Success. Inventory reduced by one extend token.
 
 High error rate with trouble items
 
@@ -288,13 +288,13 @@ The set of pairIds in left equals the set in right at every tick.
 If a mismatch occurs, perform a right-side swap or delay refill until a complete pair is ready.
 
 Run controller and timer
-Counts down. Emits Tick. Emits TierReached at 20 and 50.
+Counts down. Emits Tick. Emits TierReached at 12 and 30.
 
 Freezes timer and input during tier pauses. The board state object is untouched.
 
 On timeout:
 
-If Time Extend exists and progress <90, emit ExtendOffer.
+If Time Extend exists and progress <50, emit ExtendOffer.
 
 On accept, add 60 seconds and resume. On decline, finish with secured XP.
 
@@ -315,7 +315,7 @@ Error notification on wrong.
 
 Confetti:
 
-Small burst at tiers. Larger burst at 90.
+Small burst at tiers. Larger burst at 50.
 
 Powerups and economy
 Inventory lives in UserMeta.
@@ -328,7 +328,7 @@ Earn +1 on flawless runs. Also +1 per three runs completed in a day.
 
 Time Extend:
 
-Available only at timeout and if progress <90.
+Available only at timeout and if progress <50.
 
 Adds one minute per token. Max two uses per run.
 
@@ -337,11 +337,11 @@ Earn +1 for any run completed in under 1:30. Also +1 from the daily mission.
 Progress and rewards
 XP:
 
-+5 when you reach 20. Stored immediately.
++5 when you reach 12. Stored immediately.
 
-+10 when you reach 50. Cumulative +15. Stored immediately.
++10 when you reach 30. Cumulative +15. Stored immediately.
 
-+25 when you reach 90. Total +40. Stored on finish.
++25 when you reach 50. Total +40. Stored on finish.
 
 Streak:
 
@@ -361,7 +361,7 @@ Dev menu exports the last N runs and attempts to JSON for QA.
 QA and dev tools
 Dev menu shows content counts, version, inventory, level override, seed override, and export buttons.
 
-Auto-play test mode runs a deterministic script to reach 90 for performance tests.
+Auto-play test mode runs a deterministic script to reach 50 for performance tests.
 
 Confetti intensity slider helps test low-end devices.
 
@@ -387,7 +387,7 @@ Two columns at all times. Left English. Right Spanish.
 
 No reshuffle during a run. Only two slots change after a correct.
 
-Timer pauses exactly at 20 and 50. The board remains unchanged during the pause.
+Timer pauses exactly at 12 and 30. The board remains unchanged during the pause.
 
 Wrong answers never cost time, hearts, or XP.
 
@@ -429,9 +429,9 @@ Gameplay loop — exhaustive, implementation-ready
 
 runClock: milliseconds remaining (starts 60000).
 
-progress: correct matches so far (0→90).
+progress: correct matches so far (0→50).
 
-tierFlags: pausedAt20, pausedAt50.
+tierFlags: pausedAtTierOne, pausedAtTierTwo.
 
 rows: 5 or 4 if Row Blaster active.
 
@@ -468,7 +468,7 @@ Repair pass until every EN on board has its matching ES on board. Never insert o
 
 Clock = 60 s. progress=0. inputLock=idle.
 
-UI visible: top bar (timer, tier ticks at 20/50/90, powerup icons), grid (5×2 or 4×2), empty bottom.
+UI visible: top bar (timer, tier ticks at 12/30/50, powerup icons), grid (5×2 or 4×2), empty bottom.
 
 Core interaction cycle (one attempt)
 This cycle repeats until pause, finish, or timeout.
@@ -525,11 +525,11 @@ Set selected=null, inputLock=idle.
 
 Milestone check:
 
-If progress == 20 && !pausedAt20: → Tier pause 1.
+If progress == 12 && !pausedAtTierOne: → Tier pause 1.
 
-Else if progress == 50 && !pausedAt50: → Tier pause 2.
+Else if progress == 30 && !pausedAtTierTwo: → Tier pause 2.
 
-Else if progress == 90: → Finish success.
+Else if progress == 50: → Finish success.
 
 Wrong path:
 
@@ -543,8 +543,8 @@ Clear selection, selected=null, inputLock=idle.
 
 Trouble scheduling: mark the item for reinsert 4–6 pairs later within this run and for front-loading next run (cap to 3 appearances/run).
 
-Tier pause mechanics (at 20 and 50)
-Trigger condition: resolve a correct match that makes progress equal exactly 20 or 50.
+Tier pause mechanics (at 12 and 30)
+Trigger condition: resolve a correct match that makes progress equal exactly 12 or 30.
 
 Immediate actions:
 
@@ -554,7 +554,7 @@ Set inputLock=paused.
 
 Dim board; disable all grid hit-testing; keep board arrays unchanged.
 
-Show overlay: “Tier X complete” and secured XP (+5 at 20; cumulative +15 at 50).
+Show overlay: “Tier X complete” and secured XP (+5 at 12; cumulative +15 at 30).
 
 Resume:
 
@@ -568,12 +568,12 @@ Set inputLock=idle.
 
 Edge constraints:
 
-If the last correct was also the 90th, finish overrides pause.
+If the last correct was also the 50th, finish overrides pause.
 
 If multi-touch tries to tap during pause, all taps are ignored.
 
 Timeout and Time Extend
-Trigger: runClock reaches 0 while progress < 90.
+Trigger: runClock reaches 0 while progress < 50.
 
 Flow:
 
@@ -598,11 +598,11 @@ Compute secured XP (based on highest reached tier).
 Proceed to Finish timeout.
 
 Finish conditions
-Success (progress == 90 before time ends):
+Success (progress == 50 before time ends):
 
 Stop timer. Set inputLock=finished.
 
-Award +40 XP total for the run (5 at 20 +10 at 50 +25 at 90).
+Award +40 XP total for the run (5 at 12 +10 at 30 +25 at 50).
 
 Promote learned items that hit the rule (3 clean runs, no item errors).
 
@@ -616,7 +616,7 @@ Award highest secured tier XP only.
 
 Commit RunLog and update trouble items.
 
-Show summary with progress N/90, XP awarded, option to replay.
+Show summary with progress N/50, XP awarded, option to replay.
 
 Crash safety:
 
@@ -667,7 +667,7 @@ Correct: green overlay 80 ms → scale/fade 120 ms → refill fade-in 100 ms.
 
 Wrong: red overlay 80 ms → shake 200–250 ms → reset.
 
-Confetti: small burst at 20 and 50; bigger at 90. Auto-throttle by device.
+Confetti: small burst at 12 and 30; bigger at 50. Auto-throttle by device.
 
 Haptics: success pulse on correct; error buzz on wrong; none during pauses.
 
@@ -701,7 +701,7 @@ Wrong attempts do not consume from deck.
 
 Exhaustion:
 
-If deck empties before reaching 90:
+If deck empties before reaching 50:
 
 Pull more from the same level strata first.
 
@@ -731,7 +731,7 @@ Next run deck begins with these items. Fresh items cap stays ≤20%.
 
 C) Extend chain
 
-Timeout at 0 s with progress <90 and at least one token.
+Timeout at 0 s with progress <50 and at least one token.
 
 Accept extend: +60 s and resume unchanged board.
 
@@ -742,7 +742,7 @@ Focus traversal moves left column then right column per row, cycling.
 
 Screen reader announces: “English: the house. Double-tap to select.” then “Spanish: la casa. Double-tap to match.”
 
-On correct: announce “Correct. 1 of 90.” On wrong: “Try again.”
+On correct: announce “Correct. 1 of 50.” On wrong: “Try again.”
 
 Pause overlay has semantic focus trap until Continue.
 
@@ -784,17 +784,17 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 
 ## 2. Guiding Pillars
 - **Always solvable, never random**: Both columns refill in place with valid pairs; tiles never reshuffle or drift.
-- **Speed with memory**: Two pauses (20 & 50 correct) reset attention without altering the board. Wrong answers cost only time; mastery comes from accuracy and flow.
+- **Speed with memory**: Two pauses (12 & 30 correct) reset attention without altering the board. Wrong answers cost only time; mastery comes from accuracy and flow.
 - **Adaptive content**: Learned items fade after 3 perfect appearances; trouble items repeat within and across runs; fresh items stay under 20% of a deck.
 - **Offline first**: All data (vocabulary, telemetry, powerups) ships locally. No remote services or analytics in MVP.
 - **Delight in execution**: 60 FPS, responsive animations under 250 ms, and a punchy visual identity built on gradients and procedural vectors.
 
 ## 3. Player Journey
 1. **Gate**: Entry screen confirms Spanish course, surfaces streak/progress, and advertises powerups. (If prerequisites fail, show "Palabra not available".)
-2. **Pre-Run**: Displays goal "90 in 1:45", tier rewards (20/50/90), Row Blaster toggle, powerup inventory, Start CTA.
+2. **Pre-Run**: Displays goal "50 in 1:00", tier rewards (12/30/50), Row Blaster toggle, powerup inventory, Start CTA.
 3. **Run**: Default 5x2 grid (Row Blaster makes it 4x2). Timer counts down from 60 seconds. Progress bar marks 12/30/50.
-4. **Pauses**: Automatic at 20 and 50 correct. Timer freezes, board locks, XP summary shown. Resume keeps board untouched.
-5. **Finish**: Success (+40 XP) at 90 pairs before time expires. On timeout, offer +60 s/time extend if token available; otherwise show completion summary with secured XP.
+4. **Pauses**: Automatic at 12 and 30 correct. Timer freezes, board locks, XP summary shown. Resume keeps board untouched.
+5. **Finish**: Success (+40 XP) at 50 pairs before time expires. On timeout, offer +60 s/time extend if token available; otherwise show completion summary with secured XP.
 
 ## 4. Game Rules & Mechanics
 - **Board**: Five rows of English tiles on the left, matching Spanish on the right. Selecting one tile per column resolves a pair.
@@ -803,9 +803,9 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 - **Wrong pair**: Flash red, shake 200–250 ms, reset selection without penalties; timer keeps ticking.
 - **Timer**: 60 seconds (1:00). Pauses trigger exactly at 12 and 30 correct pairs; finishing at 50 ends run.
 - **Powerups**:
-  - *Row Blaster*: optional pre-run toggle, board becomes 4 rows. Goal remains 90 matches.
-  - *Time Extend*: offered on timeout when progress <90 and a token exists; adds 60 s, max twice per run.
-- **XP**: 5 XP at 20, +10 at 50 (15 total), +25 at 90 (40 total). Failing runs earn the last awarded tier.
+  - *Row Blaster*: optional pre-run toggle, board becomes 4 rows. Goal remains 50 matches.
+  - *Time Extend*: offered on timeout when progress <50 and a token exists; adds 60 s, max twice per run.
+- **XP**: 5 XP at 12, +10 at 30 (15 total), +25 at 50 (40 total). Failing runs earn the last awarded tier.
 
 ## 5. Content & Adaptation
 - **Assets**: JSON files in `assets/vocabulary/spanish/{a1,a2,b1,b2}.json` with entries `{id,en,es,level,family,topic}`.
@@ -855,7 +855,7 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 ## 11. Testing Strategy
 - **Unit**: Deck mix ratios, SRS transitions, family window enforcement, fallback chains.
 - **Widget**: Tap guard flow, correct/wrong animations, pause overlay behavior, board refill integrity.
-- **Integration**: Scripted 90-match run, timeout + Time Extend, Row Blaster path.
+- **Integration**: Scripted 50-match run, timeout + Time Extend, Row Blaster path.
 - **Golden**: Gate, Prerun, Run, Pause, Finish at key DPIs.
 - **Performance**: Automated tap stress harness ensuring frame budget compliance.
 
@@ -871,12 +871,12 @@ Palabra is a high-speed, offline Spanish vocabulary trainer. Players tap matchin
 - **Fresh Item**: Vocabulary entry not yet seen by the user in Palabra.
 - **Learned**: Item temporarily retired after three perfect appearances.
 - **Trouble**: Item flagged for repeat drilling after mistakes.
-- **Tier**: Reward milestones at 20, 50, and 90 matches.
+- **Tier**: Reward milestones at 12, 30, and 50 matches.
 - **Run**: One timed Palabra session.
 
 ## 14. Acceptance Criteria Summary
 - Board solvable at all times; both tiles refill together in place.
-- Pauses freeze timer exactly at 20 and 50 correct answers; board remains untouched.
+- Pauses freeze timer exactly at 12 and 30 correct answers; board remains untouched.
 - Wrong answers never deduct XP or trigger reshuffle.
 - Learned/trouble logic persists across sessions (future persistent store; current web beta keeps data per session).
 - Powerups function exactly as specified, with clear inventory limits.

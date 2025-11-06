@@ -4,6 +4,7 @@
 - Ship a web-only beta that runs reliably in Chrome/Edge with high-fidelity visuals and feedback.
 - Keep runtime state in memory/`shared_preferences` while planning migrations and LXC-hosted persistence.
 - Ensure the Gate → Pre-run → Run → Finish loop exposes new telemetry (streaks, averages) on first load.
+- Harden the sequential CEFR progression (A1 → B2) so users must master a tier before advancing, and surface XP/powerup inventory accurately during runs.
 - Prepare documentation and infra notes for the upcoming Proxmox-hosted persistence/API service (currently offline).
 
 ## Beta Demo Task List
@@ -23,6 +24,9 @@
 - Animated gradient + sparkle background applied app-wide.
 - RunController emits audio/haptics (platform aware), match celebrations, and mismatch penalties.
 - Offline speech fallback now ships with Piper-generated MP3s for all vocabulary items and numbers 1–100 (`assets/audio/spanish*`), keeping pronunciation available when Web Speech APIs fail.
+- Core run loop retuned to a 60-second, 50-match goal with tier pauses at 12/30/50 and dynamic copy updates across gate/pre-run/run surfaces.
+- Sequential level gating keeps learners on their active CEFR deck until every pair is mastered, with progress persisted per level and surfaced on the pre-run screen.
+- XP is now earned on every correct match, streak bonuses are tracked, and clean runs grant powerups plus celebratory finish copy.
 - Tier pauses and run completion now trigger confetti overlays and celebratory states.
 - Finish screen now surfaces inventory deltas, streaks, averages, and total run telemetry.
 - Gate → Pre-run → Run flow with device/course gating, row blaster toggle, and interactive board UI.

@@ -60,6 +60,13 @@ class RunController extends StateNotifier<RunState> {
   final List<int> _pendingRefillRows = <int>[];
   final Set<String> _dirtyItemIds = <String>{};
   final Random _random = Random();
+  final Set<String> _matchedThisRun = <String>{};
+  final List<String> _powerupsEarnedThisRun = <String>[];
+  int _xpEarned = 0;
+  int _xpBonus = 0;
+  int _currentStreak = 0;
+  int _bestStreak = 0;
+  bool _cleanRun = true;
   bool _refillSequenceActive = false;
   int _placeholderSalt = 0;
   int _mismatchSalt = 0;
@@ -69,6 +76,7 @@ class RunController extends StateNotifier<RunState> {
   Timer? _progressPersistTimer;
   int _confettiSalt = 0;
   Timer? _confettiTimer;
+  String _activeLevelId = 'a1';
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
@@ -82,6 +90,10 @@ class RunController extends StateNotifier<RunState> {
     _resetSession();
 
     await _loadUserMeta();
+    _activeLevelId = _userMeta?.activeLevel ?? UserMeta.levelOrder.first;
+    if (_userMeta != null) {
+      _userMeta!.level = _activeLevelId;
+    }
     _deckResult = await _deckBuilderService.buildDeck();
     _deckQueue
       ..clear()
@@ -105,6 +117,9 @@ class RunController extends StateNotifier<RunState> {
 
     _randomizeRightColumn(initialBoard);
     final balancedBoard = _ensureBoardInvariant(initialBoard);
+    final initialInventory = _userMeta != null
+        ? _buildPowerupInventory(_userMeta!)
+        : const <String, int>{};
 
     state = RunState.ready(
       rows: _settings.rows,
@@ -113,6 +128,7 @@ class RunController extends StateNotifier<RunState> {
       millisecondsRemaining: _settings.runDurationMs,
       timeExtendTokens: _userMeta?.timeExtendTokens ?? 0,
       timeExtendsUsed: _timeExtendsUsed,
+      powerupInventory: initialInventory,
     );
     _startTimer(_settings.runDurationMs);
   }
@@ -137,10 +153,40 @@ class RunController extends StateNotifier<RunState> {
     }
     if (success) {
       meta.currentStreak += 1;
-      meta.bestStreak = max(meta.bestStreak, meta.currentStreak);
     } else {
       meta.currentStreak = 0;
     }
+    meta.bestStreak = max(
+      meta.bestStreak,
+      max(meta.currentStreak, runLog.streakMax),
+    );
+    meta.xp += runLog.xpEarned;
+    meta.xpSinceLastReward += runLog.xpEarned;
+
+    final levelProgress = meta.levelProgress[_activeLevelId] ?? LevelProgress();
+    levelProgress.recordMasteredItems(_matchedThisRun);
+    levelProgress.bestStreak = max(levelProgress.bestStreak, runLog.streakMax);
+    if (runLog.cleanRun) {
+      levelProgress.cleanRuns += 1;
+      levelProgress.lastCleanRunAt = runLog.completedAt ?? DateTime.now();
+      _grantPowerup(meta, _settings.cleanRunRewardPowerup);
+    }
+    if (levelProgress.totalMatches > 0 &&
+        levelProgress.matchesCleared >= levelProgress.totalMatches &&
+        levelProgress.completedAt == null) {
+      levelProgress.completedAt = runLog.completedAt ?? DateTime.now();
+    }
+    meta.levelProgress[_activeLevelId] = levelProgress;
+
+    for (final entry in _settings.powerupXpThresholds.entries) {
+      final powerupId = entry.key;
+      final threshold = entry.value;
+      if (meta.xp >= threshold && !meta.unlockedPowerups.contains(powerupId)) {
+        _grantPowerup(meta, powerupId);
+      }
+    }
+
+    meta.level = meta.activeLevel;
     _userMeta = meta;
     await _userMetaRepository.save(meta);
   }
@@ -251,6 +297,13 @@ class RunController extends StateNotifier<RunState> {
     _confettiSalt = 0;
     _dirtyItemIds.clear();
     _cancelProgressPersistTimer();
+    _matchedThisRun.clear();
+    _powerupsEarnedThisRun.clear();
+    _xpEarned = 0;
+    _xpBonus = 0;
+    _currentStreak = 0;
+    _bestStreak = 0;
+    _cleanRun = true;
   }
 
   BoardRow _createRow(VocabItem item) {
@@ -260,21 +313,40 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void _handleCorrect(String itemId) {
-    final state = _ensureItemState(itemId)
+    final itemState = _ensureItemState(itemId)
       ..seenCount += 1
       ..correctStreak += 1
       ..lastSeenAt = DateTime.now();
 
-    final wasLearned = state.learnedAt != null;
-    if (state.wrongCount == 0 && state.correctStreak >= 3) {
+    final wasLearned = itemState.learnedAt != null;
+    if (itemState.wrongCount == 0 && itemState.correctStreak >= 3) {
       if (!wasLearned) {
-        state.learnedAt = DateTime.now();
+        itemState.learnedAt = DateTime.now();
       }
       if (!wasLearned && !_learnedPromotions.contains(itemId)) {
         _learnedPromotions.add(itemId);
       }
     }
     _markStateDirty(itemId);
+
+    _currentStreak += 1;
+    _bestStreak = max(_bestStreak, _currentStreak);
+    var gainedXp = _settings.baseMatchXp;
+    final streakBonus = _settings.streakBonusTable[_currentStreak] ?? 0;
+    if (streakBonus > 0) {
+      _xpBonus += streakBonus;
+      gainedXp += streakBonus;
+      _triggerConfetti(intensity: 0.35);
+    }
+    _xpEarned += gainedXp;
+    _matchedThisRun.add(itemId);
+    state = this.state.copyWith(
+      xpEarned: _xpEarned,
+      xpBonus: _xpBonus,
+      streakCurrent: _currentStreak,
+      streakBest: _bestStreak,
+    );
+    _evaluatePowerupThresholds();
   }
 
   void _handleWrong(String itemId) {
@@ -288,6 +360,12 @@ class RunController extends StateNotifier<RunState> {
     _troubleDetected.add(itemId);
     _markStateDirty(itemId);
     unawaited(_feedbackService.onMismatch());
+    _cleanRun = false;
+    _currentStreak = 0;
+    state = this.state.copyWith(
+      streakCurrent: 0,
+      cleanRun: false,
+    );
   }
 
   void _applyMismatchPenalty() {
@@ -296,6 +374,42 @@ class RunController extends StateNotifier<RunState> {
       return;
     }
     _timerService.reduceBy(penalty);
+  }
+
+  void activatePowerup(String powerupId) {
+    final normalized = powerupId.toLowerCase();
+    if (normalized == 'timeextend' || normalized == 'time_extend') {
+      _applyManualTimeExtend();
+    }
+  }
+
+  void _applyManualTimeExtend() {
+    if (_runFinished) {
+      return;
+    }
+    final meta = _userMeta;
+    if (meta == null || meta.timeExtendTokens <= 0) {
+      return;
+    }
+    if (_timeExtendsUsed >= _settings.maxTimeExtendsPerRun) {
+      return;
+    }
+    meta.timeExtendTokens -= 1;
+    _timeExtendsUsed += 1;
+    _timerService.extendBy(_settings.timeExtendDurationMs);
+    final updatedRemaining =
+        max(0, state.millisecondsRemaining) + _settings.timeExtendDurationMs;
+    final updatedInventory = Map<String, int>.from(state.powerupInventory);
+    updatedInventory['timeExtend'] = max(
+      0,
+      (updatedInventory['timeExtend'] ?? 0) - 1,
+    );
+    state = state.copyWith(
+      millisecondsRemaining: updatedRemaining,
+      timeExtendTokens: meta.timeExtendTokens,
+      timeExtendsUsed: _timeExtendsUsed,
+      powerupInventory: updatedInventory,
+    );
   }
 
   void _markStateDirty(String itemId) {
@@ -497,6 +611,10 @@ class RunController extends StateNotifier<RunState> {
       millisecondsRemaining: updatedRemaining,
       timeExtendTokens: meta.timeExtendTokens,
       timeExtendsUsed: _timeExtendsUsed,
+      powerupInventory: {
+        ...state.powerupInventory,
+        'timeExtend': max(0, (state.powerupInventory['timeExtend'] ?? 0) - 1),
+      },
     );
 
     await _userMetaRepository.save(meta);
@@ -574,14 +692,20 @@ class RunController extends StateNotifier<RunState> {
       ..startedAt = _runStartedAt
       ..completedAt = completedAt
       ..tierReached = _tierForProgress(state.progress)
+      ..levelId = _activeLevelId
       ..rowsUsed = _settings.rows
       ..timeExtendsUsed = _timeExtendsUsed
       ..matchesCompleted = state.progress
       ..attemptCount = _attempts.length
       ..durationMs = durationMs < 0 ? 0 : durationMs
+      ..xpEarned = _xpEarned
+      ..xpBonus = _xpBonus
+      ..streakMax = _bestStreak
+      ..cleanRun = success && _cleanRun
       ..deckComposition = _buildDeckComposition()
       ..learnedPromoted = _learnedPromotions.toSet().toList()
-      ..troubleDetected = _troubleDetected.toList();
+      ..troubleDetected = _troubleDetected.toList()
+      ..powerupsEarned = _powerupsEarnedThisRun.toSet().toList();
 
     final runId = await _addRunLog(runLog);
     if (_attempts.isNotEmpty) {
@@ -618,6 +742,72 @@ class RunController extends StateNotifier<RunState> {
             ..count = entry.value,
         )
         .toList();
+  }
+
+  Map<String, int> _buildPowerupInventory(UserMeta meta) {
+    final inventory = Map<String, int>.from(meta.powerupInventory);
+    inventory['timeExtend'] = meta.timeExtendTokens;
+    inventory['rowBlaster'] = meta.rowBlasterCharges;
+    return inventory;
+  }
+
+  void _evaluatePowerupThresholds() {
+    final meta = _userMeta;
+    if (meta == null) {
+      return;
+    }
+    final totalXp = meta.xp + _xpEarned;
+    for (final entry in _settings.powerupXpThresholds.entries) {
+      final powerupId = entry.key;
+      final threshold = entry.value;
+      final alreadyUnlocked =
+          meta.unlockedPowerups.contains(powerupId) ||
+          _powerupsEarnedThisRun.contains(powerupId);
+      if (!alreadyUnlocked && totalXp >= threshold) {
+        _grantPowerup(meta, powerupId);
+      }
+    }
+  }
+
+  void _grantPowerup(UserMeta meta, String powerupId) {
+    if (powerupId.isEmpty) {
+      return;
+    }
+    final normalized = powerupId.toLowerCase();
+    String canonicalId;
+    switch (normalized) {
+      case 'timeextend':
+      case 'time_extend':
+      case 'timeextendtoken':
+        canonicalId = 'timeExtend';
+        meta.timeExtendTokens += 1;
+        break;
+      case 'rowblaster':
+      case 'row_blaster':
+        canonicalId = 'rowBlaster';
+        meta.rowBlasterCharges += 1;
+        break;
+      default:
+        canonicalId = normalized;
+        break;
+    }
+
+    meta.powerupInventory[canonicalId] =
+        (meta.powerupInventory[canonicalId] ?? 0) + 1;
+    meta.unlockedPowerups.add(canonicalId);
+    _powerupsEarnedThisRun.add(canonicalId);
+
+    final updatedInventory = Map<String, int>.from(state.powerupInventory);
+    updatedInventory[canonicalId] = (updatedInventory[canonicalId] ?? 0) + 1;
+
+    if (canonicalId == 'timeExtend') {
+      state = state.copyWith(
+        timeExtendTokens: meta.timeExtendTokens,
+        powerupInventory: updatedInventory,
+      );
+    } else {
+      state = state.copyWith(powerupInventory: updatedInventory);
+    }
   }
 
   void _logAttempt({

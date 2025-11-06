@@ -120,6 +120,12 @@ class _PreRunContent extends ConsumerWidget {
     final seconds = (runDuration.inSeconds % 60).toString().padLeft(2, '0');
     final objectiveText =
         'Make ${runSettings.targetMatches} correct matches in $minutes:$seconds.';
+    final levelProgress = meta.levelProgress[meta.level];
+    final mastered = levelProgress?.matchesCleared ?? 0;
+    final totalMatches = levelProgress?.totalMatches ?? 0;
+    final progressText = totalMatches > 0
+        ? '$mastered / $totalMatches words mastered'
+        : 'Progress data unavailable';
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 520),
@@ -142,6 +148,19 @@ class _PreRunContent extends ConsumerWidget {
                 Text(
                   objectiveText,
                   style: theme.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Current level: ${meta.level.toUpperCase()}',
+                  style: theme.textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  progressText,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.lg),

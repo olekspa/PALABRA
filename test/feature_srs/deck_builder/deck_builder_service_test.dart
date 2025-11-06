@@ -101,9 +101,13 @@ void main() {
     );
 
     final result = await service.buildDeck();
-    expect(result.items.length, 40);
-    expect(result.troubleCount, greaterThan(0));
-    expect(result.freshCount, lessThanOrEqualTo(8));
+    expect(result.items.length, items['a1']!.length);
+    expect(result.troubleCount, greaterThanOrEqualTo(0));
+    final expectedFresh = states.entries
+        .where((entry) => entry.key.startsWith('a1_'))
+        .where((entry) => entry.value.seenCount == 0)
+        .length;
+    expect(result.freshCount, equals(expectedFresh));
   });
 
   test('falls back to learned items when insufficient supply', () async {

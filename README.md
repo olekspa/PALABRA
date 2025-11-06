@@ -73,6 +73,8 @@ flutter test           # Widget + unit tests
 - Run loop delivers audio/haptic feedback (where supported), pulse/shake mismatch cues, and celebration overlays.
 - Tier pauses and run completion trigger confetti bursts to reinforce milestones.
 - Finish screen conveys per-run inventory changes alongside lifetime streak/accuracy stats.
+- Sequential CEFR progression keeps learners on a single deck (A1 → B2) until every pair in that tier is mastered, and the HUD now surfaces live XP, streak, and deck depth readouts.
+- Clean runs award bonus XP and unlock powerups; the in-run toolbar exposes available boosts (time extend today, more coming) with inventory counts that persist across sessions.
 - CI runs static analysis, unit/widget/integration tests (`.github/workflows/ci.yml`).
 
 ## Near-term roadmap

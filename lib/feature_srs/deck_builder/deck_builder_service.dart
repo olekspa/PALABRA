@@ -5,6 +5,8 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 
+import 'package:palabra/data_core/models/user_meta.dart';
+import 'package:palabra/data_core/models/level_progress.dart';
 import 'package:palabra/data_core/models/user_item_state.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
@@ -75,13 +77,25 @@ class DeckBuilderService {
   /// Builds a deck using the given configuration and user state.
   Future<DeckBuildResult> buildDeck() async {
     final meta = await _userMetaRepository.getOrCreate();
-    final userLevel = meta.level;
-    final mix =
-        _config.levelMix[userLevel] ??
-        _config.levelMix.entries
-            .firstWhereOrNull((entry) => entry.value.containsKey(userLevel))
-            ?.value ??
-        _config.levelMix['a1']!;
+    final activeLevel = meta.activeLevel;
+    final requireSingleLevel =
+        !(meta.levelProgress[activeLevel]?.isCompleted ?? false);
+
+    if (requireSingleLevel) {
+      final result = await _buildSingleLevelDeck(meta, activeLevel);
+      await _userMetaRepository.save(meta);
+      return result;
+    }
+
+    final mix = requireSingleLevel
+        ? <String, double>{activeLevel: 1.0}
+        : (_config.levelMix[activeLevel] ??
+              _config.levelMix.entries
+                  .firstWhereOrNull(
+                    (entry) => entry.value.containsKey(activeLevel),
+                  )
+                  ?.value ??
+              _config.levelMix['a1']!);
     final targetCounts = _allocateCounts(_config.deckSize, mix);
 
     final deck = <_DeckEntry>[];
@@ -89,6 +103,7 @@ class DeckBuilderService {
     var freshCount = 0;
     var troubleCount = 0;
     final freshLimit = (_config.deckSize * _config.freshCap).floor();
+    var progressUpdated = false;
 
     for (final entry in targetCounts.entries) {
       final level = entry.key;
@@ -99,6 +114,13 @@ class DeckBuilderService {
 
       final vocab = await _vocabularyFetcher(level);
       final states = await _progressFetcher(vocab.map((item) => item.itemId));
+      final progress = meta.levelProgress[level] ?? LevelProgress();
+      if (progress.totalMatches != vocab.length) {
+        progress.totalMatches = vocab.length;
+        progressUpdated = true;
+      }
+      meta.levelProgress[level] = progress;
+
       final entries = vocab
           .map(
             (item) => _DeckEntry(
@@ -123,10 +145,54 @@ class DeckBuilderService {
     }
 
     deck.shuffle(_random);
+    if (progressUpdated) {
+      await _userMetaRepository.save(meta);
+    }
     return DeckBuildResult(
       items: deck.map((entry) => entry.item).toList(),
       freshCount: freshCount,
       troubleCount: troubleCount,
+    );
+  }
+
+  Future<DeckBuildResult> _buildSingleLevelDeck(
+    UserMeta meta,
+    String level,
+  ) async {
+    final vocab = await _vocabularyFetcher(level);
+    final states = await _progressFetcher(vocab.map((item) => item.itemId));
+    final progress = meta.levelProgress[level] ?? LevelProgress();
+    if (progress.totalMatches != vocab.length) {
+      progress.totalMatches = vocab.length;
+    }
+    meta.levelProgress[level] = progress;
+
+    final entries = vocab
+        .map(
+          (item) => _DeckEntry(
+            item: item,
+            state: states[item.itemId],
+            prioritySeed: _random.nextDouble(),
+          ),
+        )
+        .toList();
+
+    final deck = <_DeckEntry>[];
+    final selection = _selectForLevel(
+      entries: entries,
+      target: entries.length,
+      deck: deck,
+      usedFamilies: <String>{},
+      freshLimit: entries.length,
+      freshCount: 0,
+      troubleCount: 0,
+    );
+    deck.shuffle(_random);
+
+    return DeckBuildResult(
+      items: deck.map((entry) => entry.item).toList(),
+      freshCount: selection.freshCount,
+      troubleCount: selection.troubleCount,
     );
   }
 

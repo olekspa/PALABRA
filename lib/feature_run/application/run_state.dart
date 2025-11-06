@@ -101,6 +101,12 @@ class RunState {
     required this.timeExtendTokens,
     required this.timeExtendsUsed,
     required this.showingTimeExtendOffer,
+    required this.xpEarned,
+    required this.xpBonus,
+    required this.streakCurrent,
+    required this.streakBest,
+    required this.cleanRun,
+    required this.powerupInventory,
   });
 
   factory RunState.loading({required int rows}) {
@@ -122,6 +128,12 @@ class RunState {
       timeExtendTokens: 0,
       timeExtendsUsed: 0,
       showingTimeExtendOffer: false,
+      xpEarned: 0,
+      xpBonus: 0,
+      streakCurrent: 0,
+      streakBest: 0,
+      cleanRun: true,
+      powerupInventory: const <String, int>{},
     );
   }
 
@@ -132,6 +144,7 @@ class RunState {
     required int millisecondsRemaining,
     int timeExtendTokens = 0,
     int timeExtendsUsed = 0,
+    Map<String, int>? powerupInventory,
   }) {
     return RunState(
       phase: RunPhase.ready,
@@ -151,6 +164,14 @@ class RunState {
       timeExtendTokens: timeExtendTokens,
       timeExtendsUsed: timeExtendsUsed,
       showingTimeExtendOffer: false,
+      xpEarned: 0,
+      xpBonus: 0,
+      streakCurrent: 0,
+      streakBest: 0,
+      cleanRun: true,
+      powerupInventory: powerupInventory != null
+          ? Map<String, int>.from(powerupInventory)
+          : const <String, int>{},
     );
   }
 
@@ -171,6 +192,12 @@ class RunState {
   final int timeExtendTokens;
   final int timeExtendsUsed;
   final bool showingTimeExtendOffer;
+  final int xpEarned;
+  final int xpBonus;
+  final int streakCurrent;
+  final int streakBest;
+  final bool cleanRun;
+  final Map<String, int> powerupInventory;
 
   bool get isReady => phase == RunPhase.ready;
 
@@ -199,6 +226,12 @@ class RunState {
     int? timeExtendTokens,
     int? timeExtendsUsed,
     bool? showingTimeExtendOffer,
+    int? xpEarned,
+    int? xpBonus,
+    int? streakCurrent,
+    int? streakBest,
+    bool? cleanRun,
+    Map<String, int>? powerupInventory,
   }) {
     return RunState(
       phase: phase ?? this.phase,
@@ -226,6 +259,14 @@ class RunState {
       timeExtendsUsed: timeExtendsUsed ?? this.timeExtendsUsed,
       showingTimeExtendOffer:
           showingTimeExtendOffer ?? this.showingTimeExtendOffer,
+      xpEarned: xpEarned ?? this.xpEarned,
+      xpBonus: xpBonus ?? this.xpBonus,
+      streakCurrent: streakCurrent ?? this.streakCurrent,
+      streakBest: streakBest ?? this.streakBest,
+      cleanRun: cleanRun ?? this.cleanRun,
+      powerupInventory: powerupInventory != null
+          ? Map<String, int>.from(powerupInventory)
+          : this.powerupInventory,
     );
   }
 }

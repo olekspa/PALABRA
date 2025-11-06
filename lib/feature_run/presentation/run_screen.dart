@@ -95,6 +95,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
                     onRateChanged: configNotifier.setRate,
                     onPitchChanged: configNotifier.setPitch,
                     voiceLabel: voiceLabel,
+                    onPowerupTap: controller.activatePowerup,
                   ),
           ),
         ),
@@ -148,6 +149,7 @@ class _RunView extends StatelessWidget {
     required this.onRateChanged,
     required this.onPitchChanged,
     required this.voiceLabel,
+    required this.onPowerupTap,
   });
 
   final RunState state;
@@ -161,6 +163,7 @@ class _RunView extends StatelessWidget {
   final ValueChanged<double> onRateChanged;
   final ValueChanged<double> onPitchChanged;
   final String? voiceLabel;
+  final void Function(String id) onPowerupTap;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +177,18 @@ class _RunView extends StatelessWidget {
               target: settings.targetMatches,
               millisecondsRemaining: state.millisecondsRemaining,
               deckRemaining: state.deckRemaining,
+              xpEarned: state.xpEarned,
+              xpBonus: state.xpBonus,
+              streakCurrent: state.streakCurrent,
+              streakBest: state.streakBest,
             ),
+            if (state.powerupInventory.values.any((count) => count > 0)) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _PowerupToolbar(
+                inventory: state.powerupInventory,
+                onTap: onPowerupTap,
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             Expanded(
               child: _RunBoard(
@@ -360,12 +374,20 @@ class _RunHeader extends StatelessWidget {
     required this.target,
     required this.millisecondsRemaining,
     required this.deckRemaining,
+    required this.xpEarned,
+    required this.xpBonus,
+    required this.streakCurrent,
+    required this.streakBest,
   });
 
   final int progress;
   final int target;
   final int millisecondsRemaining;
   final int deckRemaining;
+  final int xpEarned;
+  final int xpBonus;
+  final int streakCurrent;
+  final int streakBest;
 
   String get _timeLabel {
     final duration = Duration(milliseconds: millisecondsRemaining);
@@ -406,10 +428,96 @@ class _RunHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'XP: $xpEarned${xpBonus > 0 ? " (+$xpBonus bonus)" : ""}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              'Streak: $streakCurrent (best $streakBest)',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.secondary),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           'Deck remaining: $deckRemaining',
           style: Theme.of(context).textTheme.bodySmall,
         ),
+      ],
+    );
+  }
+}
+
+class _PowerupToolbar extends StatelessWidget {
+  const _PowerupToolbar({
+    required this.inventory,
+    required this.onTap,
+  });
+
+  final Map<String, int> inventory;
+  final void Function(String id) onTap;
+
+  String _labelFor(String id) {
+    switch (id) {
+      case 'timeExtend':
+        return '+60s';
+      case 'rowBlaster':
+        return 'Row Blaster';
+      default:
+        return id;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = inventory.entries
+        .where((entry) => entry.value > 0)
+        .toList(growable: false);
+    if (entries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Wrap(
+      spacing: AppSpacing.xs.toDouble(),
+      runSpacing: AppSpacing.xs.toDouble(),
+      children: [
+        for (final entry in entries)
+          ElevatedButton(
+            onPressed: entry.key == 'timeExtend'
+                ? () => onTap(entry.key)
+                : null,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_labelFor(entry.key)),
+                const SizedBox(width: AppSpacing.xxs),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxs,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    entry.value.toString(),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

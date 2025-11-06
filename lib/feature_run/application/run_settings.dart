@@ -15,6 +15,10 @@ class RunSettings {
     this.mismatchPenaltyMs = 1000,
     this.tierOneThreshold = 12,
     this.tierTwoThreshold = 30,
+    this.baseMatchXp = 10,
+    this.streakBonusTable = const {3: 5, 6: 10, 9: 15},
+    this.powerupXpThresholds = const {'timeExtend': 120, 'rowBlaster': 180},
+    this.cleanRunRewardPowerup = 'rowBlaster',
   });
 
   final int rows;
@@ -27,6 +31,10 @@ class RunSettings {
   final int mismatchPenaltyMs;
   final int tierOneThreshold;
   final int tierTwoThreshold;
+  final int baseMatchXp;
+  final Map<int, int> streakBonusTable;
+  final Map<String, int> powerupXpThresholds;
+  final String cleanRunRewardPowerup;
 }
 
 /// Tracks the active board row count (Row Blaster toggles this to four).

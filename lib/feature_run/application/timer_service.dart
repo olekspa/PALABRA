@@ -76,6 +76,18 @@ class RunTimerService {
     }
   }
 
+  void extendBy(int milliseconds) {
+    if (milliseconds <= 0) {
+      return;
+    }
+    if (_remainingMs <= 0) {
+      _remainingMs = milliseconds;
+    } else {
+      _remainingMs += milliseconds;
+    }
+    _onTick?.call(_remainingMs);
+  }
+
   void pause() {
     _isPaused = true;
   }

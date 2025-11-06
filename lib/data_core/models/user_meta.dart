@@ -1,44 +1,81 @@
+import 'package:palabra/data_core/models/level_progress.dart';
+
 /// Persistent metadata for the prototype user profile across sessions.
 class UserMeta {
   /// Creates prototype metadata with default values.
-  UserMeta();
+  UserMeta() {
+    _ensureLevelProgress();
+  }
+
+  /// Ordered list of CEFR levels supported by the app.
+  static const List<String> levelOrder = <String>['a1', 'a2', 'b1', 'b2'];
 
   /// Whether the vocabulary cache has been seeded for the user.
   bool hasSeededVocabulary = false;
+
   /// Preferred row count on the board.
   int preferredRows = 5;
+
   /// Current CEFR level for the user.
   String level = 'a1';
+
   /// Total learned item count.
   int learnedCount = 0;
+
   /// Total trouble item count.
   int troubleCount = 0;
+
   /// Timestamp of the most recent run.
   DateTime? lastRunAt;
+
   /// Available Row Blaster powerups.
   int rowBlasterCharges = 0;
+
   /// Available time-extend tokens.
   int timeExtendTokens = 0;
+
+  /// Aggregate XP earned across all runs.
+  int xp = 0;
+
+  /// XP earned since the last powerup reward or threshold.
+  int xpSinceLastReward = 0;
+
   /// Total number of runs completed.
   int totalRuns = 0;
+
   /// Aggregate correct matches across all runs.
   int totalMatches = 0;
+
   /// Aggregate attempt count across all runs.
   int totalAttempts = 0;
+
   /// Aggregate time spent in milliseconds.
   int totalTimeMs = 0;
+
   /// Current streak of successful runs.
   int currentStreak = 0;
+
   /// Best streak of successful runs.
   int bestStreak = 0;
+
   /// Learned promotions captured from the last run.
   int lastLearnedDelta = 0;
+
   /// Trouble items flagged during the last run.
   int lastTroubleDelta = 0;
 
+  /// Per-level progression details.
+  Map<String, LevelProgress> levelProgress = <String, LevelProgress>{};
+
+  /// Additional powerup inventory keyed by powerup id.
+  Map<String, int> powerupInventory = <String, int>{};
+
+  /// Set of powerups the player has unlocked at least once.
+  Set<String> unlockedPowerups = <String>{};
+
   /// Hydrates metadata from persisted JSON.
   factory UserMeta.fromJson(Map<String, dynamic> json) {
-    return UserMeta()
+    final meta = UserMeta()
       ..hasSeededVocabulary = json['hasSeededVocabulary'] as bool? ?? false
       ..preferredRows = json['preferredRows'] as int? ?? 5
       ..level = (json['level'] as String? ?? 'a1').toLowerCase()
@@ -47,6 +84,8 @@ class UserMeta {
       ..lastRunAt = _parseTimestamp(json['lastRunAt'])
       ..rowBlasterCharges = json['rowBlasterCharges'] as int? ?? 0
       ..timeExtendTokens = json['timeExtendTokens'] as int? ?? 0
+      ..xp = json['xp'] as int? ?? 0
+      ..xpSinceLastReward = json['xpSinceLastReward'] as int? ?? 0
       ..totalRuns = json['totalRuns'] as int? ?? 0
       ..totalMatches = json['totalMatches'] as int? ?? 0
       ..totalAttempts = json['totalAttempts'] as int? ?? 0
@@ -55,6 +94,33 @@ class UserMeta {
       ..bestStreak = json['bestStreak'] as int? ?? 0
       ..lastLearnedDelta = json['lastLearnedDelta'] as int? ?? 0
       ..lastTroubleDelta = json['lastTroubleDelta'] as int? ?? 0;
+
+    final progressJson = json['levelProgress'];
+    if (progressJson is Map<String, dynamic>) {
+      meta.levelProgress = progressJson.map(
+        (key, value) => MapEntry(
+          key.toLowerCase(),
+          LevelProgress.fromJson(
+            (value as Map).cast<String, dynamic>(),
+          ),
+        ),
+      );
+    }
+
+    final inventoryJson = json['powerupInventory'];
+    if (inventoryJson is Map<String, dynamic>) {
+      meta.powerupInventory = inventoryJson.map(
+        (key, value) => MapEntry(key, (value as num).toInt()),
+      );
+    }
+
+    final unlockedJson = json['unlockedPowerups'];
+    if (unlockedJson is List) {
+      meta.unlockedPowerups = unlockedJson.map((e) => e.toString()).toSet();
+    }
+
+    meta._ensureLevelProgress();
+    return meta;
   }
 
   /// Serializes metadata to a JSON-compatible map.
@@ -76,7 +142,34 @@ class UserMeta {
       'bestStreak': bestStreak,
       'lastLearnedDelta': lastLearnedDelta,
       'lastTroubleDelta': lastTroubleDelta,
+      'xp': xp,
+      'xpSinceLastReward': xpSinceLastReward,
+      'levelProgress': levelProgress.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
+      'powerupInventory': powerupInventory,
+      'unlockedPowerups': unlockedPowerups.toList(),
     };
+  }
+
+  /// Returns the first level that has not yet been completed.
+  String get activeLevel {
+    for (final levelId in levelOrder) {
+      final progress = levelProgress[levelId];
+      if (progress == null || !progress.isCompleted) {
+        return levelId;
+      }
+    }
+    return levelOrder.last;
+  }
+
+  void _ensureLevelProgress() {
+    final existing = levelProgress;
+    levelProgress = {
+      for (final levelId in levelOrder)
+        levelId: existing[levelId]?.mapCopy() ?? LevelProgress(),
+    };
+    level = activeLevel;
   }
 
   static DateTime? _parseTimestamp(Object? raw) {
@@ -84,5 +177,18 @@ class UserMeta {
       return DateTime.tryParse(raw);
     }
     return null;
+  }
+}
+
+extension on LevelProgress {
+  LevelProgress mapCopy() {
+    return LevelProgress(
+      totalMatches: totalMatches,
+      cleanRuns: cleanRuns,
+      bestStreak: bestStreak,
+      completedAt: completedAt,
+      lastCleanRunAt: lastCleanRunAt,
+      masteredItemIds: List<String>.from(masteredItemIds),
+    );
   }
 }

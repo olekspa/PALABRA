@@ -50,17 +50,7 @@ class _FinishSummary extends ConsumerWidget {
   final RunLog? run;
 
   int get _xpEarned {
-    final tier = run?.tierReached ?? 0;
-    if (tier >= 3) {
-      return 40;
-    }
-    if (tier == 2) {
-      return 15;
-    }
-    if (tier == 1) {
-      return 5;
-    }
-    return 0;
+    return run?.xpEarned ?? 0;
   }
 
   String get _headline {
@@ -81,7 +71,13 @@ class _FinishSummary extends ConsumerWidget {
     final troubleCount = run?.troubleDetected.length ?? 0;
     final rows = run?.rowsUsed ?? ref.watch(runRowsProvider);
     final timeExtends = run?.timeExtendsUsed ?? 0;
-    final meta = ref.watch(userMetaFutureProvider).maybeWhen(
+    final xpBonus = run?.xpBonus ?? 0;
+    final streakMax = run?.streakMax ?? 0;
+    final cleanRun = run?.cleanRun ?? false;
+    final powerupsEarned = run?.powerupsEarned ?? const <String>[];
+    final meta = ref
+        .watch(userMetaFutureProvider)
+        .maybeWhen(
           data: (value) => value,
           orElse: () => null,
         );
@@ -108,99 +104,111 @@ class _FinishSummary extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                Text(
-                  _headline,
-                  style: theme.textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'You earned $_xpEarned XP.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.secondary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _FinishStatRow(
-                  label: 'Tier reached',
-                  value: run?.tierReached.toString() ?? '—',
-                ),
-                _FinishStatRow(
-                  label: 'Rows used',
-                  value: '$rows',
-                ),
-                _FinishStatRow(
-                  label: 'Time extends used',
-                  value: '$timeExtends',
-                ),
-                _FinishStatRow(
-                  label: 'Learned promotions',
-                  value: '$learnedCount',
-                ),
-                _FinishStatRow(
-                  label: 'Trouble items flagged',
-                  value: '$troubleCount',
-                ),
-                _FinishStatRow(
-                  label: 'Inventory change',
-                  value: inventoryChange,
-                ),
-                if (deckMix.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Deck mix',
-                    style: theme.textTheme.titleMedium,
+                    _headline,
+                    style: theme.textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  for (final entry in deckMix)
-                    _FinishStatRow(
-                      label: entry.level.toUpperCase(),
-                      value: '${entry.count}',
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'You earned $_xpEarned XP${xpBonus > 0 ? " (+$xpBonus bonus)" : ""}.',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: AppColors.secondary,
                     ),
-                ],
-                if (meta != null && meta.totalRuns > 0) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    'Lifetime stats',
-                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
+                  const SizedBox(height: AppSpacing.lg),
                   _FinishStatRow(
-                    label: 'Runs played',
-                    value: '${meta.totalRuns}',
+                    label: 'Tier reached',
+                    value: run?.tierReached.toString() ?? '—',
                   ),
                   _FinishStatRow(
-                    label: 'Current streak',
-                    value: '${meta.currentStreak}',
+                    label: 'Rows used',
+                    value: '$rows',
                   ),
                   _FinishStatRow(
-                    label: 'Best streak',
-                    value: '${meta.bestStreak}',
+                    label: 'Time extends used',
+                    value: '$timeExtends',
                   ),
                   _FinishStatRow(
-                    label: 'Avg matches/run',
-                    value: avgMatches,
+                    label: 'Max streak',
+                    value: '$streakMax',
                   ),
                   _FinishStatRow(
-                    label: 'Avg accuracy',
-                    value: avgAccuracy,
+                    label: 'Clean run',
+                    value: cleanRun ? 'Yes' : 'No',
                   ),
                   _FinishStatRow(
-                    label: 'Avg time/run',
-                    value: avgDuration,
+                    label: 'Learned promotions',
+                    value: '$learnedCount',
                   ),
-                ],
-                const SizedBox(height: AppSpacing.xl),
-                ElevatedButton(
-                  onPressed: () => context.go(AppRoute.preRun.path),
-                  child: const Text('Play again'),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextButton(
-                  onPressed: () => context.go(AppRoute.gate.path),
-                  child: const Text('Exit to gate'),
-                ),
+                  _FinishStatRow(
+                    label: 'Trouble items flagged',
+                    value: '$troubleCount',
+                  ),
+                  _FinishStatRow(
+                    label: 'Learned/Trouble delta',
+                    value: inventoryChange,
+                  ),
+                  _FinishStatRow(
+                    label: 'Powerups earned',
+                    value: _formatPowerups(powerupsEarned),
+                  ),
+                  if (deckMix.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Deck mix',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    for (final entry in deckMix)
+                      _FinishStatRow(
+                        label: entry.level.toUpperCase(),
+                        value: '${entry.count}',
+                      ),
+                  ],
+                  if (meta != null && meta.totalRuns > 0) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Lifetime stats',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    _FinishStatRow(
+                      label: 'Runs played',
+                      value: '${meta.totalRuns}',
+                    ),
+                    _FinishStatRow(
+                      label: 'Current streak',
+                      value: '${meta.currentStreak}',
+                    ),
+                    _FinishStatRow(
+                      label: 'Best streak',
+                      value: '${meta.bestStreak}',
+                    ),
+                    _FinishStatRow(
+                      label: 'Avg matches/run',
+                      value: avgMatches,
+                    ),
+                    _FinishStatRow(
+                      label: 'Avg accuracy',
+                      value: avgAccuracy,
+                    ),
+                    _FinishStatRow(
+                      label: 'Avg time/run',
+                      value: avgDuration,
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.xl),
+                  ElevatedButton(
+                    onPressed: () => context.go(AppRoute.preRun.path),
+                    child: const Text('Play again'),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: () => context.go(AppRoute.gate.path),
+                    child: const Text('Exit to gate'),
+                  ),
                 ],
               ),
             ),
@@ -217,6 +225,35 @@ String _formatInventoryChange({UserMeta? meta, RunLog? run}) {
   final learnedLabel = _formatSignedDelta(learned);
   final troubleLabel = _formatSignedDelta(trouble);
   return 'Learned $learnedLabel / Trouble $troubleLabel';
+}
+
+String _formatPowerups(List<String> powerups) {
+  if (powerups.isEmpty) {
+    return 'None';
+  }
+  final counts = <String, int>{};
+  for (final id in powerups) {
+    final label = _powerupLabel(id);
+    counts[label] = (counts[label] ?? 0) + 1;
+  }
+  return counts.entries
+      .map((entry) => '${entry.key} ×${entry.value}')
+      .join(', ');
+}
+
+String _powerupLabel(String id) {
+  switch (id.toLowerCase()) {
+    case 'timeextend':
+    case 'time_extend':
+    case 'timeextendtoken':
+    case 'timeextendpowerup':
+      return 'Time Extend';
+    case 'rowblaster':
+    case 'row_blaster':
+      return 'Row Blaster';
+    default:
+      return id;
+  }
 }
 
 String _formatAverageMatches(UserMeta? meta) {
@@ -284,8 +321,9 @@ class _FinishStatRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.secondary),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.secondary,
+              ),
             ),
           ),
         ],
