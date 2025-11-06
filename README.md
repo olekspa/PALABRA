@@ -65,7 +65,7 @@ flutter test           # Widget + unit tests
 - Future milestone: host a central persistence + telemetry service on the Proxmox LXC cluster (static web + API). Docs will be updated once that pipeline ships.
 
 ## Versioning
-- Current app version: **7.341**
+- Current app version: **7.342**
 - Use Conventional Commits (`feat:`, `fix:`, etc.) and follow trunk-based flow with feature branches (`feat/<ticket>`).
 - Always bump `lib/app/app_constants.dart`’s `kAppVersion` (micro increments such as 7.341 → 7.342) whenever you land code so the Gate screen reflects the deployed build.
 

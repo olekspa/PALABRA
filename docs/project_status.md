@@ -6,6 +6,7 @@
 - Ensure the Gate → Pre-run → Run → Number Drill → Finish flow exposes new telemetry (streaks, number mastery, averages) on first load.
 - Harden the sequential CEFR progression (A1 → B2) so users must master a tier before advancing, and surface XP/powerup inventory accurately during runs.
 - Prepare documentation and infra notes for the upcoming Proxmox-hosted persistence/API service (currently offline).
+- Web beta now forces `spanish` as the active course via `PALABRA_FORCE_COURSE` default to align content with the current milestone.
 
 ## Beta Demo Task List
 - [x] Replace Isar models/repositories with in-memory services seeded from JSON assets.

@@ -47,7 +47,7 @@ const bool _allowWebBetaFlag =
 const bool _allowDebugDeviceOverrideFlag =
     bool.fromEnvironment('PALABRA_ALLOW_DEBUG_DEVICE', defaultValue: true);
 const String _forcedCourseFlag =
-    String.fromEnvironment('PALABRA_FORCE_COURSE', defaultValue: '');
+    String.fromEnvironment('PALABRA_FORCE_COURSE', defaultValue: 'spanish');
 const String _requiredCourseFlag =
     String.fromEnvironment('PALABRA_REQUIRED_COURSE', defaultValue: 'spanish');
 
