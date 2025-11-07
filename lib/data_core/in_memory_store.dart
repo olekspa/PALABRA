@@ -118,6 +118,22 @@ class InMemoryStore {
     ensureActiveProfile();
   }
 
+  /// Resets the given profile to a clean slate (stats, logs, progress).
+  void resetProfile(String profileId) {
+    final meta = profileMeta(profileId);
+    final newMeta = UserMeta()
+      ..profileName = meta.profileName
+      ..createdAt = meta.createdAt
+      ..lastSeenAt = DateTime.now();
+    _profiles[profileId] = newMeta;
+    _profileUserStates[profileId] = <String, UserItemState>{};
+    _profileRunLogs[profileId] = <RunLog>[];
+    _profileAttemptLogs[profileId] = <AttemptLog>[];
+    if (activeProfileId == profileId) {
+      activeProfileId = profileId;
+    }
+  }
+
   Map<String, UserItemState> userStatesFor(String profileId) {
     return _profileUserStates.putIfAbsent(
       profileId,

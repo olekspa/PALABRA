@@ -162,9 +162,9 @@ class DeckBuilderService {
     final vocab = await _vocabularyFetcher(level);
     final states = await _progressFetcher(vocab.map((item) => item.itemId));
     final progress = meta.levelProgress[level] ?? LevelProgress();
-    if (progress.totalMatches != vocab.length) {
-      progress.totalMatches = vocab.length;
-    }
+      if (progress.totalMatches != vocab.length) {
+        progress.totalMatches = vocab.length;
+      }
     meta.levelProgress[level] = progress;
 
     final entries = vocab

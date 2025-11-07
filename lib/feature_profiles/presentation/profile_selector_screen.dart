@@ -286,21 +286,29 @@ class _ProfileListView extends StatelessWidget {
             child: Material(
               color: Colors.black.withOpacity(0.05),
               borderRadius: BorderRadius.circular(24),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                itemCount: profiles.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (context, index) {
-                  final profile = profiles[index];
-                  return _ProfileTile(
-                    summary: profile,
-                    isBusy: isBusy,
-                    onTap: () => onSelect(profile),
-                    onRename: () => onRename(profile),
-                    onDelete: () => onDelete(profile),
-                  );
-                },
+              child: Scrollbar(
+                radius: const Radius.circular(18),
+                thumbVisibility: profiles.length > 6,
+                child: GlowingOverscrollIndicator(
+                  color: Colors.white.withOpacity(0.15),
+                  axisDirection: AxisDirection.down,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    itemCount: profiles.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSpacing.md),
+                    itemBuilder: (context, index) {
+                      final profile = profiles[index];
+                      return _ProfileTile(
+                        summary: profile,
+                        isBusy: isBusy,
+                        onTap: () => onSelect(profile),
+                        onRename: () => onRename(profile),
+                        onDelete: () => onDelete(profile),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),

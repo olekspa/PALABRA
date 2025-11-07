@@ -239,6 +239,7 @@ extension on LevelProgress {
       completedAt: completedAt,
       lastCleanRunAt: lastCleanRunAt,
       masteredItemIds: List<String>.from(masteredItemIds),
+      targetMatches: targetMatches,
     );
   }
 }

@@ -29,3 +29,11 @@ jobs:
 
       - name: Run tests
         run: flutter test --coverage
+
+      - name: Run accessibility tests
+        run: flutter test test/accessibility
+
+      - name: Run web smoke test (Chrome)
+        env:
+          CHROME_EXECUTABLE: /usr/bin/google-chrome
+        run: flutter test --platform chrome test/integration/web_flow_smoke_test.dart

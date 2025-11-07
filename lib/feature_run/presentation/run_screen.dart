@@ -32,6 +32,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   late final ProviderSubscription<RunState> _runSubscription;
   late final RunTtsService _ttsService;
   DateTime? _lastTtsToastAt;
+  int? _lastAudioEchoToken;
 
   @override
   void initState() {
@@ -84,6 +85,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
     final ttsConfig = ref.watch(runTtsConfigProvider);
     final voiceLabel = ref.watch(runTtsVoiceLabelProvider);
     final configNotifier = ref.read(runTtsConfigProvider.notifier);
+    _maybeHandleAudioEcho(runState);
 
     return GradientBackground(
       child: Scaffold(
@@ -96,6 +98,9 @@ class _RunScreenState extends ConsumerState<RunScreen> {
                 : _RunView(
                     state: runState,
                     settings: settings,
+                    hintGlowEffect: runState.hintGlowEffect,
+                    audioEchoEffect: runState.audioEchoEffect,
+                    isTimerFrozen: runState.isTimerFrozen,
                     onTileTap: (row, column) {
                       if (!runState.inputLocked &&
                           column == TileColumn.right &&
@@ -132,6 +137,26 @@ class _RunScreenState extends ConsumerState<RunScreen> {
     }
   }
 
+  void _maybeHandleAudioEcho(RunState runState) {
+    final effect = runState.audioEchoEffect;
+    if (effect == null || effect.token == _lastAudioEchoToken) {
+      return;
+    }
+    _lastAudioEchoToken = effect.token;
+    final tile = BoardTile(
+      id: 'audio_echo_${effect.token}',
+      pairId: effect.pairId,
+      text: effect.spanishText,
+      column: TileColumn.right,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(_handleSpanishTileTap(tile));
+    });
+  }
+
   void _showTtsUnavailableToast() {
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) {
@@ -158,6 +183,9 @@ class _RunView extends StatelessWidget {
   const _RunView({
     required this.state,
     required this.settings,
+    required this.hintGlowEffect,
+    required this.audioEchoEffect,
+    required this.isTimerFrozen,
     required this.onTileTap,
     required this.onResume,
     required this.onAcceptTimeExtend,
@@ -172,6 +200,9 @@ class _RunView extends StatelessWidget {
 
   final RunState state;
   final RunSettings settings;
+  final HintGlowEffect? hintGlowEffect;
+  final AudioEchoEffect? audioEchoEffect;
+  final bool isTimerFrozen;
   final void Function(int row, TileColumn column) onTileTap;
   final Future<void> Function() onResume;
   final Future<void> Function() onAcceptTimeExtend;
@@ -185,9 +216,6 @@ class _RunView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasActivatablePowerups = state.powerupInventory.entries.any(
-      (entry) => entry.value > 0 && _isRunActivatablePowerup(entry.key),
-    );
     return Stack(
       children: [
         Column(
@@ -202,18 +230,19 @@ class _RunView extends StatelessWidget {
               xpBonus: state.xpBonus,
               streakCurrent: state.streakCurrent,
               streakBest: state.streakBest,
+              isTimerFrozen: isTimerFrozen,
             ),
-            if (hasActivatablePowerups) ...[
-              const SizedBox(height: AppSpacing.sm),
-              _PowerupToolbar(
-                inventory: state.powerupInventory,
-                onTap: onPowerupTap,
-              ),
-            ],
+            const SizedBox(height: AppSpacing.sm),
+            _PowerupToolbar(
+              inventory: state.powerupInventory,
+              onTap: onPowerupTap,
+            ),
             const SizedBox(height: AppSpacing.lg),
             Expanded(
               child: _RunBoard(
                 state: state,
+                hintGlowEffect: hintGlowEffect,
+                audioEchoEffect: audioEchoEffect,
                 onTileTap: (row, column) {
                   if (state.inputLocked) {
                     return;
@@ -399,6 +428,7 @@ class _RunHeader extends StatelessWidget {
     required this.xpBonus,
     required this.streakCurrent,
     required this.streakBest,
+    required this.isTimerFrozen,
   });
 
   final int progress;
@@ -409,6 +439,7 @@ class _RunHeader extends StatelessWidget {
   final int xpBonus;
   final int streakCurrent;
   final int streakBest;
+  final bool isTimerFrozen;
 
   String get _timeLabel {
     final duration = Duration(milliseconds: millisecondsRemaining);
@@ -425,16 +456,31 @@ class _RunHeader extends StatelessWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Matches $progress / $target',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            Text(
-              _timeLabel,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(color: AppColors.secondary),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _timeLabel,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: isTimerFrozen
+                        ? AppColors.warning
+                        : AppColors.secondary,
+                  ),
+                ),
+                if (isTimerFrozen)
+                  Text(
+                    'Timer frozen',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.warning,
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
@@ -474,11 +520,19 @@ class _RunHeader extends StatelessWidget {
   }
 }
 
-class _PowerupToolbar extends StatelessWidget {
+class _PowerupToolbar extends ConsumerWidget {
   const _PowerupToolbar({
     required this.inventory,
     required this.onTap,
   });
+
+  static const List<String> _runtimePowerups = <String>[
+    'timeExtend',
+    'hintGlow',
+    'freezeTimer',
+    'autoMatch',
+    'audioEcho',
+  ];
 
   final Map<String, int> inventory;
   final void Function(String id) onTap;
@@ -487,12 +541,10 @@ class _PowerupToolbar extends StatelessWidget {
     switch (id) {
       case 'timeExtend':
         return '+60s';
-      case 'rowBlaster':
-        return 'Row Blaster';
       case 'hintGlow':
         return 'Hint Glow';
       case 'freezeTimer':
-        return 'Freeze';
+        return 'Freeze Timer';
       case 'autoMatch':
         return 'Auto-Match';
       case 'audioEcho':
@@ -503,66 +555,75 @@ class _PowerupToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final entries = inventory.entries
-        .where(
-          (entry) => entry.value > 0 && _isRunActivatablePowerup(entry.key),
-        )
-        .toList(growable: false);
-    if (entries.isEmpty) {
-      return const SizedBox.shrink();
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(runControllerProvider.notifier);
     return Wrap(
       spacing: AppSpacing.xs.toDouble(),
       runSpacing: AppSpacing.xs.toDouble(),
       children: [
-        for (final entry in entries)
-          ElevatedButton(
-            onPressed: entry.key == 'timeExtend'
-                ? () => onTap(entry.key)
-                : null,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(_labelFor(entry.key)),
-                const SizedBox(width: AppSpacing.xxs),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xxs,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    entry.value.toString(),
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ),
-              ],
-            ),
+        for (final id in _runtimePowerups)
+          _PowerupChip(
+            id: id,
+            label: _labelFor(id),
+            count: inventory[id] ?? 0,
+            enabled: controller.isPowerupReady(id),
+            onTap: onTap,
           ),
       ],
     );
   }
 }
 
-bool _isRunActivatablePowerup(String id) {
-  switch (id.toLowerCase()) {
-    case 'timeextend':
-    case 'time_extend':
-    case 'timeextendtoken':
-    case 'timeextendpowerup':
-      return true;
-    default:
-      return false;
+class _PowerupChip extends StatelessWidget {
+  const _PowerupChip({
+    required this.id,
+    required this.label,
+    required this.count,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String id;
+  final String label;
+  final int count;
+  final bool enabled;
+  final void Function(String id) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isAvailable = count > 0 && enabled;
+    return ElevatedButton(
+      onPressed: isAvailable ? () => onTap(id) : null,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          const SizedBox(width: AppSpacing.xxs),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxs,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: isAvailable
+                  ? AppColors.secondary.withValues(alpha: 0.12)
+                  : Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              count.toString(),
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -570,10 +631,14 @@ class _RunBoard extends StatelessWidget {
   const _RunBoard({
     required this.state,
     required this.onTileTap,
+    required this.hintGlowEffect,
+    required this.audioEchoEffect,
   });
 
   final RunState state;
   final void Function(int row, TileColumn column) onTileTap;
+  final HintGlowEffect? hintGlowEffect;
+  final AudioEchoEffect? audioEchoEffect;
 
   @override
   Widget build(BuildContext context) {
@@ -593,6 +658,8 @@ class _RunBoard extends StatelessWidget {
               mismatchEffect: state.mismatchEffect,
               onTileTap: onTileTap,
               inputLocked: state.inputLocked,
+              hintGlowEffect: hintGlowEffect,
+              audioEchoEffect: audioEchoEffect,
             ),
           ),
       ],
@@ -608,6 +675,8 @@ class _BoardRowView extends StatelessWidget {
     required this.mismatchEffect,
     required this.onTileTap,
     required this.inputLocked,
+    required this.hintGlowEffect,
+    required this.audioEchoEffect,
   });
 
   final int index;
@@ -616,6 +685,8 @@ class _BoardRowView extends StatelessWidget {
   final MismatchEffect? mismatchEffect;
   final void Function(int row, TileColumn column) onTileTap;
   final bool inputLocked;
+  final HintGlowEffect? hintGlowEffect;
+  final AudioEchoEffect? audioEchoEffect;
 
   bool _isSelected(TileColumn column) {
     return selection != null &&
@@ -625,6 +696,22 @@ class _BoardRowView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hintEnglish = hintGlowEffect?.englishRow == index;
+    final bool hintSpanish = hintGlowEffect?.spanishRow == index;
+    final bool echoEnglish = audioEchoEffect?.englishRow == index;
+    final bool echoSpanish = audioEchoEffect?.spanishRow == index;
+    final bool leftHighlight = hintEnglish || echoEnglish;
+    final bool rightHighlight = hintSpanish || echoSpanish;
+    final Color? leftHighlightColor = echoEnglish
+        ? AppColors.secondary
+        : hintEnglish
+        ? AppColors.warning
+        : null;
+    final Color? rightHighlightColor = echoSpanish
+        ? AppColors.secondary
+        : hintSpanish
+        ? AppColors.warning
+        : null;
     return Row(
       children: [
         Expanded(
@@ -641,6 +728,8 @@ class _BoardRowView extends StatelessWidget {
                 mismatchToken: mismatchEffect?.token ?? 0,
                 onTap: () => onTileTap(index, TileColumn.left),
                 enabled: !inputLocked && row.left.pairId.isNotEmpty,
+                isHighlighted: leftHighlight,
+                highlightColor: leftHighlightColor,
               ),
             ),
           ),
@@ -660,6 +749,8 @@ class _BoardRowView extends StatelessWidget {
                 mismatchToken: mismatchEffect?.token ?? 0,
                 onTap: () => onTileTap(index, TileColumn.right),
                 enabled: !inputLocked && row.right.pairId.isNotEmpty,
+                isHighlighted: rightHighlight,
+                highlightColor: rightHighlightColor,
               ),
             ),
           ),
@@ -695,6 +786,8 @@ class _RunTile extends StatefulWidget {
     required this.mismatchToken,
     required this.onTap,
     required this.enabled,
+    this.isHighlighted = false,
+    this.highlightColor,
   });
 
   final String text;
@@ -703,6 +796,8 @@ class _RunTile extends StatefulWidget {
   final int mismatchToken;
   final VoidCallback onTap;
   final bool enabled;
+  final bool isHighlighted;
+  final Color? highlightColor;
 
   @override
   State<_RunTile> createState() => _RunTileState();
@@ -761,16 +856,22 @@ class _RunTileState extends State<_RunTile>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool mismatch = widget.isMismatch;
-    final background = mismatch
+    final highlight = widget.isHighlighted;
+    final Color baseBackground = mismatch
         ? AppColors.danger.withValues(alpha: 0.18)
         : widget.isSelected
         ? AppColors.secondary.withValues(alpha: 0.2)
         : AppColors.surfaceVariant;
-    final border = mismatch
+    final Color baseBorder = mismatch
         ? AppColors.danger
         : widget.isSelected
         ? AppColors.secondary
         : AppColors.outline;
+    final Color highlightColor = widget.highlightColor ?? AppColors.secondary;
+    final Color background = highlight
+        ? highlightColor.withValues(alpha: 0.18)
+        : baseBackground;
+    final Color border = highlight ? highlightColor : baseBorder;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),

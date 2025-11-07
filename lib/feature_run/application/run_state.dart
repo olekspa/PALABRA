@@ -50,6 +50,34 @@ class ConfettiEffect {
   final double intensity;
 }
 
+class HintGlowEffect {
+  const HintGlowEffect({
+    required this.token,
+    required this.englishRow,
+    required this.spanishRow,
+  });
+
+  final int token;
+  final int englishRow;
+  final int spanishRow;
+}
+
+class AudioEchoEffect {
+  const AudioEchoEffect({
+    required this.token,
+    required this.spanishRow,
+    required this.englishRow,
+    required this.spanishText,
+    required this.pairId,
+  });
+
+  final int token;
+  final int spanishRow;
+  final int englishRow;
+  final String spanishText;
+  final String pairId;
+}
+
 class BoardTile {
   const BoardTile({
     required this.id,
@@ -95,12 +123,15 @@ class RunState {
     required this.mismatchEffect,
     required this.celebrationEffect,
     required this.confettiEffect,
+    required this.hintGlowEffect,
+    required this.audioEchoEffect,
     required this.isResolving,
     required this.deckRemaining,
     required this.millisecondsRemaining,
     required this.pausedAtTierOne,
     required this.pausedAtTierTwo,
     required this.inputLocked,
+    required this.isTimerFrozen,
     required this.timeExtendTokens,
     required this.timeExtendsUsed,
     required this.showingTimeExtendOffer,
@@ -128,12 +159,15 @@ class RunState {
       mismatchEffect: null,
       celebrationEffect: null,
       confettiEffect: null,
+      hintGlowEffect: null,
+      audioEchoEffect: null,
       isResolving: false,
       deckRemaining: 0,
       millisecondsRemaining: 60000,
       pausedAtTierOne: false,
       pausedAtTierTwo: false,
       inputLocked: false,
+      isTimerFrozen: false,
       timeExtendTokens: 0,
       timeExtendsUsed: 0,
       showingTimeExtendOffer: false,
@@ -170,12 +204,15 @@ class RunState {
       mismatchEffect: null,
       celebrationEffect: null,
       confettiEffect: null,
+      hintGlowEffect: null,
+      audioEchoEffect: null,
       isResolving: false,
       deckRemaining: deckRemaining,
       millisecondsRemaining: millisecondsRemaining,
       pausedAtTierOne: false,
       pausedAtTierTwo: false,
       inputLocked: false,
+      isTimerFrozen: false,
       timeExtendTokens: timeExtendTokens,
       timeExtendsUsed: timeExtendsUsed,
       showingTimeExtendOffer: false,
@@ -201,12 +238,15 @@ class RunState {
   final MismatchEffect? mismatchEffect;
   final CelebrationEffect? celebrationEffect;
   final ConfettiEffect? confettiEffect;
+  final HintGlowEffect? hintGlowEffect;
+  final AudioEchoEffect? audioEchoEffect;
   final bool isResolving;
   final int deckRemaining;
   final int millisecondsRemaining;
   final bool pausedAtTierOne;
   final bool pausedAtTierTwo;
   final bool inputLocked;
+  final bool isTimerFrozen;
   final int timeExtendTokens;
   final int timeExtendsUsed;
   final bool showingTimeExtendOffer;
@@ -238,12 +278,17 @@ class RunState {
     bool clearCelebration = false,
     ConfettiEffect? confettiEffect,
     bool clearConfetti = false,
+    HintGlowEffect? hintGlowEffect,
+    bool clearHintGlow = false,
+    AudioEchoEffect? audioEchoEffect,
+    bool clearAudioEcho = false,
     bool? isResolving,
     int? deckRemaining,
     int? millisecondsRemaining,
     bool? pausedAtTierOne,
     bool? pausedAtTierTwo,
     bool? inputLocked,
+    bool? isTimerFrozen,
     int? timeExtendTokens,
     int? timeExtendsUsed,
     bool? showingTimeExtendOffer,
@@ -272,6 +317,12 @@ class RunState {
       confettiEffect: clearConfetti
           ? null
           : confettiEffect ?? this.confettiEffect,
+      hintGlowEffect: clearHintGlow
+          ? null
+          : hintGlowEffect ?? this.hintGlowEffect,
+      audioEchoEffect: clearAudioEcho
+          ? null
+          : audioEchoEffect ?? this.audioEchoEffect,
       isResolving: isResolving ?? this.isResolving,
       deckRemaining: deckRemaining ?? this.deckRemaining,
       millisecondsRemaining:
@@ -279,6 +330,7 @@ class RunState {
       pausedAtTierOne: pausedAtTierOne ?? this.pausedAtTierOne,
       pausedAtTierTwo: pausedAtTierTwo ?? this.pausedAtTierTwo,
       inputLocked: inputLocked ?? this.inputLocked,
+      isTimerFrozen: isTimerFrozen ?? this.isTimerFrozen,
       timeExtendTokens: timeExtendTokens ?? this.timeExtendTokens,
       timeExtendsUsed: timeExtendsUsed ?? this.timeExtendsUsed,
       showingTimeExtendOffer:

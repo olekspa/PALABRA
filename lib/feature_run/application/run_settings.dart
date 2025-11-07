@@ -46,9 +46,9 @@ class RunSettings {
   int targetForProgress(LevelProgress? progress) {
     final minTarget = minTargetMatches;
     final maxTarget = targetMatches;
-    final mastered = progress?.matchesCleared ?? 0;
-    final target = minTarget + mastered;
-    return target.clamp(minTarget, maxTarget);
+    final candidate = progress?.targetMatches ?? minTarget;
+    final clamped = candidate.clamp(minTarget, maxTarget);
+    return clamped is int ? clamped : clamped.round();
   }
 
   int tierOneThresholdFor(int target) => _scaledThreshold(tierOneRatio, target);

@@ -55,6 +55,8 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 ## Testing & Quality
 - `flutter test` exercises profile logic, deck building, run flow, finish screen stats, and the new number drill.
 - `test/integration/web_flow_smoke_test.dart` walks the Gate → Pre-run → Run → Finish path with seeded data.
+- Browser smoke test: `flutter test --platform chrome test/integration/web_flow_smoke_test.dart` (requires Chrome).
+- Accessibility suite: `flutter test test/accessibility` uses semantics checks to ensure critical controls expose labels/roles.
 - Add new widget tests for UI changes and keep run-time animations short to avoid pump timeouts.
 
 ## Release & Deployment

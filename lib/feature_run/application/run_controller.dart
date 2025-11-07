@@ -58,6 +58,26 @@ class RunController extends StateNotifier<RunState> {
   final AddAttemptLogs _addAttemptLogs;
   final UserMetaRepository _userMetaRepository;
   final RunFeedbackService _feedbackService;
+  static const Map<String, int> _perRunPowerupGrants = <String, int>{
+    'hintGlow': 1,
+    'freezeTimer': 1,
+    'autoMatch': 1,
+    'audioEcho': 2,
+  };
+  static const Map<String, int> _powerupRunLimits = <String, int>{
+    'hintGlow': 2,
+    'freezeTimer': 1,
+    'autoMatch': 1,
+    'audioEcho': 2,
+  };
+  static const Map<String, Duration> _powerupCooldownDurations =
+      <String, Duration>{
+        'hintGlow': Duration(seconds: 25),
+        'audioEcho': Duration(seconds: 15),
+      };
+  static const Duration _freezeTimerDuration = Duration(seconds: 10);
+  static const Duration _hintGlowDuration = Duration(seconds: 2);
+  static const Duration _audioEchoHighlightDuration = Duration(seconds: 2);
   final ProfileService _profileService;
 
   final List<VocabItem> _deckQueue = <VocabItem>[];
@@ -88,6 +108,14 @@ class RunController extends StateNotifier<RunState> {
   String _activeLevelId = 'a1';
   int _tierOneThreshold = 1;
   int _tierTwoThreshold = 1;
+  final Map<String, DateTime> _powerupCooldowns = <String, DateTime>{};
+  final Map<String, int> _powerupUses = <String, int>{};
+  Timer? _hintGlowTimer;
+  Timer? _audioEchoTimer;
+  Timer? _freezeTimer;
+  bool _freezeTimerActive = false;
+  int _hintGlowSalt = 0;
+  int _audioEchoSalt = 0;
 
   DeckBuildResult? _deckResult;
   DateTime _runStartedAt = DateTime.now();
@@ -145,8 +173,8 @@ class RunController extends StateNotifier<RunState> {
     _randomizeRightColumn(initialBoard);
     final balancedBoard = _ensureBoardInvariant(initialBoard);
     final initialInventory = _userMeta != null
-        ? _buildPowerupInventory(_userMeta!)
-        : const <String, int>{};
+        ? _buildInitialPowerupInventory(_userMeta!)
+        : Map<String, int>.from(_perRunPowerupGrants);
 
     state = RunState.ready(
       rows: _settings.rows,
@@ -205,6 +233,17 @@ class RunController extends StateNotifier<RunState> {
         levelProgress.matchesCleared >= levelProgress.totalMatches &&
         levelProgress.completedAt == null) {
       levelProgress.completedAt = runLog.completedAt ?? DateTime.now();
+    }
+    if (success) {
+      final currentTarget = max(levelProgress.targetMatches, _targetMatches);
+      final nextTarget = min(_settings.targetMatches, currentTarget + 1);
+      levelProgress.targetMatches = nextTarget;
+    } else {
+      final clamped = levelProgress.targetMatches.clamp(
+        _settings.minTargetMatches,
+        _settings.targetMatches,
+      );
+      levelProgress.targetMatches = clamped is int ? clamped : clamped.round();
     }
     meta.levelProgress[_activeLevelId] = levelProgress;
 
@@ -325,10 +364,16 @@ class RunController extends StateNotifier<RunState> {
     _celebrationSalt = 0;
     _cancelConfettiTimer();
     _confettiSalt = 0;
+    _cancelHintGlowTimer();
+    _cancelAudioEchoTimer();
+    _cancelFreezeTimer();
+    _freezeTimerActive = false;
     _dirtyItemIds.clear();
     _cancelProgressPersistTimer();
     _matchedThisRun.clear();
     _powerupsEarnedThisRun.clear();
+    _powerupCooldowns.clear();
+    _powerupUses.clear();
     _xpEarned = 0;
     _xpBonus = 0;
     _currentStreak = 0;
@@ -342,7 +387,7 @@ class RunController extends StateNotifier<RunState> {
     return BoardRow(left: left, right: right);
   }
 
-  void _handleCorrect(String itemId) {
+  void _handleCorrect(String itemId, {bool awardXp = true}) {
     final itemState = _ensureItemState(itemId)
       ..seenCount += 1
       ..correctStreak += 1
@@ -360,22 +405,24 @@ class RunController extends StateNotifier<RunState> {
     }
     _markStateDirty(itemId);
 
-    _currentStreak += 1;
-    _bestStreak = max(_bestStreak, _currentStreak);
-    var gainedXp = _settings.baseMatchXp;
-    final streakBonus = _settings.streakBonusTable[_currentStreak] ?? 0;
-    if (streakBonus > 0) {
-      _xpBonus += streakBonus;
-      gainedXp += streakBonus;
-      _triggerConfetti(intensity: 0.35);
+    if (awardXp) {
+      _currentStreak += 1;
+      _bestStreak = max(_bestStreak, _currentStreak);
+      var gainedXp = _settings.baseMatchXp;
+      final streakBonus = _settings.streakBonusTable[_currentStreak] ?? 0;
+      if (streakBonus > 0) {
+        _xpBonus += streakBonus;
+        gainedXp += streakBonus;
+        _triggerConfetti(intensity: 0.35);
+      }
+      _xpEarned += gainedXp;
     }
-    _xpEarned += gainedXp;
     _matchedThisRun.add(itemId);
     state = this.state.copyWith(
       xpEarned: _xpEarned,
       xpBonus: _xpBonus,
-      streakCurrent: _currentStreak,
-      streakBest: _bestStreak,
+      streakCurrent: awardXp ? _currentStreak : state.streakCurrent,
+      streakBest: awardXp ? _bestStreak : state.streakBest,
     );
     _evaluatePowerupThresholds();
   }
@@ -409,9 +456,27 @@ class RunController extends StateNotifier<RunState> {
 
   void activatePowerup(String powerupId) {
     final canonicalId = _canonicalizePowerupId(powerupId);
-    if (canonicalId == 'timeExtend') {
-      _applyManualTimeExtend();
+    switch (canonicalId) {
+      case 'timeExtend':
+        _applyManualTimeExtend();
+        break;
+      case 'hintGlow':
+        _activateHintGlow();
+        break;
+      case 'freezeTimer':
+        _activateFreezeTimer();
+        break;
+      case 'autoMatch':
+        _activateAutoMatch();
+        break;
+      case 'audioEcho':
+        _activateAudioEcho();
+        break;
     }
+  }
+
+  bool isPowerupReady(String powerupId) {
+    return _canUsePowerup(powerupId);
   }
 
   void _applyManualTimeExtend() {
@@ -443,6 +508,142 @@ class RunController extends StateNotifier<RunState> {
       powerupInventory: updatedInventory,
     );
     unawaited(_userMetaRepository.save(meta));
+  }
+
+  void _activateHintGlow() {
+    if (!_canUsePowerup('hintGlow')) {
+      return;
+    }
+    final englishRow = _pickRandomEnglishRow();
+    if (englishRow == null) {
+      return;
+    }
+    final pairId = state.board[englishRow].left.pairId;
+    final spanishRow = _findRowForPair(pairId, TileColumn.right);
+    if (spanishRow == null) {
+      return;
+    }
+    if (!_consumePowerupCharge('hintGlow')) {
+      return;
+    }
+    final effect = HintGlowEffect(
+      token: ++_hintGlowSalt,
+      englishRow: englishRow,
+      spanishRow: spanishRow,
+    );
+    _cancelHintGlowTimer();
+    state = state.copyWith(hintGlowEffect: effect);
+    _hintGlowTimer = Timer(_hintGlowDuration, () {
+      if (!mounted || _runFinished) {
+        return;
+      }
+      if (state.hintGlowEffect?.token == effect.token) {
+        state = state.copyWith(clearHintGlow: true);
+      }
+    });
+    final cooldown = _powerupCooldownDurations['hintGlow'];
+    _startCooldown('hintGlow', cooldown);
+  }
+
+  void _activateFreezeTimer() {
+    if (_freezeTimerActive || !_canUsePowerup('freezeTimer')) {
+      return;
+    }
+    if (!_consumePowerupCharge('freezeTimer')) {
+      return;
+    }
+    _freezeTimerActive = true;
+    _timerService.pause();
+    state = state.copyWith(isTimerFrozen: true);
+    _cancelFreezeTimer();
+    _freezeTimer = Timer(_freezeTimerDuration, () {
+      if (!_runFinished) {
+        _timerService.resume();
+      }
+      _freezeTimerActive = false;
+      if (!mounted) {
+        return;
+      }
+      state = state.copyWith(isTimerFrozen: false);
+    });
+  }
+
+  void _activateAutoMatch() {
+    if (!_canUsePowerup('autoMatch')) {
+      return;
+    }
+    final englishRow = _pickRandomEnglishRow();
+    if (englishRow == null) {
+      return;
+    }
+    final englishTile = state.board[englishRow].left;
+    final pairId = englishTile.pairId;
+    final spanishRow = _findRowForPair(pairId, TileColumn.right);
+    if (pairId.isEmpty || spanishRow == null) {
+      return;
+    }
+    if (!_consumePowerupCharge('autoMatch')) {
+      return;
+    }
+    final leftSelection = TileSelection(
+      column: TileColumn.left,
+      row: englishRow,
+      pairId: pairId,
+    );
+    final rightSelection = TileSelection(
+      column: TileColumn.right,
+      row: spanishRow,
+      pairId: pairId,
+    );
+    _logAttempt(
+      first: leftSelection,
+      second: rightSelection,
+      correct: true,
+      resultingProgress: state.progress + 1,
+    );
+    _handleCorrect(pairId, awardXp: false);
+    _resolveMatch(leftSelection, rightSelection);
+  }
+
+  void _activateAudioEcho() {
+    if (!_canUsePowerup('audioEcho')) {
+      return;
+    }
+    final spanishRow = _pickRandomSpanishRow();
+    if (spanishRow == null) {
+      return;
+    }
+    final spanishTile = state.board[spanishRow].right;
+    final pairId = spanishTile.pairId;
+    if (pairId.isEmpty) {
+      return;
+    }
+    final englishRow = _findRowForPair(pairId, TileColumn.left);
+    if (englishRow == null) {
+      return;
+    }
+    if (!_consumePowerupCharge('audioEcho')) {
+      return;
+    }
+    final effect = AudioEchoEffect(
+      token: ++_audioEchoSalt,
+      spanishRow: spanishRow,
+      englishRow: englishRow,
+      spanishText: spanishTile.text,
+      pairId: pairId,
+    );
+    state = state.copyWith(audioEchoEffect: effect);
+    _cancelAudioEchoTimer();
+    _audioEchoTimer = Timer(_audioEchoHighlightDuration, () {
+      if (!mounted || _runFinished) {
+        return;
+      }
+      if (state.audioEchoEffect?.token == effect.token) {
+        state = state.copyWith(clearAudioEcho: true);
+      }
+    });
+    final cooldown = _powerupCooldownDurations['audioEcho'];
+    _startCooldown('audioEcho', cooldown);
   }
 
   void _markStateDirty(String itemId) {
@@ -714,6 +915,18 @@ class RunController extends StateNotifier<RunState> {
       return;
     }
     _runFinished = true;
+    _cancelHintGlowTimer();
+    _cancelAudioEchoTimer();
+    _cancelFreezeTimer();
+    if (_freezeTimerActive) {
+      _freezeTimerActive = false;
+      _timerService.resume();
+    }
+    state = state.copyWith(
+      clearHintGlow: true,
+      clearAudioEcho: true,
+      isTimerFrozen: false,
+    );
     _refillSequenceActive = false;
     _clearMismatchEffect();
     _clearCelebrationEffect();
@@ -781,6 +994,17 @@ class RunController extends StateNotifier<RunState> {
     final inventory = Map<String, int>.from(meta.powerupInventory);
     inventory['timeExtend'] = meta.timeExtendTokens;
     inventory['rowBlaster'] = meta.rowBlasterCharges;
+    return inventory;
+  }
+
+  Map<String, int> _buildInitialPowerupInventory(UserMeta meta) {
+    final inventory = _buildPowerupInventory(meta);
+    for (final entry in _perRunPowerupGrants.entries) {
+      if (entry.value <= 0) {
+        continue;
+      }
+      inventory[entry.key] = (inventory[entry.key] ?? 0) + entry.value;
+    }
     return inventory;
   }
 
@@ -852,16 +1076,40 @@ class RunController extends StateNotifier<RunState> {
       case 'rowblaster':
       case 'row_blaster':
         return 'rowBlaster';
+      case 'hintglow':
+      case 'hint_glow':
+        return 'hintGlow';
+      case 'freezetimer':
+      case 'freeze_timer':
+        return 'freezeTimer';
+      case 'automatch':
+      case 'auto_match':
+        return 'autoMatch';
+      case 'audioecho':
+      case 'audio_echo':
+        return 'audioEcho';
       default:
         return id;
     }
   }
 
   void _setInventoryCount(UserMeta meta, String id, int count) {
-    if (count <= 0) {
-      meta.powerupInventory.remove(id);
-    } else {
-      meta.powerupInventory[id] = count;
+    final canonical = _canonicalizePowerupId(id);
+    final next = max(0, count);
+    switch (canonical) {
+      case 'timeExtend':
+        meta.timeExtendTokens = next;
+        break;
+      case 'rowBlaster':
+        meta.rowBlasterCharges = next;
+        break;
+      default:
+        if (next <= 0) {
+          meta.powerupInventory.remove(canonical);
+        } else {
+          meta.powerupInventory[canonical] = next;
+        }
+        break;
     }
   }
 
@@ -896,6 +1144,103 @@ class RunController extends StateNotifier<RunState> {
     return 1;
   }
 
+  bool _canUsePowerup(String powerupId) {
+    final canonical = _canonicalizePowerupId(powerupId);
+    if (_runFinished) {
+      return false;
+    }
+    final count = state.powerupInventory[canonical] ?? 0;
+    if (count <= 0) {
+      return false;
+    }
+    final limit = _powerupRunLimits[canonical];
+    if (limit != null && (_powerupUses[canonical] ?? 0) >= limit) {
+      return false;
+    }
+    final cooldownUntil = _powerupCooldowns[canonical];
+    if (cooldownUntil != null && cooldownUntil.isAfter(DateTime.now())) {
+      return false;
+    }
+    return true;
+  }
+
+  bool _consumePowerupCharge(String powerupId) {
+    final canonical = _canonicalizePowerupId(powerupId);
+    final current = state.powerupInventory[canonical] ?? 0;
+    if (current <= 0) {
+      return false;
+    }
+    final updatedInventory = Map<String, int>.from(state.powerupInventory);
+    updatedInventory[canonical] = current - 1;
+    int? updatedTimeExtendTokens;
+    if (canonical == 'timeExtend') {
+      updatedTimeExtendTokens = max(0, state.timeExtendTokens - 1);
+    }
+    state = state.copyWith(
+      powerupInventory: updatedInventory,
+      timeExtendTokens: updatedTimeExtendTokens ?? state.timeExtendTokens,
+    );
+    final meta = _userMeta;
+    if (meta != null) {
+      _setInventoryCount(meta, canonical, current - 1);
+      unawaited(_userMetaRepository.save(meta));
+    }
+    _powerupUses[canonical] = (_powerupUses[canonical] ?? 0) + 1;
+    return true;
+  }
+
+  void _startCooldown(String powerupId, Duration? duration) {
+    final canonical = _canonicalizePowerupId(powerupId);
+    if (duration == null || duration <= Duration.zero) {
+      _powerupCooldowns.remove(canonical);
+      return;
+    }
+    _powerupCooldowns[canonical] = DateTime.now().add(duration);
+  }
+
+  int? _pickRandomEnglishRow() {
+    final candidates = <int>[];
+    for (var i = 0; i < state.board.length; i++) {
+      final tile = state.board[i].left;
+      if (tile.pairId.isNotEmpty) {
+        candidates.add(i);
+      }
+    }
+    if (candidates.isEmpty) {
+      return null;
+    }
+    return candidates[_random.nextInt(candidates.length)];
+  }
+
+  int? _pickRandomSpanishRow() {
+    final candidates = <int>[];
+    for (var i = 0; i < state.board.length; i++) {
+      final tile = state.board[i].right;
+      if (tile.pairId.isNotEmpty) {
+        candidates.add(i);
+      }
+    }
+    if (candidates.isEmpty) {
+      return null;
+    }
+    return candidates[_random.nextInt(candidates.length)];
+  }
+
+  int? _findRowForPair(String pairId, TileColumn column) {
+    if (pairId.isEmpty) {
+      return null;
+    }
+    for (var i = 0; i < state.board.length; i++) {
+      final tile = column == TileColumn.left
+          ? state.board[i].left
+          : state.board[i].right;
+      if (tile.pairId == pairId) {
+        return i;
+      }
+    }
+    return null;
+  }
+
   void _maybeRefillPending({bool force = false}) {
     if (_pendingRefillRows.isEmpty || !_canContinueRefill()) {
       return;
@@ -917,6 +1262,21 @@ class RunController extends StateNotifier<RunState> {
   void _cancelMismatchTimer() {
     _mismatchTimer?.cancel();
     _mismatchTimer = null;
+  }
+
+  void _cancelHintGlowTimer() {
+    _hintGlowTimer?.cancel();
+    _hintGlowTimer = null;
+  }
+
+  void _cancelAudioEchoTimer() {
+    _audioEchoTimer?.cancel();
+    _audioEchoTimer = null;
+  }
+
+  void _cancelFreezeTimer() {
+    _freezeTimer?.cancel();
+    _freezeTimer = null;
   }
 
   void _scheduleCelebrationClear(CelebrationEffect effect) {
