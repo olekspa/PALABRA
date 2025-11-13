@@ -61,7 +61,7 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 - Add new widget tests for UI changes and keep run-time animations short to avoid pump timeouts.
 
 ## Release & Deployment
-- Application version is surfaced on the Gate screen and must be bumped in `lib/app/app_constants.dart` for every change (current: **7.345**).
+- Application version is surfaced on the Gate screen and must be bumped in `lib/app/app_constants.dart` for every change (current: **7.351**).
 - Deploy to the Proxmox LXC container with:
   ```bash
   deploy_palabra_web
@@ -91,7 +91,7 @@ When set (as in our live build), the profile selector lists remote profiles, pul
 ## Working Agreements
 - Branch naming: `feat/`, `fix/`, `chore/`, etc., using Conventional Commit prefixes.
 - Keep the workspace lint-clean (`flutter analyze`) and add tests alongside new logic.
-- Version bump rule: increment the micro component (e.g., 7.345 → 7.346) whenever the repository changes.
+- Version bump rule: increment the micro component (e.g., 7.350 → 7.351) whenever the repository changes.
 - Store Piper `.onnx` models under `tool/` (ignored from commits); generated audio output belongs in `assets/audio`.
 
 ## Next Up

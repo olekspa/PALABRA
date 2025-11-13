@@ -1,10 +1,10 @@
-# Palabra Project Status — v7.345
+# Palabra Project Status — v7.351
 
 _Last updated: 2025-11-06_
 
 ## Snapshot
 - **Build target:** Web-first Spanish vocabulary trainer with timed matching, streak XP, powerups, and a number-listening drill.
-- **Current release:** 7.345 (forced Spanish course, multi-profile selector, offline audio library, remote profile API sync enabled on the LXC host).
+- **Current release:** 7.351 (forced Spanish course, multi-profile selector, offline audio library, remote profile API sync enabled on the LXC host).
 - **Deployment:** Static web bundle served from the Proxmox LXC (nginx). `deploy_palabra_web` handles fetch, build, rsync, and reload.
 - **Persistence:** In-memory store persisted to shared_preferences for offline dev; production builds hit the FastAPI profile sync (`/api`) on the LXC so every profile/state change is written server-side; Piper-generated audio assets bundled in `assets/audio`.
 
