@@ -108,6 +108,8 @@ class RunController extends StateNotifier<RunState> {
   String _activeLevelId = 'a1';
   int _tierOneThreshold = 1;
   int _tierTwoThreshold = 1;
+  bool _tierOneCelebrated = false;
+  bool _tierTwoCelebrated = false;
   final Map<String, DateTime> _powerupCooldowns = <String, DateTime>{};
   final Map<String, int> _powerupUses = <String, int>{};
   Timer? _hintGlowTimer;
@@ -234,17 +236,25 @@ class RunController extends StateNotifier<RunState> {
         levelProgress.completedAt == null) {
       levelProgress.completedAt = runLog.completedAt ?? DateTime.now();
     }
+    final minTarget = _settings.minTargetMatches;
+    final maxTarget = _settings.targetMatches;
+    levelProgress.targetMatches =
+        max(levelProgress.targetMatches, _targetMatches);
+
     if (success) {
-      final currentTarget = max(levelProgress.targetMatches, _targetMatches);
-      final nextTarget = min(_settings.targetMatches, currentTarget + 1);
-      levelProgress.targetMatches = nextTarget;
+      final interval = max(1, _settings.successesPerTargetIncrement);
+      levelProgress.successRampProgress += 1;
+      while (levelProgress.successRampProgress >= interval &&
+          levelProgress.targetMatches < maxTarget) {
+        levelProgress.successRampProgress -= interval;
+        levelProgress.targetMatches += 1;
+      }
     } else {
-      final clamped = levelProgress.targetMatches.clamp(
-        _settings.minTargetMatches,
-        _settings.targetMatches,
-      );
-      levelProgress.targetMatches = clamped is int ? clamped : clamped.round();
+      levelProgress.successRampProgress = 0;
     }
+
+    final clamped = levelProgress.targetMatches.clamp(minTarget, maxTarget);
+    levelProgress.targetMatches = clamped is int ? clamped : clamped.round();
     meta.levelProgress[_activeLevelId] = levelProgress;
 
     for (final entry in _settings.powerupXpThresholds.entries) {
@@ -323,14 +333,6 @@ class RunController extends StateNotifier<RunState> {
     super.dispose();
   }
 
-  Future<void> resumeFromPause() async {
-    if (!state.inputLocked || _runFinished) {
-      return;
-    }
-    state = state.copyWith(inputLocked: false);
-    _timerService.resume();
-  }
-
   Future<void> _loadUserMeta() async {
     _userMeta = await _userMetaRepository.getOrCreate();
   }
@@ -379,6 +381,8 @@ class RunController extends StateNotifier<RunState> {
     _currentStreak = 0;
     _bestStreak = 0;
     _cleanRun = true;
+    _tierOneCelebrated = false;
+    _tierTwoCelebrated = false;
   }
 
   BoardRow _createRow(VocabItem item) {
@@ -497,10 +501,7 @@ class RunController extends StateNotifier<RunState> {
     _timerService.extendBy(_settings.timeExtendDurationMs);
     final updatedRemaining = baseRemaining + _settings.timeExtendDurationMs;
     final updatedInventory = Map<String, int>.from(state.powerupInventory);
-    updatedInventory['timeExtend'] = max(
-      0,
-      (updatedInventory['timeExtend'] ?? 0) - 1,
-    );
+    updatedInventory['timeExtend'] = meta.timeExtendTokens;
     state = state.copyWith(
       millisecondsRemaining: updatedRemaining,
       timeExtendTokens: meta.timeExtendTokens,
@@ -877,28 +878,28 @@ class RunController extends StateNotifier<RunState> {
   }
 
   void _checkTierPause() {
-    if (!state.pausedAtTierOne && state.progress == _tierOneThreshold) {
-      _enterPause(pausedAtTierOne: true);
-    } else if (!state.pausedAtTierTwo && state.progress == _tierTwoThreshold) {
-      _enterPause(pausedAtTierTwo: true);
-    } else if (state.progress >= _targetMatches) {
+    if (!_tierOneCelebrated && state.progress >= _tierOneThreshold) {
+      _handleTierMilestone(tier: 1);
+    }
+    if (!_tierTwoCelebrated && state.progress >= _tierTwoThreshold) {
+      _handleTierMilestone(tier: 2);
+    }
+    if (state.progress >= _targetMatches) {
       unawaited(_completeRun());
     }
   }
 
-  void _enterPause({
-    bool pausedAtTierOne = false,
-    bool pausedAtTierTwo = false,
-  }) {
-    _timerService.pause();
-    state = state.copyWith(
-      inputLocked: true,
-      pausedAtTierOne: pausedAtTierOne || state.pausedAtTierOne,
-      pausedAtTierTwo: pausedAtTierTwo || state.pausedAtTierTwo,
-    );
-    final tier = pausedAtTierTwo ? 2 : 1;
+  void _handleTierMilestone({required int tier}) {
+    if (_runFinished) {
+      return;
+    }
+    if (tier == 1) {
+      _tierOneCelebrated = true;
+    } else if (tier == 2) {
+      _tierTwoCelebrated = true;
+    }
     unawaited(_feedbackService.onTierPause(tier: tier));
-    _triggerConfetti(intensity: pausedAtTierTwo ? 0.8 : 0.6);
+    _triggerConfetti(intensity: tier == 2 ? 0.8 : 0.6);
   }
 
   Future<void> _completeRun() async {
@@ -1099,9 +1100,11 @@ class RunController extends StateNotifier<RunState> {
     switch (canonical) {
       case 'timeExtend':
         meta.timeExtendTokens = next;
+        meta.powerupInventory['timeExtend'] = next;
         break;
       case 'rowBlaster':
         meta.rowBlasterCharges = next;
+        meta.powerupInventory['rowBlaster'] = next;
         break;
       default:
         if (next <= 0) {

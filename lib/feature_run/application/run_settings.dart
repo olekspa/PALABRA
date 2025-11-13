@@ -23,7 +23,8 @@ class RunSettings {
     this.streakBonusTable = const {3: 5, 6: 10, 9: 15},
     this.powerupXpThresholds = const {'timeExtend': 120, 'rowBlaster': 600},
     this.cleanRunRewardPowerup = 'timeExtend',
-    this.matchesToLearn = 3,
+    this.matchesToLearn = 5,
+    this.successesPerTargetIncrement = 4,
   });
 
   final int rows;
@@ -42,6 +43,7 @@ class RunSettings {
   final Map<String, int> powerupXpThresholds;
   final String cleanRunRewardPowerup;
   final int matchesToLearn;
+  final int successesPerTargetIncrement;
 
   int targetForProgress(LevelProgress? progress) {
     final minTarget = minTargetMatches;

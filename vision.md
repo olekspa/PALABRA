@@ -12,18 +12,18 @@ Palabra is a browser-friendly, mobile-ready Spanish vocabulary trainer designed 
 ### Experience Pillars
 1. **Match:** Five-row dual-column boards highlight clear pairings, predictable gestures, and immediate confirmation or correction.
 2. **Master:** Difficulty ramps from 15 matches to 50 across each CEFR milestone, only unlocking the next tier once the current deck is mastered. Powerups reward clean runs and streaks.
-3. **Celebrate:** Tier checkpoints pause the clock, deliver XP bonuses, and set goals for the next push. Finish screens summarize gains, and bonus number drills reinforce listening skills.
+3. **Celebrate:** Tier checkpoints trigger celebratory overlays and cues (without interrupting play), deliver XP bonuses, and set goals for the next push. Finish screens summarize gains, and bonus number drills reinforce listening skills.
 
 ### Current Feature Set
 - Sequential CEFR progression with profile-aware tracking of learned, trouble, and fresh vocabulary.
 - XP, streak, and powerup systems with clean-run rewards and manual activations (time extend available today).
 - Bonus number drill mini-game using pre-generated Spanish audio for numbers 1–100 and speed-based scoring.
 - Full offline audio library with Piper-generated clips; automatic Web Speech fallback and voice caching on supported browsers.
-- Profile selector for local multi-learner households with optional remote sync so learners can pick up progress on any browser tied to the LXC backend.
+- Profile selector for local multi-learner households backed by the LXC-hosted profile API (with a local-only fallback for offline builds) so learners can pick up progress on any browser tied to the service.
 - Web-first deployment workflow targeting an LXC-hosted nginx origin, with a simple CLI deploy script.
 
 ### Design Principles
-- **Offline-first:** Assets, progress, and audio live locally; network calls are optional enhancements.
+- **Offline-first:** Assets, progress, and audio live locally; remote profile sync is layered on but not required for core play.
 - **Deterministic decks:** Every refill maintains solvable boards, enforces family spacing, and respects trouble item limits.
 - **Short-session friendly:** 60-second timers, 4×4 number grids, and celebratory checkpoints make Palabra ideal for quick practice.
 - **Transparency:** HUD elements show match goals, XP gains, streaks, and available powerups so learners understand how to improve.
@@ -31,7 +31,7 @@ Palabra is a browser-friendly, mobile-ready Spanish vocabulary trainer designed 
 ### Roadmap Themes
 - **Profile polish:** Long lists, deep links, and parental controls for shared devices.
 - **Powerup variety:** Additional boosts (row blaster, hint windows) tied to higher XP thresholds.
-- **Telemetry & cloud sync:** Optional backend to sync progress across devices while keeping offline support intact.
+- **Telemetry & cloud sync:** Build on the existing backend sync to capture opt-in telemetry while keeping offline support intact.
 - **Accessibility & localization:** Broader language support for UI copy, screen-reader affordances, and adjustable tile density.
 - **Community & curriculum:** Layered missions, daily challenges, and curated vocabulary packs beyond the base CEFR decks.
 
@@ -86,9 +86,9 @@ Writes import counts per level into a lightweight report for the dev menu.
 SRS engine
 Learned:
 
-Needs three clean matches across three runs. Only one credit per run.
+Needs five correct matches before promotion. Credits accrue across sessions and only once per resolved pair.
 
-Learned items skip the next three runs. Retest once. If correct, skip five more.
+Learned items get deprioritized to the back of the deck so they reappear infrequently, ensuring active focus stays on unlearned and trouble items.
 
 Trouble:
 

@@ -7,6 +7,7 @@ class LevelProgress {
     this.completedAt,
     this.lastCleanRunAt,
     this.targetMatches = 5,
+    this.successRampProgress = 0,
     List<String>? masteredItemIds,
   }) : masteredItemIds = masteredItemIds ?? <String>[];
 
@@ -31,6 +32,9 @@ class LevelProgress {
   /// Current run target for this level (persists between sessions).
   int targetMatches;
 
+  /// Counts successful runs since the last difficulty increase.
+  int successRampProgress;
+
   /// Number of clean runs (zero mistakes) completed for the level.
   int get matchesCleared => masteredItemIds.length;
 
@@ -46,6 +50,7 @@ class LevelProgress {
       'lastCleanRunAt': lastCleanRunAt?.toIso8601String(),
       'masteredItemIds': masteredItemIds,
       'targetMatches': targetMatches,
+      'successRampProgress': successRampProgress,
     };
   }
 
@@ -58,6 +63,7 @@ class LevelProgress {
       lastCleanRunAt: _parseTimestamp(json['lastCleanRunAt']),
       masteredItemIds: _decodeIds(json['masteredItemIds']),
       targetMatches: json['targetMatches'] as int? ?? 5,
+      successRampProgress: json['successRampProgress'] as int? ?? 0,
     );
   }
 

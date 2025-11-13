@@ -9,6 +9,7 @@ import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_run/application/run_controller.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
+import 'package:palabra/feature_run/application/run_sfx_player.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
 import 'package:palabra/feature_run/application/tts/run_tts_config.dart';
 import 'package:palabra/feature_run/application/tts/run_tts_service.dart';
@@ -31,41 +32,24 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   bool _launchedNumberDrill = false;
   late final ProviderSubscription<RunState> _runSubscription;
   late final RunTtsService _ttsService;
+  late final RunSfxPlayer _sfxPlayer;
   DateTime? _lastTtsToastAt;
   int? _lastAudioEchoToken;
+  bool _spanishAudioActive = false;
+  int? _pendingCelebrationToken;
+  int _lastCelebrationSoundToken = 0;
+  int? _pendingMismatchToken;
+  int _lastMismatchSoundToken = 0;
 
   @override
   void initState() {
     super.initState();
     _ttsService = ref.refresh(runTtsServiceProvider);
+    _sfxPlayer = RunSfxPlayer();
     // React to completion so we can transition to the finish summary.
     _runSubscription = ref.listenManual<RunState>(
       runControllerProvider,
-      (previous, next) {
-        if (next.phase == RunPhase.completed) {
-          final success = next.progress >= next.targetMatches;
-          if (success && !_launchedNumberDrill) {
-            _launchedNumberDrill = true;
-            _navigatedToFinish = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted) {
-                return;
-              }
-              context.go(AppRoute.numberDrill.path);
-            });
-            return;
-          }
-          if (!_navigatedToFinish) {
-            _navigatedToFinish = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted) {
-                return;
-              }
-              context.go(AppRoute.finish.path);
-            });
-          }
-        }
-      },
+      _onRunStateChanged,
     );
   }
 
@@ -73,6 +57,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   void dispose() {
     _runSubscription.close();
     unawaited(_ttsService.cancel());
+    unawaited(_sfxPlayer.dispose());
     super.dispose();
   }
 
@@ -110,7 +95,6 @@ class _RunScreenState extends ConsumerState<RunScreen> {
                       }
                       controller.onTileTapped(row, column);
                     },
-                    onResume: controller.resumeFromPause,
                     onAcceptTimeExtend: controller.acceptTimeExtend,
                     onDeclineTimeExtend: controller.declineTimeExtend,
                     ttsDevPanelEnabled: devPanelEnabled,
@@ -126,14 +110,104 @@ class _RunScreenState extends ConsumerState<RunScreen> {
     );
   }
 
+  void _onRunStateChanged(RunState? previous, RunState next) {
+    _handleCompletionNavigation(next);
+    _maybeQueueCelebrationSound(previous, next);
+    _maybeQueueMismatchSound(previous, next);
+  }
+
+  void _handleCompletionNavigation(RunState state) {
+    if (state.phase != RunPhase.completed) {
+      return;
+    }
+    final success = state.progress >= state.targetMatches;
+    if (success && !_launchedNumberDrill) {
+      _launchedNumberDrill = true;
+      _navigatedToFinish = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        context.go(AppRoute.numberDrill.path);
+      });
+      return;
+    }
+    if (!_navigatedToFinish) {
+      _navigatedToFinish = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        context.go(AppRoute.finish.path);
+      });
+    }
+  }
+
+  void _maybeQueueCelebrationSound(RunState? previous, RunState next) {
+    final token = next.celebrationEffect?.token;
+    final previousToken = previous?.celebrationEffect?.token;
+    if (token == null ||
+        token == previousToken ||
+        token == _lastCelebrationSoundToken ||
+        token == _pendingCelebrationToken) {
+      return;
+    }
+    _pendingCelebrationToken = token;
+    _tryPlayCelebrationSound();
+  }
+
+  void _tryPlayCelebrationSound() {
+    if (_pendingCelebrationToken == null || _spanishAudioActive) {
+      return;
+    }
+    final token = _pendingCelebrationToken!;
+    _pendingCelebrationToken = null;
+    _lastCelebrationSoundToken = token;
+    unawaited(_sfxPlayer.playCelebration());
+  }
+
+  void _maybeQueueMismatchSound(RunState? previous, RunState next) {
+    final token = next.mismatchEffect?.token;
+    final previousToken = previous?.mismatchEffect?.token;
+    if (token == null ||
+        token == previousToken ||
+        token == _lastMismatchSoundToken ||
+        token == _pendingMismatchToken) {
+      return;
+    }
+    _pendingMismatchToken = token;
+    _tryPlayMismatchSound();
+  }
+
+  void _tryPlayMismatchSound() {
+    if (_pendingMismatchToken == null || _spanishAudioActive) {
+      return;
+    }
+    final token = _pendingMismatchToken!;
+    _pendingMismatchToken = null;
+    _lastMismatchSoundToken = token;
+    unawaited(_sfxPlayer.playMismatch());
+  }
+
+  void _flushPendingSfx() {
+    _tryPlayCelebrationSound();
+    _tryPlayMismatchSound();
+  }
+
   Future<void> _handleSpanishTileTap(BoardTile tile) async {
-    await _ttsService.onUserGesture();
-    final outcome = await _ttsService.speak(
-      text: tile.text,
-      itemId: tile.pairId.isEmpty ? null : tile.pairId,
-    );
-    if (outcome == RunTtsPlaybackOutcome.unavailable) {
-      _showTtsUnavailableToast();
+    _spanishAudioActive = true;
+    try {
+      await _ttsService.onUserGesture();
+      final outcome = await _ttsService.speak(
+        text: tile.text,
+        itemId: tile.pairId.isEmpty ? null : tile.pairId,
+      );
+      if (outcome == RunTtsPlaybackOutcome.unavailable) {
+        _showTtsUnavailableToast();
+      }
+    } finally {
+      _spanishAudioActive = false;
+      _flushPendingSfx();
     }
   }
 
@@ -187,7 +261,6 @@ class _RunView extends StatelessWidget {
     required this.audioEchoEffect,
     required this.isTimerFrozen,
     required this.onTileTap,
-    required this.onResume,
     required this.onAcceptTimeExtend,
     required this.onDeclineTimeExtend,
     required this.ttsDevPanelEnabled,
@@ -204,7 +277,6 @@ class _RunView extends StatelessWidget {
   final AudioEchoEffect? audioEchoEffect;
   final bool isTimerFrozen;
   final void Function(int row, TileColumn column) onTileTap;
-  final Future<void> Function() onResume;
   final Future<void> Function() onAcceptTimeExtend;
   final Future<void> Function() onDeclineTimeExtend;
   final bool ttsDevPanelEnabled;
@@ -226,10 +298,6 @@ class _RunView extends StatelessWidget {
               target: state.targetMatches,
               millisecondsRemaining: state.millisecondsRemaining,
               deckRemaining: state.deckRemaining,
-              xpEarned: state.xpEarned,
-              xpBonus: state.xpBonus,
-              streakCurrent: state.streakCurrent,
-              streakBest: state.streakBest,
               isTimerFrozen: isTimerFrozen,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -252,24 +320,12 @@ class _RunView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            _RunFooter(
-              deckRemaining: state.deckRemaining,
-              rows: state.rows,
-            ),
           ],
         ),
         if (state.celebrationEffect != null)
           _CelebrationOverlay(token: state.celebrationEffect!.token),
         if (state.confettiEffect != null)
           ConfettiOverlay(effect: state.confettiEffect!),
-        if (state.inputLocked &&
-            state.phase == RunPhase.ready &&
-            !state.showingTimeExtendOffer)
-          _TierPauseOverlay(
-            state: state,
-            settings: settings,
-            onResume: onResume,
-          ),
         if (state.showingTimeExtendOffer)
           _TimeExtendOverlay(
             tokensRemaining: state.timeExtendTokens,
@@ -424,10 +480,6 @@ class _RunHeader extends StatelessWidget {
     required this.target,
     required this.millisecondsRemaining,
     required this.deckRemaining,
-    required this.xpEarned,
-    required this.xpBonus,
-    required this.streakCurrent,
-    required this.streakBest,
     required this.isTimerFrozen,
   });
 
@@ -435,10 +487,6 @@ class _RunHeader extends StatelessWidget {
   final int target;
   final int millisecondsRemaining;
   final int deckRemaining;
-  final int xpEarned;
-  final int xpBonus;
-  final int streakCurrent;
-  final int streakBest;
   final bool isTimerFrozen;
 
   String get _timeLabel {
@@ -495,22 +543,6 @@ class _RunHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'XP: $xpEarned${xpBonus > 0 ? " (+$xpBonus bonus)" : ""}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            Text(
-              'Streak: $streakCurrent (best $streakBest)',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.secondary),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.xs),
         Text(
           'Deck remaining: $deckRemaining',
           style: Theme.of(context).textTheme.bodySmall,
@@ -911,103 +943,6 @@ class _RunTileState extends State<_RunTile>
                     color: mismatch ? AppColors.danger : null,
                   ),
                 ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RunFooter extends StatelessWidget {
-  const _RunFooter({
-    required this.deckRemaining,
-    required this.rows,
-  });
-
-  final int deckRemaining;
-  final int rows;
-
-  @override
-  Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodySmall;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Rows in play: $rows', style: style),
-        Text('Deck queue: $deckRemaining', style: style),
-      ],
-    );
-  }
-}
-
-class _TierPauseOverlay extends StatelessWidget {
-  const _TierPauseOverlay({
-    required this.state,
-    required this.settings,
-    required this.onResume,
-  });
-
-  final RunState state;
-  final RunSettings settings;
-  final Future<void> Function() onResume;
-
-  String get _title {
-    if (state.pausedAtTierTwo && state.progress >= state.tierTwoThreshold) {
-      return 'Tier 2 complete';
-    }
-    if (state.pausedAtTierOne && state.progress >= state.tierOneThreshold) {
-      return 'Tier 1 complete';
-    }
-    return 'Paused';
-  }
-
-  String get _subtitle {
-    if (state.pausedAtTierTwo && state.progress >= state.tierTwoThreshold) {
-      return '+10 XP secured • Total +15 XP';
-    }
-    if (state.pausedAtTierOne && state.progress >= state.tierOneThreshold) {
-      return '+5 XP secured';
-    }
-    return 'Catch your breath and resume when ready.';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: ColoredBox(
-        color: Colors.black.withValues(alpha: 0.6),
-        child: Center(
-          child: Card(
-            color: AppColors.surfaceVariant,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    _subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textMuted,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  ElevatedButton(
-                    onPressed: () => unawaited(onResume()),
-                    child: const Text('Continue'),
-                  ),
-                ],
               ),
             ),
           ),

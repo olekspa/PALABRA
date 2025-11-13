@@ -128,8 +128,6 @@ class RunState {
     required this.isResolving,
     required this.deckRemaining,
     required this.millisecondsRemaining,
-    required this.pausedAtTierOne,
-    required this.pausedAtTierTwo,
     required this.inputLocked,
     required this.isTimerFrozen,
     required this.timeExtendTokens,
@@ -164,8 +162,6 @@ class RunState {
       isResolving: false,
       deckRemaining: 0,
       millisecondsRemaining: 60000,
-      pausedAtTierOne: false,
-      pausedAtTierTwo: false,
       inputLocked: false,
       isTimerFrozen: false,
       timeExtendTokens: 0,
@@ -209,8 +205,6 @@ class RunState {
       isResolving: false,
       deckRemaining: deckRemaining,
       millisecondsRemaining: millisecondsRemaining,
-      pausedAtTierOne: false,
-      pausedAtTierTwo: false,
       inputLocked: false,
       isTimerFrozen: false,
       timeExtendTokens: timeExtendTokens,
@@ -243,8 +237,6 @@ class RunState {
   final bool isResolving;
   final int deckRemaining;
   final int millisecondsRemaining;
-  final bool pausedAtTierOne;
-  final bool pausedAtTierTwo;
   final bool inputLocked;
   final bool isTimerFrozen;
   final int timeExtendTokens;
@@ -285,8 +277,6 @@ class RunState {
     bool? isResolving,
     int? deckRemaining,
     int? millisecondsRemaining,
-    bool? pausedAtTierOne,
-    bool? pausedAtTierTwo,
     bool? inputLocked,
     bool? isTimerFrozen,
     int? timeExtendTokens,
@@ -327,8 +317,6 @@ class RunState {
       deckRemaining: deckRemaining ?? this.deckRemaining,
       millisecondsRemaining:
           millisecondsRemaining ?? this.millisecondsRemaining,
-      pausedAtTierOne: pausedAtTierOne ?? this.pausedAtTierOne,
-      pausedAtTierTwo: pausedAtTierTwo ?? this.pausedAtTierTwo,
       inputLocked: inputLocked ?? this.inputLocked,
       isTimerFrozen: isTimerFrozen ?? this.isTimerFrozen,
       timeExtendTokens: timeExtendTokens ?? this.timeExtendTokens,

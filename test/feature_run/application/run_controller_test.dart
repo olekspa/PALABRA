@@ -3,6 +3,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palabra/data_core/models/attempt_log.dart';
+import 'package:palabra/data_core/models/profile_summary.dart';
 import 'package:palabra/data_core/models/run_log.dart';
 import 'package:palabra/data_core/models/user_item_state.dart';
 import 'package:palabra/data_core/models/user_meta.dart';
@@ -13,6 +14,7 @@ import 'package:palabra/feature_run/application/run_feedback_service.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:palabra/feature_run/application/run_state.dart';
 import 'package:palabra/feature_run/application/timer_service.dart';
+import 'package:palabra/feature_profiles/application/profile_service.dart';
 import 'package:palabra/feature_srs/deck_builder/deck_builder_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,6 +58,40 @@ class _FakeRunFeedbackService extends RunFeedbackService {
     required int tierReached,
     required bool success,
   }) async {}
+}
+
+class _FakeProfileService implements ProfileService {
+  const _FakeProfileService();
+
+  ProfileSummary get _summary => ProfileSummary(
+        id: 'profile',
+        displayName: 'Test Profile',
+        createdAt: DateTime(2024, 1, 1),
+        lastSeenAt: DateTime(2024, 1, 1),
+        level: 'a1',
+        totalRuns: 0,
+        isActive: true,
+      );
+
+  @override
+  Future<List<ProfileSummary>> listProfiles() async => <ProfileSummary>[_summary];
+
+  @override
+  Future<ProfileSummary> createProfile(String name) async {
+    return _summary.copyWith(displayName: name);
+  }
+
+  @override
+  Future<void> renameProfile(String profileId, String name) async {}
+
+  @override
+  Future<void> switchProfile(String profileId) async {}
+
+  @override
+  Future<void> deleteProfile(String profileId) async {}
+
+  @override
+  Future<void> pushActiveProfile() async {}
 }
 
 DeckBuilderService _buildDeckBuilder({int deckSize = 50}) {
@@ -177,6 +213,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();
@@ -219,6 +256,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();
@@ -277,6 +315,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: metaRepository,
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();
@@ -356,6 +395,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();
@@ -412,6 +452,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();
@@ -465,11 +506,12 @@ void main() {
           timerService: RunTimerService.fake(),
           fetchUserStates: fetchStates,
           saveUserStates: saveStates,
-          addRunLog: addRunLog,
-          addAttemptLogs: addAttempts,
-          userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
-          feedbackService: const _FakeRunFeedbackService(),
-        );
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
+        feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
+      );
 
         await controller.initialize();
 
@@ -534,6 +576,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: metaRepository,
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();
@@ -593,11 +636,12 @@ void main() {
           timerService: RunTimerService.fake(),
           fetchUserStates: fetchStates,
           saveUserStates: saveStates,
-          addRunLog: addRunLog,
-          addAttemptLogs: addAttempts,
-          userMetaRepository: metaRepository,
-          feedbackService: const _FakeRunFeedbackService(),
-        );
+        addRunLog: addRunLog,
+        addAttemptLogs: addAttempts,
+        userMetaRepository: metaRepository,
+        feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
+      );
 
         await controller.initialize();
 
@@ -651,6 +695,7 @@ void main() {
         addAttemptLogs: addAttempts,
         userMetaRepository: _InMemoryUserMetaRepository(UserMeta()),
         feedbackService: const _FakeRunFeedbackService(),
+        profileService: const _FakeProfileService(),
       );
 
       await controller.initialize();

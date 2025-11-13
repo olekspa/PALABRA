@@ -3,8 +3,8 @@
 Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter. Learners race against the clock to match English prompts to Spanish translations, earn streak-based XP, unlock powerups, and tackle a listening bonus round for numbers 1–100. The experience runs entirely in the browser, keeps progress locally, and ships with offline pronunciation so practice never stalls.
 
 ## Highlights
-- **Progressive mastery:** A1 → B2 decks unlock sequentially. Match goals ramp from 15 to 50 within each milestone, and words are marked “learned” after three clean matches across sessions.
-- **Profile aware:** A lightweight profile selector lets multiple learners share a device (or sync via the optional profile API) while keeping separate XP totals, streaks, powerups, and drill history.
+- **Progressive mastery:** A1 → B2 decks unlock sequentially. Match goals ramp from 15 to 50 within each milestone, and words are marked “learned” after five correct matches across sessions.
+- **Profile aware:** A lightweight profile selector works offline per device, and our LXC deployment runs the remote profile API so learners can sign into the same profile from any browser and keep XP, streaks, powerups, and drill history in sync.
 - **Rewarding loop:** Tier checkpoints deliver XP bonuses, clean runs award powerups, and the finish screen summarizes gains before launching the number-listening mini-game.
 - **Offline audio:** Every vocabulary word and number has a Piper MP3 asset; Web Speech only acts as a fallback when an asset is missing or the user enables the dev TTS panel.
 - **Web-first publishing:** A single command builds and deploys the app to an nginx-backed LXC container; everything else lives in the repo.
@@ -38,19 +38,20 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
    flutter test
    ```
 4. **Launch on web**  
-   ```bash
-   flutter run -d chrome \
-     --dart-define=PALABRA_FORCE_COURSE=spanish \
-     --dart-define=PALABRA_PROFILE_API_BASE=http://192.168.1.175/api \
-     --dart-define=PALABRA_PROFILE_API_KEY=<shared-secret>
-   ```  
-   For WSL, prefer `flutter run -d web-server` and open the provided URL in the Windows browser.
+  ```bash
+  flutter run -d chrome \
+    --dart-define=PALABRA_FORCE_COURSE=spanish \
+    --dart-define=PALABRA_PROFILE_API_BASE=http://192.168.1.175/api \
+    --dart-define=PALABRA_PROFILE_API_KEY=<shared-secret>
+  ```  
+  For WSL, prefer `flutter run -d web-server` and open the provided URL in the Windows browser.
+   - Omitting the `PALABRA_PROFILE_API_*` defines keeps progress local to the browser; including them (as we do on the LXC host) enables shared, server-side profiles.
 
 ## Local Development Tips
 - Export `CHROME_EXECUTABLE` inside WSL to point at the Windows Chrome installation for direct launches.
 - Use `flutter run -d chrome --web-renderer canvaskit` when profiling animation-heavy scenes.
 - Piper-generated assets live in `assets/audio`; regenerate vocabulary or number clips with tools under `tool/`.
-- The active profile and progress data are stored in shared_preferences. Use `StorePersistence.clear()` in a debug shell or delete browser storage to reset.
+- The active profile and progress data are stored in shared_preferences when remote sync is disabled. Enable the profile API defines (default in our production LXC deploy) to persist everything through the backend instead.
 
 ## Testing & Quality
 - `flutter test` exercises profile logic, deck building, run flow, finish screen stats, and the new number drill.
@@ -69,14 +70,14 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 - Include Piper assets, vocabulary JSON, and other static files in commits; the deployment is static-site only.
 
 ## Remote Profile Sync (optional)
-Expose the FastAPI profile service on the LXC (see `docs/project_status.md`) and provide the API coordinates when running or deploying:
+Expose (or reuse the existing) FastAPI profile service on the LXC (see `docs/project_status.md`) and provide the API coordinates when running or deploying:
 
 ```
 --dart-define=PALABRA_PROFILE_API_BASE=http://192.168.1.175/api
 --dart-define=PALABRA_PROFILE_API_KEY=$(cat /opt/PALABRA/api/secrets/profile_api_key)
 ```
 
-When set, the profile selector lists remote profiles, pulls the chosen snapshot, and uploads progress after every run. Leave the defines unset to keep progress device-local.
+When set (as in our live build), the profile selector lists remote profiles, pulls the chosen snapshot, and uploads progress after every run. Leave the defines unset to keep progress device-local for offline testing.
 
 ## Repository Layout
 - `lib/app` – bootstrap, router, constants (version), and theme entry points.
