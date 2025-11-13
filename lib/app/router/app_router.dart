@@ -1,7 +1,11 @@
+// Router wiring is internal-only; dartdoc would mirror the GoRouter setup.
+// ignore_for_file: public_member_api_docs
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:palabra/feature_finish/presentation/finish_screen.dart';
+import 'package:palabra/feature_games/presentation/game_hub_screen.dart';
 import 'package:palabra/feature_gate/presentation/gate_screen.dart';
 import 'package:palabra/feature_numbers/presentation/number_drill_screen.dart';
 import 'package:palabra/feature_prerun/presentation/prerun_screen.dart';
@@ -11,6 +15,8 @@ import 'package:palabra/feature_run/presentation/run_screen.dart';
 /// Declarative identifiers for app navigation targets.
 enum AppRoute {
   profile('/profile'),
+  /// Game selection hub.
+  gameHub('/games'),
   /// Landing gate route.
   gate('/gate'),
 
@@ -42,6 +48,13 @@ final goRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoute.profile.name,
         builder: (BuildContext context, GoRouterState state) {
           return const ProfileSelectorScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoute.gameHub.path,
+        name: AppRoute.gameHub.name,
+        builder: (BuildContext context, GoRouterState state) {
+          return const GameHubScreen();
         },
       ),
       GoRoute(

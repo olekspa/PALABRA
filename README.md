@@ -1,6 +1,6 @@
 # Palabra
 
-Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter. Learners race against the clock to match English prompts to Spanish translations, earn streak-based XP, unlock powerups, and tackle a listening bonus round for numbers 1–100. The experience runs entirely in the browser, keeps progress locally, and ships with offline pronunciation so practice never stalls.
+ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter. Learners now choose from a growing slate of mini-games—starting with the signature Palabra Word Match sprint—and race against the clock with streak XP, powerups, and listening drills. The experience runs entirely in the browser, keeps progress locally, and ships with offline pronunciation so practice never stalls.
 
 ## Highlights
 - **Progressive mastery:** A1 → B2 decks unlock sequentially. Match goals ramp from 15 to 50 within each milestone, and words are marked “learned” after five correct matches across sessions.
@@ -8,6 +8,11 @@ Palabra is a fast, arcade-inspired Spanish vocabulary trainer built with Flutter
 - **Rewarding loop:** Tier checkpoints deliver XP bonuses, clean runs award powerups, and the finish screen summarizes gains before launching the number-listening mini-game.
 - **Offline audio:** Every vocabulary word and number has a Piper MP3 asset; Web Speech only acts as a fallback when an asset is missing or the user enables the dev TTS panel.
 - **Web-first publishing:** A single command builds and deploys the app to an nginx-backed LXC container; everything else lives in the repo.
+- **Game hub ready:** The Palabra Arcade hub surfaces current and upcoming mini-games so we can expand beyond Word Match without reworking the core navigation.
+
+## Game Modes
+- **Palabra Word Match:** Tap-to-match sprint focused on English ↔ Spanish vocabulary pairs, streak XP, powerups, and the bonus number drill.
+- **Coming soon:** Additional listening, verb, and challenge modes are designed into the hub so they can roll out without UX churn.
 
 ## Core Flow
 1. **Profile selector** – create or choose a learner profile. Progress is stored in shared_preferences per profile.

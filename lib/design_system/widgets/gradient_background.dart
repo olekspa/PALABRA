@@ -71,13 +71,24 @@ class _GradientBackgroundState extends State<GradientBackground>
         final gradient = _interpolatedGradient(t);
         return Container(
           decoration: BoxDecoration(gradient: gradient),
-          child: CustomPaint(
-            painter: _SparklePainter(
-              sparkles: _sparkles,
-              progress: t,
-              color: AppColors.secondary.withValues(alpha: 0.18),
-            ),
-            child: widget.child,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _AuroraPainter(progress: t),
+                ),
+              ),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _SparklePainter(
+                    sparkles: _sparkles,
+                    progress: t,
+                    color: AppColors.secondary.withValues(alpha: 0.18),
+                  ),
+                ),
+              ),
+              widget.child,
+            ],
           ),
         );
       },
@@ -155,5 +166,62 @@ class _SparklePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SparklePainter oldDelegate) {
     return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
+
+class _AuroraPainter extends CustomPainter {
+  const _AuroraPainter({required this.progress});
+
+  final double progress;
+
+  static const List<List<Color>> _auroraPalettes = <List<Color>>[
+    <Color>[
+      Color(0x8813C6E8),
+      Color(0x6634D399),
+    ],
+    <Color>[
+      Color(0x8854F7C5),
+      Color(0x665CBAFF),
+    ],
+    <Color>[
+      Color(0x88F472B6),
+      Color(0x66C084FC),
+    ],
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+    for (var i = 0; i < _auroraPalettes.length; i++) {
+      final colors = _auroraPalettes[i];
+      paint.shader = LinearGradient(
+        colors: colors,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+      final path = Path();
+      final baseY = size.height * (0.15 + 0.2 * i);
+      final amplitude = size.height * (0.08 + 0.03 * i);
+      final phase = progress * 2 * math.pi + (i * math.pi / 3);
+
+      path.moveTo(0, size.height);
+      path.lineTo(0, baseY);
+      const int segments = 32;
+      for (var s = 0; s <= segments; s++) {
+        final double x = size.width * (s / segments);
+        final double wave = math.sin((s / segments) * 2 * math.pi + phase);
+        final double y = baseY + wave * amplitude;
+        path.lineTo(x, y);
+      }
+      path.lineTo(size.width, size.height);
+      path.close();
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _AuroraPainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }

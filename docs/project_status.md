@@ -9,6 +9,7 @@ _Last updated: 2025-11-06_
 - **Persistence:** In-memory store persisted to shared_preferences for offline dev; production builds hit the FastAPI profile sync (`/api`) on the LXC so every profile/state change is written server-side; Piper-generated audio assets bundled in `assets/audio`.
 
 ## Recent Highlights
+- Introduced the Palabra Arcade hub so additional mini-games can ship alongside Word Match without disrupting the existing loop.
 - Added a multi-profile selector with create/rename/delete flows and HUD polish.
 - Tuned XP/streak logic, powerup rewards, and the bonus number drill with pre-generated audio.
 - Reworked deck difficulty scaling (15 → 50 matches per CEFR milestone) and CEFR gating logic.

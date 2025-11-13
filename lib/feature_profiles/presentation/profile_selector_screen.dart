@@ -1,4 +1,4 @@
-import 'package:characters/characters.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,8 +8,11 @@ import 'package:palabra/data_core/data_core.dart';
 import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
 import 'package:palabra/feature_profiles/application/profile_controller.dart';
+import 'package:palabra/feature_profiles/widgets/profile_summary_tile.dart';
 
+/// Entry screen that lets learners choose, create, or manage profiles.
 class ProfileSelectorScreen extends ConsumerStatefulWidget {
+  /// Creates a new profile selector screen instance.
   const ProfileSelectorScreen({super.key});
 
   @override
@@ -22,7 +25,7 @@ class _ProfileSelectorScreenState extends ConsumerState<ProfileSelectorScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(profileControllerProvider.notifier).refresh();
+      unawaited(ref.read(profileControllerProvider.notifier).refresh());
     });
   }
 
@@ -100,10 +103,11 @@ class _ProfileSelectorScreenState extends ConsumerState<ProfileSelectorScreen> {
     if (name == null) return;
     try {
       final summary = await controller.create(name);
-      if (!mounted) return;
+      if (!context.mounted) return;
       _showSnack('Welcome, ${summary.displayName}!');
-      context.go(AppRoute.gate.path);
-    } catch (error) {
+      context.go(AppRoute.gameHub.path);
+    } on Object catch (error) {
+      if (!context.mounted) return;
       _showError(error);
     }
   }
@@ -115,9 +119,10 @@ class _ProfileSelectorScreenState extends ConsumerState<ProfileSelectorScreen> {
     final controller = ref.read(profileControllerProvider.notifier);
     try {
       await controller.select(profile.id);
-      if (!mounted) return;
-      context.go(AppRoute.gate.path);
-    } catch (error) {
+      if (!context.mounted) return;
+      context.go(AppRoute.gameHub.path);
+    } on Object catch (error) {
+      if (!context.mounted) return;
       _showError(error);
     }
   }
@@ -137,9 +142,10 @@ class _ProfileSelectorScreenState extends ConsumerState<ProfileSelectorScreen> {
     if (name == null || name == profile.displayName) return;
     try {
       await controller.rename(id: profile.id, name: name);
-      if (!mounted) return;
+      if (!context.mounted) return;
       _showSnack('Renamed to $name');
-    } catch (error) {
+    } on Object catch (error) {
+      if (!context.mounted) return;
       _showError(error);
     }
   }
@@ -148,15 +154,16 @@ class _ProfileSelectorScreenState extends ConsumerState<ProfileSelectorScreen> {
     BuildContext context,
     ProfileSummary profile,
   ) async {
-    if (!await _confirmDelete(context, profile.displayName)) {
+    if (!await _confirmDelete(context, profile)) {
       return;
     }
     final controller = ref.read(profileControllerProvider.notifier);
     try {
       await controller.delete(profile.id);
-      if (!mounted) return;
+      if (!context.mounted) return;
       _showSnack('Deleted ${profile.displayName}');
-    } catch (error) {
+    } on Object catch (error) {
+      if (!context.mounted) return;
       _showError(error);
     }
   }
@@ -181,25 +188,10 @@ class _ProfileSelectorScreenState extends ConsumerState<ProfileSelectorScreen> {
     );
   }
 
-  Future<bool> _confirmDelete(BuildContext context, String name) {
+  Future<bool> _confirmDelete(BuildContext context, ProfileSummary profile) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete profile'),
-        content: Text(
-          'Remove "$name"? Progress and stats stay on this device.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+      builder: (context) => DeleteProfileDialog(profile: profile),
     ).then((value) => value ?? false);
   }
 
@@ -265,7 +257,7 @@ class _ProfileListView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who\'s playing?',
+            "Who's playing?",
             style: theme.textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
@@ -284,29 +276,36 @@ class _ProfileListView extends StatelessWidget {
           if (activeProfile != null) const SizedBox(height: AppSpacing.lg),
           Expanded(
             child: Material(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(24),
-              child: Scrollbar(
-                radius: const Radius.circular(18),
-                thumbVisibility: profiles.length > 6,
-                child: GlowingOverscrollIndicator(
-                  color: Colors.white.withOpacity(0.15),
-                  axisDirection: AxisDirection.down,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    itemCount: profiles.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, index) {
-                      final profile = profiles[index];
-                      return _ProfileTile(
-                        summary: profile,
-                        isBusy: isBusy,
-                        onTap: () => onSelect(profile),
-                        onRename: () => onRename(profile),
-                        onDelete: () => onDelete(profile),
-                      );
-                    },
+              child: FocusTraversalGroup(
+                policy: OrderedTraversalPolicy(),
+                child: Scrollbar(
+                  radius: const Radius.circular(18),
+                  thumbVisibility: profiles.length > 6,
+                  child: GlowingOverscrollIndicator(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    axisDirection: AxisDirection.down,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      itemCount: profiles.length,
+                      separatorBuilder: (context, _) =>
+                          const SizedBox(height: AppSpacing.md),
+                      itemBuilder: (context, index) {
+                        final profile = profiles[index];
+                        final shouldAutofocus = profile.isActive ||
+                            (activeProfile == null && index == 0);
+                        return ProfileSummaryTile(
+                          key: ValueKey('profile-tile-${profile.id}'),
+                          summary: profile,
+                          isBusy: isBusy,
+                          autofocus: shouldAutofocus,
+                          onActivate: () => onSelect(profile),
+                          onRename: () => onRename(profile),
+                          onDelete: () => onDelete(profile),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -340,7 +339,7 @@ class _ActiveProfileBanner extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -351,7 +350,7 @@ class _ActiveProfileBanner extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            _formatSubtitle(profile),
+            profileSubtitle(profile),
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -360,117 +359,6 @@ class _ActiveProfileBanner extends StatelessWidget {
             child: const Text('Continue'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileTile extends StatelessWidget {
-  const _ProfileTile({
-    required this.summary,
-    required this.isBusy,
-    required this.onTap,
-    required this.onRename,
-    required this.onDelete,
-  });
-
-  final ProfileSummary summary;
-  final bool isBusy;
-  final VoidCallback onTap;
-  final VoidCallback onRename;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final subtitle = _formatSubtitle(summary);
-
-    return InkWell(
-      onTap: isBusy ? null : onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Ink(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: summary.isActive
-              ? Colors.deepPurple.withOpacity(0.3)
-              : Colors.black.withOpacity(0.12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                child: Text(
-                  summary.displayName.characters.first.toUpperCase(),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      summary.displayName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              if (summary.isActive)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.sm),
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.greenAccent.shade400,
-                  ),
-                ),
-              PopupMenuButton<_ProfileTileAction>(
-                key: ValueKey('profile-actions-${summary.id}'),
-                enabled: !isBusy,
-                onSelected: (action) {
-                  switch (action) {
-                    case _ProfileTileAction.rename:
-                      onRename();
-                    case _ProfileTileAction.delete:
-                      onDelete();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    key: const ValueKey('profile-actions.rename'),
-                    value: _ProfileTileAction.rename,
-                    child: const ListTile(
-                      leading: Icon(Icons.edit_outlined),
-                      title: Text('Rename'),
-                    ),
-                  ),
-                  PopupMenuItem(
-                    key: const ValueKey('profile-actions.delete'),
-                    value: _ProfileTileAction.delete,
-                    child: const ListTile(
-                      leading: Icon(Icons.delete_outline),
-                      title: Text('Delete'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -507,8 +395,8 @@ class _EmptyState extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Profiles keep XP, streaks, and vocabulary history separate '
-                    'for each learner.',
+                    'Profiles keep XP, streaks, and vocabulary '
+                    'history separate for each learner.',
                     style: theme.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -637,13 +525,110 @@ class _ProfileNameDialogState extends State<_ProfileNameDialog> {
   }
 }
 
-String _formatSubtitle(ProfileSummary summary) {
-  final level = summary.level?.toUpperCase() ?? 'A1';
-  final runs = summary.totalRuns;
-  if (runs == 0) {
-    return 'Fresh start · Level $level';
-  }
-  return '$level · $runs run${runs == 1 ? '' : 's'}';
+/// Confirmation modal that safeguards profile deletion.
+class DeleteProfileDialog extends StatefulWidget {
+  /// Creates a delete confirmation dialog for [profile].
+  const DeleteProfileDialog({required this.profile, super.key});
+
+  /// Profile slated for deletion.
+  final ProfileSummary profile;
+
+  @override
+  State<DeleteProfileDialog> createState() => _DeleteProfileDialogState();
 }
 
-enum _ProfileTileAction { rename, delete }
+/// Dialog state tracking confirmation input/acknowledgement.
+class _DeleteProfileDialogState extends State<DeleteProfileDialog> {
+  late final TextEditingController _controller;
+  bool _acknowledged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = widget.profile;
+    final subtitle = profileSubtitle(profile);
+    final theme = Theme.of(context);
+    final typedName = _controller.text.trim().toLowerCase();
+    final nameMatch = typedName == profile.displayName.toLowerCase();
+    final canDelete = nameMatch && _acknowledged;
+
+    return AlertDialog(
+      title: const Text('Delete profile'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'This removes "${profile.displayName}". Progress stays on this '
+              'device, but the profile can’t be recovered.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.black.withValues(alpha: 0.05),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.displayName,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              onChanged: (_) => setState(() {}),
+              decoration: const InputDecoration(
+                labelText: 'Type the profile name to confirm',
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _acknowledged,
+              onChanged: (value) {
+                setState(() => _acknowledged = value ?? false);
+              },
+              title: const Text('I understand this can’t be undone'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: canDelete ? () => Navigator.of(context).pop(true) : null,
+          child: const Text('Delete'),
+        ),
+      ],
+    );
+  }
+}

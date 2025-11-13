@@ -417,7 +417,10 @@ class RunController extends StateNotifier<RunState> {
       if (streakBonus > 0) {
         _xpBonus += streakBonus;
         gainedXp += streakBonus;
-        _triggerConfetti(intensity: 0.35);
+        _triggerConfetti(
+          intensity: 0.35,
+          tone: ConfettiTone.streak,
+        );
       }
       _xpEarned += gainedXp;
     }
@@ -899,7 +902,10 @@ class RunController extends StateNotifier<RunState> {
       _tierTwoCelebrated = true;
     }
     unawaited(_feedbackService.onTierPause(tier: tier));
-    _triggerConfetti(intensity: tier == 2 ? 0.8 : 0.6);
+    _triggerConfetti(
+      intensity: tier == 2 ? 0.8 : 0.6,
+      tone: ConfettiTone.tier,
+    );
   }
 
   Future<void> _completeRun() async {
@@ -970,7 +976,10 @@ class RunController extends StateNotifier<RunState> {
         success: success,
       ),
     );
-    _triggerConfetti(intensity: success ? 1.0 : 0.4);
+    _triggerConfetti(
+      intensity: success ? 1.0 : 0.4,
+      tone: success ? ConfettiTone.finishWin : ConfettiTone.finishFail,
+    );
   }
 
   List<DeckLevelCount> _buildDeckComposition() {
@@ -1298,12 +1307,16 @@ class RunController extends StateNotifier<RunState> {
     _celebrationTimer = null;
   }
 
-  void _triggerConfetti({required double intensity}) {
+  void _triggerConfetti({
+    required double intensity,
+    required ConfettiTone tone,
+  }) {
     final clamped = intensity.clamp(0.25, 1.2);
     state = state.copyWith(
       confettiEffect: ConfettiEffect(
         token: ++_confettiSalt,
         intensity: clamped,
+        tone: tone,
       ),
     );
     _cancelConfettiTimer();

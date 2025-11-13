@@ -40,14 +40,18 @@ class CelebrationEffect {
   final int token;
 }
 
+enum ConfettiTone { streak, tier, finishWin, finishFail }
+
 class ConfettiEffect {
   const ConfettiEffect({
     required this.token,
     required this.intensity,
+    required this.tone,
   });
 
   final int token;
   final double intensity;
+  final ConfettiTone tone;
 }
 
 class HintGlowEffect {

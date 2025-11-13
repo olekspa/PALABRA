@@ -41,7 +41,7 @@ class GateScreen extends ConsumerWidget {
                         flags: flags,
                         requiredCourseId: requiredCourseId,
                       ),
-                      error: (error, stack) => _GateError(
+                      error: (error, stack) => const _GateError(
                         message: 'Unable to evaluate device access.',
                       ),
                       loading: () => const _GateLoading(),
@@ -114,8 +114,17 @@ class _GateContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Palabra',
+          'Palabra Word Match',
           style: textTheme.displaySmall,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Mini-game · Word Match',
+          style: textTheme.labelLarge?.copyWith(
+            color: Colors.white70,
+            letterSpacing: 1.2,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.md),
@@ -234,7 +243,7 @@ String _formatCourseName(String value) {
   if (value.isEmpty) {
     return 'Spanish';
   }
-  final segments = value.split(RegExp('[_\\-]')).where((s) => s.isNotEmpty);
+  final segments = value.split(RegExp('[_-]')).where((s) => s.isNotEmpty);
   final formatted = segments
       .map(
         (segment) =>

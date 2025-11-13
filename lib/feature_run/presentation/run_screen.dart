@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +41,9 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   int _lastCelebrationSoundToken = 0;
   int? _pendingMismatchToken;
   int _lastMismatchSoundToken = 0;
+  int? _pendingConfettiToken;
+  ConfettiTone? _pendingConfettiTone;
+  int _lastConfettiSoundToken = 0;
 
   @override
   void initState() {
@@ -114,6 +118,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
     _handleCompletionNavigation(next);
     _maybeQueueCelebrationSound(previous, next);
     _maybeQueueMismatchSound(previous, next);
+    _maybeQueueConfettiSound(previous, next);
   }
 
   void _handleCompletionNavigation(RunState state) {
@@ -192,6 +197,7 @@ class _RunScreenState extends ConsumerState<RunScreen> {
   void _flushPendingSfx() {
     _tryPlayCelebrationSound();
     _tryPlayMismatchSound();
+    _tryPlayConfettiSound();
   }
 
   Future<void> _handleSpanishTileTap(BoardTile tile) async {
@@ -229,6 +235,34 @@ class _RunScreenState extends ConsumerState<RunScreen> {
       }
       unawaited(_handleSpanishTileTap(tile));
     });
+  }
+
+  void _maybeQueueConfettiSound(RunState? previous, RunState next) {
+    final token = next.confettiEffect?.token;
+    final prevToken = previous?.confettiEffect?.token;
+    if (token == null ||
+        token == prevToken ||
+        token == _lastConfettiSoundToken ||
+        token == _pendingConfettiToken) {
+      return;
+    }
+    _pendingConfettiToken = token;
+    _pendingConfettiTone = next.confettiEffect?.tone;
+    _tryPlayConfettiSound();
+  }
+
+  void _tryPlayConfettiSound() {
+    if (_pendingConfettiToken == null ||
+        _pendingConfettiTone == null ||
+        _spanishAudioActive) {
+      return;
+    }
+    final token = _pendingConfettiToken!;
+    final tone = _pendingConfettiTone!;
+    _pendingConfettiToken = null;
+    _pendingConfettiTone = null;
+    _lastConfettiSoundToken = token;
+    unawaited(_sfxPlayer.playConfettiTone(tone));
   }
 
   void _showTtsUnavailableToast() {
@@ -533,13 +567,45 @@ class _RunHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: LinearProgressIndicator(
-            value: value.isNaN ? 0 : value,
-            minHeight: 10,
-            color: AppColors.secondary,
-            backgroundColor: AppColors.surfaceVariant,
+        Container(
+          height: 12,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white.withValues(alpha: 0.08),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.1),
+            ),
+          ),
+          child: Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final width =
+                      constraints.maxWidth * (value.isNaN ? 0 : value);
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 340),
+                    width: width,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        colors: <Color>[
+                          Color(0xFF54F7C5),
+                          Color(0xFF5CD1FF),
+                          Color(0xFFAA7CFF),
+                        ],
+                      ),
+                      boxShadow: const <BoxShadow>[
+                        BoxShadow(
+                          color: Color(0x8054F7C5),
+                          blurRadius: 12,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -606,7 +672,7 @@ class _PowerupToolbar extends ConsumerWidget {
   }
 }
 
-class _PowerupChip extends StatelessWidget {
+class _PowerupChip extends StatefulWidget {
   const _PowerupChip({
     required this.id,
     required this.label,
@@ -622,38 +688,106 @@ class _PowerupChip extends StatelessWidget {
   final void Function(String id) onTap;
 
   @override
+  State<_PowerupChip> createState() => _PowerupChipState();
+}
+
+class _PowerupChipState extends State<_PowerupChip> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final isAvailable = count > 0 && enabled;
-    return ElevatedButton(
-      onPressed: isAvailable ? () => onTap(id) : null,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label),
-          const SizedBox(width: AppSpacing.xxs),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxs,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: isAvailable
-                  ? AppColors.secondary.withValues(alpha: 0.12)
-                  : Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              count.toString(),
-              style: Theme.of(context).textTheme.labelSmall,
+    final theme = Theme.of(context);
+    final bool isAvailable = widget.count > 0 && widget.enabled;
+    final Color badgeColor =
+        isAvailable ? AppColors.secondary : Colors.white.withValues(alpha: 0.2);
+    final List<Color> gradient = isAvailable
+        ? <Color>[
+            AppColors.secondary.withValues(alpha: 0.32),
+            AppColors.primary.withValues(alpha: 0.22),
+          ]
+        : <Color>[
+            Colors.white.withValues(alpha: 0.08),
+            Colors.white.withValues(alpha: 0.04),
+          ];
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 220),
+      opacity: widget.enabled ? 1 : 0.55,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 140),
+        scale: _isPressed ? 0.95 : 1.0,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onHighlightChanged: (value) {
+              setState(() => _isPressed = value);
+            },
+            onTap: isAvailable ? () => widget.onTap(widget.id) : null,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 240),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: gradient,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.label,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.xxs,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: badgeColor.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          widget.count.toString(),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: badgeColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -889,58 +1023,115 @@ class _RunTileState extends State<_RunTile>
     final theme = Theme.of(context);
     final bool mismatch = widget.isMismatch;
     final highlight = widget.isHighlighted;
+    final double scale =
+        mismatch ? 0.97 : widget.isSelected ? 1.015 : 1.0;
     final Color baseBackground = mismatch
-        ? AppColors.danger.withValues(alpha: 0.18)
+        ? AppColors.danger.withValues(alpha: 0.28)
         : widget.isSelected
-        ? AppColors.secondary.withValues(alpha: 0.2)
-        : AppColors.surfaceVariant;
+            ? AppColors.secondary.withValues(alpha: 0.28)
+            : Colors.white.withValues(alpha: 0.08);
     final Color baseBorder = mismatch
         ? AppColors.danger
         : widget.isSelected
-        ? AppColors.secondary
-        : AppColors.outline;
+            ? AppColors.secondary
+            : Colors.white.withValues(alpha: 0.18);
     final Color highlightColor = widget.highlightColor ?? AppColors.secondary;
     final Color background = highlight
         ? highlightColor.withValues(alpha: 0.18)
         : baseBackground;
     final Color border = highlight ? highlightColor : baseBorder;
+    final List<Color> gradient = mismatch
+        ? <Color>[
+            AppColors.danger.withValues(alpha: 0.35),
+            AppColors.danger.withValues(alpha: 0.12),
+          ]
+        : widget.isSelected
+            ? <Color>[
+                AppColors.secondary.withValues(alpha: 0.32),
+                AppColors.primary.withValues(alpha: 0.18),
+              ]
+            : <Color>[
+                Colors.white.withValues(alpha: 0.12),
+                Colors.white.withValues(alpha: 0.04),
+              ];
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),
       opacity: widget.enabled ? 1 : 0.5,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final double dx = mismatch ? _offsetAnimation.value : 0.0;
-          return Transform.translate(
-            offset: Offset(dx, 0),
-            child: child,
-          );
-        },
-        child: InkWell(
-          onTap: widget.enabled ? widget.onTap : null,
-          borderRadius: BorderRadius.circular(18),
-          splashColor: mismatch
-              ? AppColors.danger.withValues(alpha: 0.1)
-              : AppColors.secondary.withValues(alpha: 0.1),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: _tileMinHeight),
-            child: Ink(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              decoration: BoxDecoration(
-                color: background,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: border),
-              ),
-              child: Center(
-                child: Text(
-                  widget.text,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: mismatch ? AppColors.danger : null,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        scale: scale,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final double dx = mismatch ? _offsetAnimation.value : 0.0;
+            return Transform.translate(
+              offset: Offset(dx, 0),
+              child: child,
+            );
+          },
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.enabled ? widget.onTap : null,
+              borderRadius: BorderRadius.circular(22),
+              splashColor: mismatch
+                  ? AppColors.danger.withValues(alpha: 0.15)
+                  : AppColors.secondary.withValues(alpha: 0.15),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: _tileMinHeight),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 260),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: gradient,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        color: background,
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color: border.withValues(alpha: 0.6),
+                        ),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 18,
+                            offset: const Offset(0, 10),
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            blurRadius: 10,
+                            spreadRadius: -6,
+                            offset: const Offset(0, -4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          widget.text,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: mismatch ? AppColors.danger : Colors.white,
+                            shadows: const <Shadow>[
+                              Shadow(
+                                blurRadius: 6,
+                                color: Colors.black54,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
