@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:palabra/app/router/app_router.dart';
 import 'package:palabra/design_system/tokens/spacing_tokens.dart';
 import 'package:palabra/design_system/widgets/gradient_background.dart';
+import 'package:palabra/feature_games/application/game_registry.dart';
 import 'package:palabra/feature_games/application/selected_game_provider.dart';
 import 'package:palabra/feature_games/data/game_catalog.dart';
 
@@ -19,6 +20,7 @@ class GameHubScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final registry = ref.watch(gameRegistryProvider);
     return GradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -40,11 +42,12 @@ class GameHubScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.lg),
                 Expanded(
                   child: ListView.separated(
-                    itemCount: kGameCatalog.length,
+                    itemCount: registry.length,
                     separatorBuilder: (context, _) =>
                         const SizedBox(height: AppSpacing.lg),
                     itemBuilder: (context, index) {
-                      final game = kGameCatalog[index];
+                      final entry = registry[index];
+                      final game = entry.descriptor;
                       return _GameCard(
                         descriptor: game,
                         onPlay: game.id == null

@@ -143,6 +143,7 @@ class _DrillContent extends StatelessWidget {
         theme: theme,
         state: state,
         onContinue: onContinue,
+        onBackToArcade: () => GoRouter.of(context).go(AppRoute.gameHub.path),
       );
     }
     return Column(
@@ -333,11 +334,13 @@ class _CompletedView extends StatelessWidget {
     required this.theme,
     required this.state,
     required this.onContinue,
+    required this.onBackToArcade,
   });
 
   final ThemeData theme;
   final NumberDrillState state;
   final VoidCallback onContinue;
+  final VoidCallback onBackToArcade;
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +378,12 @@ class _CompletedView extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
                   onPressed: onContinue,
-                  child: const Text('Continue'),
+                  child: const Text('Return to finish'),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: onBackToArcade,
+                  child: const Text('Back to arcade'),
                 ),
               ],
             ),

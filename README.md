@@ -16,11 +16,12 @@
 
 ## Core Flow
 1. **Profile selector** – create or choose a learner profile. Progress is stored in shared_preferences per profile.
-2. **Gate** – confirm course/device eligibility (forced to Spanish today) and surface the current build number.
-3. **Pre-run** – review objectives, active powerups, and deck composition before launching a 60-second round.
-4. **Run** – tap-to-match on a five-row (or four with powerups) grid, earning XP for streaks and clean tiers.
-5. **Number drill** – a 4×4 grid plays audio for numbers 1–100; match five prompts to earn bonus XP.
-6. **Finish** – celebrate progress, review stats, and queue the next run.
+2. **Arcade hub** – pick a mini-game (Palabra Word Match today, more coming) and hand off to the appropriate gate/run flow.
+3. **Gate** – confirm course/device eligibility (forced to Spanish today) and surface the current build number.
+4. **Pre-run** – review objectives, active powerups, and deck composition before launching a 60-second round.
+5. **Run** – tap-to-match on a five-row (or four with powerups) grid, earning XP for streaks and clean tiers.
+6. **Number drill** – a 4×4 grid plays audio for numbers 1–100; match five prompts to earn bonus XP.
+7. **Finish** – celebrate progress, review stats, then jump back to Pre-run or the Arcade hub.
 
 ## Tech Stack
 - **Framework:** Flutter 3.35.7 (Dart 3.9)
@@ -88,6 +89,7 @@ When set (as in our live build), the profile selector lists remote profiles, pul
 - `lib/app` – bootstrap, router, constants (version), and theme entry points.
 - `lib/data_core` – in-memory store, models, repositories, and persistence helpers.
 - `lib/design_system` – gradient backgrounds, token sets, and shared UI widgets.
+- `lib/feature_games` – Palabra Arcade hub, catalog, and shared game-state scaffolding.
 - `lib/feature_*` – modular feature packages (gate, prerun, run, finish, number drill, profiles, powerups).
 - `assets/` – vocabulary JSON, pre-rendered audio, and static web assets.
 - `docs/` – setup guides, project status, and deployment notes.
@@ -100,7 +102,8 @@ When set (as in our live build), the profile selector lists remote profiles, pul
 - Store Piper `.onnx` models under `tool/` (ignored from commits); generated audio output belongs in `assets/audio`.
 
 ## Next Up
-- Polish the profile selector (long lists, deletion safeguards, deep links).
-- Add additional powerups and visual FX.
+- Add the next mini-game (listening drills) using the shared vocabulary assets and the new game registry scaffolding.
+- Continue polishing the profile selector (long lists, deletion safeguards, deep links) now that it’s the entry point to the Arcade hub.
+- Layer richer audio/visual FX across powerups and celebrations so every game benefits from the same feedback toolkit.
 - Introduce optional cloud sync and telemetry once the LXC API service is online.
 - Expand accessibility (keyboard navigation, screen reader support) and localize UI copy.

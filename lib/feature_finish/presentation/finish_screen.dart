@@ -211,9 +211,9 @@ class _FinishSummary extends ConsumerWidget {
                   TextButton(
                     onPressed: () {
                       ref.invalidate(userMetaFutureProvider);
-                      context.go(AppRoute.gate.path);
+                      context.go(AppRoute.gameHub.path);
                     },
-                    child: const Text('Exit to gate'),
+                    child: const Text('Back to arcade'),
                   ),
                 ],
               ),
