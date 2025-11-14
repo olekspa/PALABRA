@@ -1,10 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_board.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_question.dart';
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_board_widget.dart';
-import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_quiz_overlay.dart';
 
 void main() {
   testWidgets('board widget renders every Color Lines cell', (tester) async {
@@ -20,6 +21,8 @@ void main() {
               isLocked: false,
               isGameOver: false,
               onCellTap: (_, __) {},
+              activeQuestion: null,
+              moveAnimation: null,
             ),
           ),
         ),
@@ -38,7 +41,7 @@ void main() {
     );
   });
 
-  testWidgets('quiz overlay displays Spanish word and options', (tester) async {
+  testWidgets('quiz prompt renders inside the board', (tester) async {
     const question = PalabraLinesQuestionState(
       entry: PalabraLinesVocabEntry(
         id: 'test',
@@ -48,23 +51,40 @@ void main() {
       ),
       options: <String>['road', 'path', 'stone', 'flower', 'mind', 'rope'],
       correctIndex: 0,
+      highlightCells: <Point<int>>[
+        Point<int>(4, 0),
+        Point<int>(4, 1),
+        Point<int>(4, 2),
+        Point<int>(4, 3),
+        Point<int>(4, 4),
+      ],
     );
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Stack(
-            children: <Widget>[
-              const SizedBox.shrink(),
-              PalabraLinesQuizOverlay(
-                question: question,
-                onOptionTap: (_) {},
+          body: Center(
+            child: SizedBox(
+              width: 420,
+              height: 420,
+              child: PalabraLinesBoardWidget(
+                board: PalabraLinesBoard.empty(),
+                selectedRow: null,
+                selectedCol: null,
+                isLocked: true,
+                isGameOver: false,
+                onCellTap: (_, __) {},
+                activeQuestion: question,
+                onQuizOptionTap: (_) {},
+                moveAnimation: null,
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
-    expect(find.text('camino'), findsOneWidget);
-    expect(find.byType(ElevatedButton), findsNWidgets(question.options.length));
+    for (final letter in <String>['C', 'A', 'M', 'I', 'N']) {
+      expect(find.text(letter), findsWidgets);
+    }
+    expect(find.byType(FilledButton), findsNWidgets(question.options.length));
   });
 }

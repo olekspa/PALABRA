@@ -44,7 +44,7 @@ class PalabraLinesScoreColumn extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Puntaje',
+            'Score',
             style: theme.textTheme.labelLarge?.copyWith(
               color: Colors.white70,
             ),
@@ -58,7 +58,7 @@ class PalabraLinesScoreColumn extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Mejor',
+            'Best',
             style: theme.textTheme.labelLarge?.copyWith(
               color: Colors.white70,
             ),
@@ -82,7 +82,7 @@ class PalabraLinesScoreColumn extends StatelessWidget {
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Nueva partida'),
+              child: const Text('New game'),
             ),
           ),
         ],
@@ -107,7 +107,7 @@ class _CompetitionColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Objetivo',
+          'Goal',
           style: theme.textTheme.labelLarge?.copyWith(
             color: Colors.white70,
           ),

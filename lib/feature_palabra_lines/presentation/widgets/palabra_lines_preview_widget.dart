@@ -32,7 +32,7 @@ class PalabraLinesPreviewWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-            'Próximas bolas',
+            'Upcoming balls',
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.onSurface,
               fontWeight: FontWeight.bold,

@@ -53,10 +53,13 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
   UserMeta? _activeMeta;
   Future<void>? _bootstrapFuture;
   final PalabraLinesSfxPlayer? _sfxPlayer;
+  Timer? _moveAnimationTimer;
+  int _moveAnimationCounter = 0;
 
   @override
   void dispose() {
     unawaited(_sfxPlayer?.dispose());
+    _moveAnimationTimer?.cancel();
     super.dispose();
   }
 
@@ -76,6 +79,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       selectedRow: null,
       selectedCol: null,
       activeQuestion: null,
+      moveAnimation: null,
     );
   }
 
@@ -206,6 +210,14 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       phase: PalabraLinesPhase.idle,
       selectedRow: null,
       selectedCol: null,
+      moveAnimation: null,
+    );
+    _startMoveAnimation(
+      color: movingColor,
+      fromRow: fromRow,
+      fromCol: fromCol,
+      toRow: toRow,
+      toCol: toCol,
     );
     unawaited(_sfxPlayer?.playBubbleMove());
     _handlePostMove(board);
@@ -228,13 +240,18 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     final updatedScore = state.score + result.scoreDelta;
     final newHighScore = max(state.highScore, updatedScore);
     final question = _maybeCreateQuestion(result.removedCount);
+    final highlightedQuestion = question?.withHighlightCells(result.clearedCells);
     state = state.copyWith(
       board: workingBoard,
       preview: previewResult.preview,
       score: updatedScore,
       highScore: newHighScore,
-      phase: question != null ? PalabraLinesPhase.quiz : PalabraLinesPhase.idle,
-      activeQuestion: question,
+      phase:
+          highlightedQuestion != null
+              ? PalabraLinesPhase.quiz
+              : PalabraLinesPhase.idle,
+      activeQuestion: highlightedQuestion,
+      moveAnimation: null,
     );
     _persistHighScore(newHighScore);
   }
@@ -273,6 +290,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
         activeQuestion: null,
         selectedRow: null,
         selectedCol: null,
+        moveAnimation: null,
       );
       return;
     }
@@ -286,6 +304,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       activeQuestion: null,
       selectedRow: null,
       selectedCol: null,
+      moveAnimation: null,
     );
     _persistHighScore(newHighScore);
   }
@@ -303,7 +322,12 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       _scanDirection(board, cell, const Point<int>(1, -1), cellsToClear);
     }
     if (cellsToClear.isEmpty) {
-      return PalabraLinesLineRemovalResult(board, 0, 0);
+      return PalabraLinesLineRemovalResult(
+        board,
+        0,
+        0,
+        const <Point<int>>[],
+      );
     }
     var updatedBoard = board;
     for (final point in cellsToClear) {
@@ -318,6 +342,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       updatedBoard,
       removedCount,
       removedCount,
+      List<Point<int>>.unmodifiable(cellsToClear),
     );
   }
 
@@ -540,15 +565,47 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
 
   @visibleForTesting
   void debugPersistHighScore(int candidate) => _persistHighScore(candidate);
+
+  void _startMoveAnimation({
+    required PalabraLinesColor color,
+    required int fromRow,
+    required int fromCol,
+    required int toRow,
+    required int toCol,
+  }) {
+    final animation = PalabraLinesMoveAnimation(
+      id: _moveAnimationCounter++,
+      from: Point<int>(fromRow, fromCol),
+      to: Point<int>(toRow, toCol),
+      color: color,
+    );
+    state = state.copyWith(moveAnimation: animation);
+    _moveAnimationTimer?.cancel();
+    _moveAnimationTimer = Timer(
+      PalabraLinesMoveAnimation.duration,
+      () {
+        if (!mounted) {
+          return;
+        }
+        state = state.copyWith(moveAnimation: null);
+      },
+    );
+  }
 }
 
 /// Result payload from the line detector.
 class PalabraLinesLineRemovalResult {
-  PalabraLinesLineRemovalResult(this.board, this.removedCount, this.scoreDelta);
+  PalabraLinesLineRemovalResult(
+    this.board,
+    this.removedCount,
+    this.scoreDelta,
+    this.clearedCells,
+  );
 
   final PalabraLinesBoard board;
   final int removedCount;
   final int scoreDelta;
+  final List<Point<int>> clearedCells;
 }
 
 class _PreviewResult {

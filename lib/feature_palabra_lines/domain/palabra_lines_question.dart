@@ -1,3 +1,5 @@
+import 'dart:math';
+
 /// Difficulty band used to scale quiz questions.
 enum PalabraLinesDifficultyTier {
   base,
@@ -27,12 +29,14 @@ class PalabraLinesQuestionState {
     required this.options,
     required this.correctIndex,
     this.wrongAttempts = 0,
+    this.highlightCells = const <Point<int>>[],
   });
 
   final PalabraLinesVocabEntry entry;
   final List<String> options;
   final int correctIndex;
   final int wrongAttempts;
+  final List<Point<int>> highlightCells;
 
   PalabraLinesQuestionState markWrongAttempt() {
     return PalabraLinesQuestionState(
@@ -40,6 +44,17 @@ class PalabraLinesQuestionState {
       options: options,
       correctIndex: correctIndex,
       wrongAttempts: wrongAttempts + 1,
+      highlightCells: highlightCells,
+    );
+  }
+
+  PalabraLinesQuestionState withHighlightCells(List<Point<int>> cells) {
+    return PalabraLinesQuestionState(
+      entry: entry,
+      options: options,
+      correctIndex: correctIndex,
+      wrongAttempts: wrongAttempts,
+      highlightCells: List<Point<int>>.unmodifiable(cells),
     );
   }
 }

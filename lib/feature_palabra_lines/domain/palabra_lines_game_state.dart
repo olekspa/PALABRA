@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_board.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_preview.dart';
@@ -15,6 +17,7 @@ class PalabraLinesGameState {
     required this.selectedRow,
     required this.selectedCol,
     required this.activeQuestion,
+    required this.moveAnimation,
   });
 
   factory PalabraLinesGameState.initial({
@@ -31,6 +34,7 @@ class PalabraLinesGameState {
       selectedRow: null,
       selectedCol: null,
       activeQuestion: null,
+      moveAnimation: null,
     );
   }
 
@@ -43,6 +47,7 @@ class PalabraLinesGameState {
   final int? selectedRow;
   final int? selectedCol;
   final PalabraLinesQuestionState? activeQuestion;
+  final PalabraLinesMoveAnimation? moveAnimation;
 
   static const _sentinel = Object();
 
@@ -56,6 +61,7 @@ class PalabraLinesGameState {
     Object? selectedRow = _sentinel,
     Object? selectedCol = _sentinel,
     Object? activeQuestion = _sentinel,
+    Object? moveAnimation = _sentinel,
   }) {
     return PalabraLinesGameState(
       board: board ?? this.board,
@@ -71,10 +77,30 @@ class PalabraLinesGameState {
       activeQuestion: activeQuestion == _sentinel
           ? this.activeQuestion
           : activeQuestion as PalabraLinesQuestionState?,
+      moveAnimation: moveAnimation == _sentinel
+          ? this.moveAnimation
+          : moveAnimation as PalabraLinesMoveAnimation?,
     );
   }
 
   PalabraLinesGameState clearSelection() {
     return copyWith(selectedRow: null, selectedCol: null);
   }
+}
+
+/// Metadata describing an in-flight ball movement animation.
+class PalabraLinesMoveAnimation {
+  const PalabraLinesMoveAnimation({
+    required this.id,
+    required this.from,
+    required this.to,
+    required this.color,
+  });
+
+  final int id;
+  final Point<int> from;
+  final Point<int> to;
+  final PalabraLinesColor color;
+
+  static const Duration duration = Duration(milliseconds: 320);
 }

@@ -1,7 +1,15 @@
+import 'dart:math';
+
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_board.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_cell.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
+import 'package:palabra/feature_palabra_lines/domain/palabra_lines_game_state.dart';
+import 'package:palabra/feature_palabra_lines/domain/palabra_lines_question.dart';
+
+const double _gridPadding = 8;
+const double _gridSpacing = 2;
 
 /// Renders the 9x9 Palabra Lines grid with selectable cells.
 class PalabraLinesBoardWidget extends StatelessWidget {
@@ -12,6 +20,9 @@ class PalabraLinesBoardWidget extends StatelessWidget {
     required this.isLocked,
     required this.isGameOver,
     required this.onCellTap,
+    required this.activeQuestion,
+    required this.moveAnimation,
+    this.onQuizOptionTap,
     super.key,
   });
 
@@ -21,6 +32,9 @@ class PalabraLinesBoardWidget extends StatelessWidget {
   final bool isLocked;
   final bool isGameOver;
   final void Function(int row, int col) onCellTap;
+  final PalabraLinesQuestionState? activeQuestion;
+  final PalabraLinesMoveAnimation? moveAnimation;
+  final void Function(int index)? onQuizOptionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -31,65 +45,89 @@ class PalabraLinesBoardWidget extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 1,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         child: Container(
           decoration: BoxDecoration(
             color: background,
             border: Border.all(color: border, width: 2),
           ),
-          child: Stack(
-            children: <Widget>[
-              IgnorePointer(
-                ignoring: isLocked,
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: boardSize,
-                    mainAxisSpacing: 2,
-                    crossAxisSpacing: 2,
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  itemCount: boardSize * boardSize,
-                  itemBuilder: (context, index) {
-                    final row = index ~/ boardSize;
-                    final col = index % boardSize;
-                    final cell = board.cellAt(row, col);
-                    final isSelected = selectedRow == row && selectedCol == col;
-                    return _PalabraLinesCellTile(
-                      cell: cell,
-                      isSelected: isSelected,
-                      isLocked: isLocked,
-                      onTap: () => onCellTap(row, col),
-                    );
-                  },
-                ),
-              ),
-              if (isGameOver)
-                Container(
-                  color: Colors.black54,
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const <Widget>[
-                      Icon(
-                        Icons.flag,
-                        color: Colors.white,
-                        size: 48,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Sin espacios\nJuego terminado',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final boardSide = constraints.maxWidth;
+              return Stack(
+                children: <Widget>[
+                  IgnorePointer(
+                    ignoring: isLocked,
+                    child: Padding(
+                      padding: const EdgeInsets.all(_gridPadding),
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: boardSize,
+                          mainAxisSpacing: _gridSpacing,
+                          crossAxisSpacing: _gridSpacing,
                         ),
+                        itemCount: boardSize * boardSize,
+                        itemBuilder: (context, index) {
+                          final row = index ~/ boardSize;
+                          final col = index % boardSize;
+                          final cell = board.cellAt(row, col);
+                          final isSelected =
+                              selectedRow == row && selectedCol == col;
+                          final shouldHideBall =
+                              moveAnimation != null &&
+                              moveAnimation!.to.x == row &&
+                              moveAnimation!.to.y == col;
+                          return _PalabraLinesCellTile(
+                            cell: cell,
+                            isSelected: isSelected,
+                            isLocked: isLocked,
+                            shouldHideBall: shouldHideBall,
+                            onTap: () => onCellTap(row, col),
+                          );
+                        },
                       ),
-                    ],
+                    ),
                   ),
-                ),
-            ],
+                  if (moveAnimation != null)
+                    _MovingBallOverlay(
+                      animation: moveAnimation!,
+                      boardSide: boardSide,
+                    ),
+                  if (activeQuestion != null && onQuizOptionTap != null)
+                    _BoardQuizOverlay(
+                      question: activeQuestion!,
+                      onOptionTap: onQuizOptionTap!,
+                      boardSide: boardSide,
+                    ),
+                  if (isGameOver)
+                    Container(
+                      color: Colors.black54,
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const <Widget>[
+                          Icon(
+                            Icons.flag,
+                            color: Colors.white,
+                            size: 48,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'No more moves\nGame over',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -102,12 +140,14 @@ class _PalabraLinesCellTile extends StatelessWidget {
     required this.cell,
     required this.isSelected,
     required this.isLocked,
+    required this.shouldHideBall,
     required this.onTap,
   });
 
   final PalabraLinesCell cell;
   final bool isSelected;
   final bool isLocked;
+  final bool shouldHideBall;
   final VoidCallback onTap;
 
   @override
@@ -167,7 +207,7 @@ class _PalabraLinesCellTile extends StatelessWidget {
                   ),
                 ),
               ),
-            if (cell.ballColor != null)
+            if (cell.ballColor != null && !shouldHideBall)
               _PalabraLinesBall(color: cell.ballColor!.color),
           ],
         ),
@@ -179,17 +219,19 @@ class _PalabraLinesCellTile extends StatelessWidget {
 class _PalabraLinesBall extends StatelessWidget {
   const _PalabraLinesBall({
     required this.color,
+    this.diameter = 36,
   });
 
   final Color color;
+  final double diameter;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutBack,
-      width: 36,
-      height: 36,
+      width: diameter,
+      height: diameter,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
@@ -206,6 +248,203 @@ class _PalabraLinesBall extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BoardQuizOverlay extends StatelessWidget {
+  const _BoardQuizOverlay({
+    required this.question,
+    required this.onOptionTap,
+    required this.boardSide,
+  });
+
+  final PalabraLinesQuestionState question;
+  final void Function(int index) onOptionTap;
+  final double boardSide;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final highlightCells = question.highlightCells;
+    final cellSize = _cellExtent(boardSide);
+    final scrim = Container(color: Colors.black.withOpacity(0.55));
+    final letters = question.entry.spanish.characters.toList();
+    final letterWidgets = <Widget>[];
+    for (var i = 0; i < highlightCells.length; i++) {
+      final point = highlightCells[i];
+      final offset = _cellOffset(point, cellSize);
+      final letter = i < letters.length ? letters[i].toUpperCase() : '';
+      letterWidgets.add(
+        Positioned(
+          left: offset.dx,
+          top: offset.dy,
+          child: Container(
+            width: cellSize,
+            height: cellSize,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: theme.colorScheme.primary.withOpacity(0.45),
+            ),
+            child: Center(
+              child: Text(
+                letter,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return Stack(
+      children: <Widget>[
+        scrim,
+        Positioned(
+          top: 16,
+          left: 16,
+          right: 16,
+          child: Column(
+            children: <Widget>[
+              Text(
+                'Translate this word',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              if (question.wrongAttempts > 0) ...<Widget>[
+                const SizedBox(height: 6),
+                Text(
+                  'Try again!',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        ...letterWidgets,
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 16,
+          child: _QuizOptions(
+            options: question.options,
+            onTap: onOptionTap,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuizOptions extends StatelessWidget {
+  const _QuizOptions({
+    required this.options,
+    required this.onTap,
+  });
+
+  final List<String> options;
+  final void Function(int index) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 12,
+      runSpacing: 12,
+      children: List<Widget>.generate(
+        options.length,
+        (index) => SizedBox(
+          width: 140,
+          child: FilledButton(
+            onPressed: () => onTap(index),
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.secondary.withOpacity(0.9),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: Text(
+              options[index],
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+double _cellExtent(double boardSide) {
+  final spacingTotal =
+      _gridSpacing * (PalabraLinesConfig.boardSize - 1) + _gridPadding * 2;
+  final available = boardSide - spacingTotal;
+  return available / PalabraLinesConfig.boardSize;
+}
+
+Offset _cellOffset(Point<int> cell, double cellSize) {
+  final row = cell.x;
+  final col = cell.y;
+  final dx = _gridPadding + col * (cellSize + _gridSpacing);
+  final dy = _gridPadding + row * (cellSize + _gridSpacing);
+  return Offset(dx, dy);
+}
+
+class _MovingBallOverlay extends StatelessWidget {
+  const _MovingBallOverlay({
+    required this.animation,
+    required this.boardSide,
+  });
+
+  final PalabraLinesMoveAnimation animation;
+  final double boardSide;
+
+  @override
+  Widget build(BuildContext context) {
+    final cellSize = _cellExtent(boardSide);
+    final start = _cellOffset(animation.from, cellSize);
+    final end = _cellOffset(animation.to, cellSize);
+    final tween = Tween<Offset>(
+      begin: Offset(start.dx, start.dy),
+      end: Offset(end.dx, end.dy),
+    );
+    final ballSize = (cellSize * 0.7).clamp(28.0, cellSize);
+    return TweenAnimationBuilder<Offset>(
+      key: ValueKey<int>(animation.id),
+      tween: tween,
+      duration: PalabraLinesMoveAnimation.duration,
+      builder: (context, value, child) {
+        return Positioned(
+          left: value.dx,
+          top: value.dy,
+          child: SizedBox(
+            width: cellSize,
+            height: cellSize,
+            child: Center(
+              child: _PalabraLinesBall(
+                color: animation.color.color,
+                diameter: ballSize,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
