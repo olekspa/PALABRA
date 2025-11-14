@@ -89,11 +89,16 @@ class PalabraLinesBoardWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (moveAnimation != null)
+                  if (moveAnimation != null) ...[
+                    _PathOverlay(
+                      animation: moveAnimation!,
+                      boardSide: boardSide,
+                    ),
                     _MovingBallOverlay(
                       animation: moveAnimation!,
                       boardSide: boardSide,
                     ),
+                  ],
                   if (activeQuestion != null && onQuizOptionTap != null)
                     _BoardQuizOverlay(
                       question: activeQuestion!,
@@ -445,6 +450,54 @@ class _MovingBallOverlay extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _PathOverlay extends StatelessWidget {
+  const _PathOverlay({
+    required this.animation,
+    required this.boardSide,
+  });
+
+  final PalabraLinesMoveAnimation animation;
+  final double boardSide;
+
+  @override
+  Widget build(BuildContext context) {
+    final cellSize = _cellExtent(boardSide);
+    final trailSize = (cellSize * 0.25).clamp(10, cellSize).toDouble();
+    final dots = animation.path.map((point) {
+      final offset = _cellOffset(point, cellSize);
+      return Positioned(
+        left: offset.dx + (cellSize - trailSize) / 2,
+        top: offset.dy + (cellSize - trailSize) / 2,
+        child: Container(
+          width: trailSize,
+          height: trailSize,
+          decoration: BoxDecoration(
+            color: animation.color.color.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(trailSize / 2),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: animation.color.color.withOpacity(0.35),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 1, end: 0),
+      duration: PalabraLinesMoveAnimation.duration,
+      builder: (context, opacity, child) {
+        return Opacity(
+          opacity: opacity.clamp(0, 1),
+          child: child,
+        );
+      },
+      child: Stack(children: dots),
     );
   }
 }

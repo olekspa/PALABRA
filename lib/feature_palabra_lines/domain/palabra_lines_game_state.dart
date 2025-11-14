@@ -95,12 +95,14 @@ class PalabraLinesMoveAnimation {
     required this.from,
     required this.to,
     required this.color,
+    required this.path,
   });
 
   final int id;
   final Point<int> from;
   final Point<int> to;
   final PalabraLinesColor color;
+  final List<Point<int>> path;
 
   static const Duration duration = Duration(milliseconds: 320);
 }

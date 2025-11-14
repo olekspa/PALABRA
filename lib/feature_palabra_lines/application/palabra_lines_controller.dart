@@ -55,11 +55,13 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
   final PalabraLinesSfxPlayer? _sfxPlayer;
   Timer? _moveAnimationTimer;
   int _moveAnimationCounter = 0;
+  final List<Timer> _trailTimers = <Timer>[];
 
   @override
   void dispose() {
     unawaited(_sfxPlayer?.dispose());
     _moveAnimationTimer?.cancel();
+    _cancelTrailTimers();
     super.dispose();
   }
 
@@ -116,12 +118,12 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     }
     final fromRow = current.selectedRow!;
     final fromCol = current.selectedCol!;
-    final canMove = _hasPath(current.board, fromRow, fromCol, row, col);
-    if (!canMove) {
+    final path = _findPath(current.board, fromRow, fromCol, row, col);
+    if (path == null) {
       unawaited(_sfxPlayer?.playInvalidMove());
       return;
     }
-    _applyMove(fromRow, fromCol, row, col);
+    _applyMove(fromRow, fromCol, row, col, path);
   }
 
   /// Resolves taps on the quiz overlay options.
@@ -139,7 +141,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     _resumeAfterQuiz();
   }
 
-  bool _hasPath(
+  List<Point<int>>? _findPath(
     PalabraLinesBoard board,
     int fromRow,
     int fromCol,
@@ -147,18 +149,21 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     int toCol,
   ) {
     if (fromRow == toRow && fromCol == toCol) {
-      return false;
+      return null;
     }
     final visited = Set<Point<int>>();
     final queue = Queue<Point<int>>();
+    final parent = <Point<int>, Point<int>>{};
     final start = Point<int>(fromRow, fromCol);
     final target = Point<int>(toRow, toCol);
     visited.add(start);
     queue.add(start);
+    var found = false;
     while (queue.isNotEmpty) {
       final current = queue.removeFirst();
       if (current == target) {
-        return true;
+        found = true;
+        break;
       }
       for (final delta in _neighborDeltas) {
         final next = Point<int>(
@@ -177,13 +182,34 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
           continue;
         }
         visited.add(next);
+        parent[next] = current;
         queue.add(next);
       }
     }
-    return false;
+    if (!found) {
+      return null;
+    }
+    final path = <Point<int>>[];
+    var step = target;
+    path.add(step);
+    while (step != start) {
+      final prev = parent[step];
+      if (prev == null) {
+        return null;
+      }
+      step = prev;
+      path.add(step);
+    }
+    return path.reversed.toList(growable: false);
   }
 
-  void _applyMove(int fromRow, int fromCol, int toRow, int toCol) {
+  void _applyMove(
+    int fromRow,
+    int fromCol,
+    int toRow,
+    int toCol,
+    List<Point<int>> path,
+  ) {
     var board = state.board;
     final fromCell = board.cellAt(fromRow, fromCol);
     final movingColor = fromCell.ballColor;
@@ -218,6 +244,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       fromCol: fromCol,
       toRow: toRow,
       toCol: toCol,
+      path: path,
     );
     unawaited(_sfxPlayer?.playBubbleMove());
     _handlePostMove(board);
@@ -239,7 +266,10 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     workingBoard = previewResult.board;
     final updatedScore = state.score + result.scoreDelta;
     final newHighScore = max(state.highScore, updatedScore);
-    final question = _maybeCreateQuestion(result.removedCount);
+    final question = _maybeCreateQuestion(
+      result.removedCount,
+      result.clearedCells.length,
+    );
     final highlightedQuestion = question?.withHighlightCells(result.clearedCells);
     state = state.copyWith(
       board: workingBoard,
@@ -479,8 +509,14 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     return working;
   }
 
-  PalabraLinesQuestionState? _maybeCreateQuestion(int clearedCount) {
-    return _vocabService?.createQuestion(clearedCount);
+  PalabraLinesQuestionState? _maybeCreateQuestion(
+    int clearedCount,
+    int maxLetters,
+  ) {
+    return _vocabService?.createQuestion(
+      clearedCount,
+      maxLetterCount: maxLetters,
+    );
   }
 
   void _playLineClearSfx(int removedCount) {
@@ -551,7 +587,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     int fromCol,
     int toRow,
     int toCol,
-  ) => _hasPath(board, fromRow, fromCol, toRow, toCol);
+  ) => _findPath(board, fromRow, fromCol, toRow, toCol) != null;
 
   @visibleForTesting
   PalabraLinesLineRemovalResult debugFindAndRemoveLines(
@@ -572,24 +608,49 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     required int fromCol,
     required int toRow,
     required int toCol,
+    required List<Point<int>> path,
   }) {
+    _cancelTrailTimers();
     final animation = PalabraLinesMoveAnimation(
       id: _moveAnimationCounter++,
       from: Point<int>(fromRow, fromCol),
       to: Point<int>(toRow, toCol),
       color: color,
+      path: List<Point<int>>.unmodifiable(path),
     );
     state = state.copyWith(moveAnimation: animation);
     _moveAnimationTimer?.cancel();
+    final hopCount = max(path.length - 1, 0);
+    if (hopCount > 0) {
+      final totalMs = PalabraLinesMoveAnimation.duration.inMilliseconds;
+      for (var i = 1; i <= hopCount; i++) {
+        final delayMs = (totalMs * i ~/ hopCount);
+        final timer = Timer(Duration(milliseconds: delayMs), () {
+          if (!mounted) {
+            return;
+          }
+          unawaited(_sfxPlayer?.playTrailStep());
+        });
+        _trailTimers.add(timer);
+      }
+    }
     _moveAnimationTimer = Timer(
       PalabraLinesMoveAnimation.duration,
       () {
         if (!mounted) {
           return;
         }
+        _cancelTrailTimers();
         state = state.copyWith(moveAnimation: null);
       },
     );
+  }
+
+  void _cancelTrailTimers() {
+    for (final timer in _trailTimers) {
+      timer.cancel();
+    }
+    _trailTimers.clear();
   }
 }
 

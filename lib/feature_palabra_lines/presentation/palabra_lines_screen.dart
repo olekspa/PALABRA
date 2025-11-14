@@ -83,39 +83,40 @@ class _WidePalabraLinesLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double sidebarWidth = 220;
+    const double sidebarWidth = 200;
     const double gap = 24;
-    final usableWidth = constraints.maxWidth - sidebarWidth - gap;
-    final usableHeight = constraints.maxHeight - 32;
-    final double boardSize =
-        usableWidth < usableHeight ? usableWidth : usableHeight;
+    const double designBoardSize = 720;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
           child: Center(
-            child: SizedBox(
-              width:
-                  boardSize.clamp(360.0, constraints.maxWidth).toDouble(),
-              height:
-                  boardSize.clamp(360.0, constraints.maxHeight).toDouble(),
-              child: PalabraLinesBoardWidget(
-                board: state.board,
-                selectedRow: state.selectedRow,
-                selectedCol: state.selectedCol,
-                isLocked: isLocked,
-                isGameOver: state.isGameOver,
-                onCellTap: controller.onCellTap,
-                activeQuestion: state.activeQuestion,
-                onQuizOptionTap: controller.onQuizOptionTap,
-                moveAnimation: state.moveAnimation,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: designBoardSize,
+                  height: designBoardSize,
+                  child: PalabraLinesBoardWidget(
+                    board: state.board,
+                    selectedRow: state.selectedRow,
+                    selectedCol: state.selectedCol,
+                    isLocked: isLocked,
+                    isGameOver: state.isGameOver,
+                    onCellTap: controller.onCellTap,
+                    activeQuestion: state.activeQuestion,
+                    onQuizOptionTap: controller.onQuizOptionTap,
+                    moveAnimation: state.moveAnimation,
+                  ),
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: gap),
-        SizedBox(
-          width: sidebarWidth,
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: sidebarWidth),
           child: _SidebarInfo(
             state: state,
             onNewGame: controller.startNewGame,
@@ -141,36 +142,41 @@ class _StackedPalabraLinesLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double boardSize =
-        (constraints.maxWidth - 32).clamp(320.0, constraints.maxWidth).toDouble();
+    const double designBoardSize = 640;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
-          child: Center(
-            child: SizedBox(
-              width: boardSize,
-              height: boardSize,
-              child: PalabraLinesBoardWidget(
-                board: state.board,
-                selectedRow: state.selectedRow,
-                selectedCol: state.selectedCol,
-                isLocked: isLocked,
-                isGameOver: state.isGameOver,
-                onCellTap: controller.onCellTap,
-                activeQuestion: state.activeQuestion,
-                onQuizOptionTap: controller.onQuizOptionTap,
-                moveAnimation: state.moveAnimation,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: SizedBox(
+                width: designBoardSize,
+                height: designBoardSize,
+                child: PalabraLinesBoardWidget(
+                  board: state.board,
+                  selectedRow: state.selectedRow,
+                  selectedCol: state.selectedCol,
+                  isLocked: isLocked,
+                  isGameOver: state.isGameOver,
+                  onCellTap: controller.onCellTap,
+                  activeQuestion: state.activeQuestion,
+                  onQuizOptionTap: controller.onQuizOptionTap,
+                  moveAnimation: state.moveAnimation,
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 24),
-        _SidebarInfo(
-          state: state,
-          onNewGame: controller.startNewGame,
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: _SidebarInfo(
+            state: state,
+            onNewGame: controller.startNewGame,
+          ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
       ],
     );
   }

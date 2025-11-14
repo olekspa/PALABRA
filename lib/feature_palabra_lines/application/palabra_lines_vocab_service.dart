@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:characters/characters.dart';
 import 'package:palabra/data_core/models/user_meta.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
@@ -71,7 +72,10 @@ class PalabraLinesVocabService {
   }
 
   /// Draws a question scaled by the number of cleared balls.
-  PalabraLinesQuestionState? createQuestion(int clearedCount) {
+  PalabraLinesQuestionState? createQuestion(
+    int clearedCount, {
+    int? maxLetterCount,
+  }) {
     if (_allEntries.length < PalabraLinesConfig.quizOptions) {
       return null;
     }
@@ -87,7 +91,13 @@ class PalabraLinesVocabService {
       if (!seen.add(tier)) {
         continue;
       }
-      final pool = _poolForTier(tier);
+      final pool = _poolForTier(tier)
+          .where(
+            (entry) =>
+                maxLetterCount == null ||
+                _spanishLength(entry.spanish) <= maxLetterCount,
+          )
+          .toList();
       if (pool.isEmpty) {
         continue;
       }
@@ -206,6 +216,10 @@ class PalabraLinesVocabService {
       english: english,
       level: level,
     );
+  }
+
+  int _spanishLength(String input) {
+    return input.characters.length;
   }
 }
 

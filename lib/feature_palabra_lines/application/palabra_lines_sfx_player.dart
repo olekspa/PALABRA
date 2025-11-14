@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 class PalabraLinesSfxPlayer {
   PalabraLinesSfxPlayer({Random? random})
     : _movePlayer = AudioPlayer(),
+      _trailPlayer = AudioPlayer(),
       _linePlayer = AudioPlayer(),
       _largeLinePlayer = AudioPlayer(),
       _invalidPlayer = AudioPlayer(),
@@ -23,6 +24,7 @@ class PalabraLinesSfxPlayer {
       'assets/audio/sfx/lines98_incorrect_move.wav';
 
   final AudioPlayer _movePlayer;
+  final AudioPlayer _trailPlayer;
   final AudioPlayer _linePlayer;
   final AudioPlayer _largeLinePlayer;
   final AudioPlayer _invalidPlayer;
@@ -32,6 +34,7 @@ class PalabraLinesSfxPlayer {
   bool _lineLoaded = false;
   bool _largeLineLoaded = false;
   bool _invalidLoaded = false;
+  bool _trailLoaded = false;
 
   Future<void> playBubbleMove() {
     final asset = _random.nextBool() ? _moveAssetA : _moveAssetB;
@@ -75,9 +78,23 @@ class PalabraLinesSfxPlayer {
     );
   }
 
+  Future<void> playTrailStep() {
+    final asset = _random.nextBool() ? _moveAssetA : _moveAssetB;
+    return _playAsset(
+      player: _trailPlayer,
+      assetPath: asset,
+      loadedFlag: () => _trailLoaded,
+      markLoaded: () => _trailLoaded = true,
+      markStale: () => _trailLoaded = false,
+      volume: 0.35,
+      speed: 1.15,
+    );
+  }
+
   Future<void> dispose() async {
     await Future.wait<void>([
       _movePlayer.dispose(),
+      _trailPlayer.dispose(),
       _linePlayer.dispose(),
       _largeLinePlayer.dispose(),
       _invalidPlayer.dispose(),

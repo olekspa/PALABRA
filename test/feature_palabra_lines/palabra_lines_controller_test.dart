@@ -109,6 +109,61 @@ void main() {
       expect(advancedQuestion!.entry.level, 'b2');
     });
 
+    test('vocab service enforces max letter count', () {
+      final items = <VocabItem>[
+        VocabItem(
+          itemId: 'short1',
+          english: 'sun',
+          spanish: 'sol',
+          level: 'a1',
+        ),
+        VocabItem(
+          itemId: 'short2',
+          english: 'day',
+          spanish: 'dia',
+          level: 'a1',
+        ),
+        VocabItem(
+          itemId: 'long1',
+          english: 'cloud',
+          spanish: 'cielo',
+          level: 'a1',
+        ),
+        VocabItem(
+          itemId: 'long2',
+          english: 'night',
+          spanish: 'noche',
+          level: 'a1',
+        ),
+        VocabItem(
+          itemId: 'long3',
+          english: 'earth',
+          spanish: 'tierra',
+          level: 'a1',
+        ),
+        VocabItem(
+          itemId: 'long4',
+          english: 'water',
+          spanish: 'agua',
+          level: 'a1',
+        ),
+      ];
+      final service = PalabraLinesVocabService.fromItems(
+        items: items,
+        baseLevel: 'a1',
+        random: Random(1),
+      );
+      final question = service.createQuestion(5, maxLetterCount: 4);
+      expect(question, isNotNull);
+      expect(
+        question!.entry.spanish.length,
+        lessThanOrEqualTo(4),
+      );
+      final impossible =
+          service.createQuestion(5, maxLetterCount: 1);
+      expect(impossible, isNull);
+    });
+
     test('controller ignores taps while quiz overlay is active', () {
       final controller = createController();
       const question = PalabraLinesQuestionState(
