@@ -22,71 +22,47 @@ class PalabraLinesScoreColumn extends StatelessWidget {
     final progress = baseline == 0
         ? 0.0
         : (score / baseline).clamp(0, 1).toDouble();
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.colorScheme.onSurface.withOpacity(0.12),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Palabra Lines',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            'Palabra Lines',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+        const SizedBox(height: 8),
+        Text(
+          'Score: $score',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Score',
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: Colors.white70,
-            ),
+        ),
+        Text(
+          'Best: $highScore',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.white70,
           ),
-          Text(
-            '$score',
-            style: theme.textTheme.displaySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 140,
+          child: FilledButton(
+            onPressed: onNewGame,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.white,
             ),
+            child: const Text('New game'),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Best',
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: Colors.white70,
-            ),
-          ),
-          Text(
-            '$highScore',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          _CompetitionColumn(progress: progress),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: onNewGame,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('New game'),
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        _CompetitionColumn(progress: progress),
+      ],
     );
   }
 }

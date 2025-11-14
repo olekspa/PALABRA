@@ -201,12 +201,10 @@ class _PalabraLinesCellTile extends StatelessWidget {
                 ),
               ),
             if (cell.hasPreview && cell.previewColor != null)
-              Opacity(
-                opacity: 0.85,
-                child: _PalabraLinesBall(
-                  color: cell.previewColor!.color,
-                  diameter: 20,
-                ),
+              Positioned(
+                top: 6,
+                left: 6,
+                child: _PreviewMarble(color: cell.previewColor!.color),
               ),
             if (cell.ballColor != null && !shouldHideBall)
               _PalabraLinesBall(color: cell.ballColor!.color),
@@ -248,6 +246,33 @@ class _PalabraLinesBall extends StatelessWidget {
             spreadRadius: 1,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PreviewMarble extends StatelessWidget {
+  const _PreviewMarble({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: <Color>[
+            color.withOpacity(0.45),
+            color.withOpacity(0.9),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.4),
+          width: 1,
+        ),
       ),
     );
   }

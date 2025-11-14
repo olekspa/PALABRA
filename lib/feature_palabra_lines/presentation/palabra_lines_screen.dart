@@ -86,21 +86,28 @@ class _WidePalabraLinesLayout extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Center(
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: PalabraLinesBoardWidget(
-                  board: state.board,
-                  selectedRow: state.selectedRow,
-                  selectedCol: state.selectedCol,
-                  isLocked: isLocked,
-                  isGameOver: state.isGameOver,
-                  onCellTap: controller.onCellTap,
-                  activeQuestion: state.activeQuestion,
-                  onQuizOptionTap: controller.onQuizOptionTap,
-                  moveAnimation: state.moveAnimation,
-                ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: LayoutBuilder(
+                builder: (context, boardConstraints) {
+                  final boardSide = boardConstraints.maxWidth
+                      .clamp(0.0, constraints.maxHeight);
+                  return SizedBox(
+                    width: boardSide,
+                    height: boardSide,
+                    child: PalabraLinesBoardWidget(
+                      board: state.board,
+                      selectedRow: state.selectedRow,
+                      selectedCol: state.selectedCol,
+                      isLocked: isLocked,
+                      isGameOver: state.isGameOver,
+                      onCellTap: controller.onCellTap,
+                      activeQuestion: state.activeQuestion,
+                      onQuizOptionTap: controller.onQuizOptionTap,
+                      moveAnimation: state.moveAnimation,
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -134,28 +141,35 @@ class _StackedPalabraLinesLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       child: Column(
         children: <Widget>[
           Expanded(
-            child: Center(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: PalabraLinesBoardWidget(
-                  board: state.board,
-                  selectedRow: state.selectedRow,
-                  selectedCol: state.selectedCol,
-                  isLocked: isLocked,
-                  isGameOver: state.isGameOver,
-                  onCellTap: controller.onCellTap,
-                  activeQuestion: state.activeQuestion,
-                  onQuizOptionTap: controller.onQuizOptionTap,
-                  moveAnimation: state.moveAnimation,
-                ),
-              ),
+            child: LayoutBuilder(
+              builder: (context, boxConstraints) {
+                final boardSide = boxConstraints.maxWidth
+                    .clamp(0.0, boxConstraints.maxHeight);
+                return Center(
+                  child: SizedBox(
+                    width: boardSide,
+                    height: boardSide,
+                    child: PalabraLinesBoardWidget(
+                      board: state.board,
+                      selectedRow: state.selectedRow,
+                      selectedCol: state.selectedCol,
+                      isLocked: isLocked,
+                      isGameOver: state.isGameOver,
+                      onCellTap: controller.onCellTap,
+                      activeQuestion: state.activeQuestion,
+                      onQuizOptionTap: controller.onQuizOptionTap,
+                      moveAnimation: state.moveAnimation,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _SidebarInfo(
             state: state,
             onNewGame: controller.startNewGame,
