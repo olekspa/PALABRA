@@ -6,7 +6,6 @@ import 'package:palabra/feature_palabra_lines/application/palabra_lines_provider
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_game_state.dart';
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_board_widget.dart';
-import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_preview_widget.dart';
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_score_column.dart';
 
 class PalabraLinesScreen extends ConsumerWidget {
@@ -21,27 +20,24 @@ class PalabraLinesScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 900;
-                if (isWide) {
-                  return _WidePalabraLinesLayout(
-                    state: state,
-                    controller: controller,
-                    isLocked: isLocked,
-                    constraints: constraints,
-                  );
-                }
-                return _StackedPalabraLinesLayout(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth > 900;
+              if (isWide) {
+                return _WidePalabraLinesLayout(
                   state: state,
                   controller: controller,
                   isLocked: isLocked,
                   constraints: constraints,
                 );
-              },
-            ),
+              }
+              return _StackedPalabraLinesLayout(
+                state: state,
+                controller: controller,
+                isLocked: isLocked,
+                constraints: constraints,
+              );
+            },
           ),
         ),
       ),
@@ -83,32 +79,27 @@ class _WidePalabraLinesLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double sidebarWidth = 200;
+    const double sidebarWidth = 220;
     const double gap = 24;
-    const double designBoardSize = 720;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Expanded(
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: SizedBox(
-                  width: designBoardSize,
-                  height: designBoardSize,
-                  child: PalabraLinesBoardWidget(
-                    board: state.board,
-                    selectedRow: state.selectedRow,
-                    selectedCol: state.selectedCol,
-                    isLocked: isLocked,
-                    isGameOver: state.isGameOver,
-                    onCellTap: controller.onCellTap,
-                    activeQuestion: state.activeQuestion,
-                    onQuizOptionTap: controller.onQuizOptionTap,
-                    moveAnimation: state.moveAnimation,
-                  ),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: PalabraLinesBoardWidget(
+                  board: state.board,
+                  selectedRow: state.selectedRow,
+                  selectedCol: state.selectedCol,
+                  isLocked: isLocked,
+                  isGameOver: state.isGameOver,
+                  onCellTap: controller.onCellTap,
+                  activeQuestion: state.activeQuestion,
+                  onQuizOptionTap: controller.onQuizOptionTap,
+                  moveAnimation: state.moveAnimation,
                 ),
               ),
             ),
@@ -142,17 +133,14 @@ class _StackedPalabraLinesLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double designBoardSize = 640;
-    return Column(
-      children: <Widget>[
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: SizedBox(
-                width: designBoardSize,
-                height: designBoardSize,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 1,
                 child: PalabraLinesBoardWidget(
                   board: state.board,
                   selectedRow: state.selectedRow,
@@ -167,17 +155,13 @@ class _StackedPalabraLinesLayout extends StatelessWidget {
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _SidebarInfo(
+          const SizedBox(height: 12),
+          _SidebarInfo(
             state: state,
             onNewGame: controller.startNewGame,
           ),
-        ),
-        const SizedBox(height: 16),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -201,9 +185,6 @@ class _SidebarInfo extends StatelessWidget {
           state: state,
           onNewGame: onNewGame,
         ),
-        const SizedBox(height: 16),
-        PalabraLinesPreviewWidget(preview: state.preview),
-        const SizedBox(height: 16),
         Text(
           'Create lines of ${PalabraLinesConfig.lineLength} balls to reveal a Spanish word, then answer without leaving the grid.',
           textAlign: TextAlign.center,

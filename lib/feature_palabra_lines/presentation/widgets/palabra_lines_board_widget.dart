@@ -201,15 +201,11 @@ class _PalabraLinesCellTile extends StatelessWidget {
                 ),
               ),
             if (cell.hasPreview && cell.previewColor != null)
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: cell.previewColor!.color.withOpacity(0.7),
-                  ),
+              Opacity(
+                opacity: 0.85,
+                child: _PalabraLinesBall(
+                  color: cell.previewColor!.color,
+                  diameter: 20,
                 ),
               ),
             if (cell.ballColor != null && !shouldHideBall)
