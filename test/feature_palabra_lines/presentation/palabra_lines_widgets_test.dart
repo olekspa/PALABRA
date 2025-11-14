@@ -14,15 +14,19 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: PalabraLinesBoardWidget(
-              board: board,
-              selectedRow: null,
-              selectedCol: null,
-              isLocked: false,
-              isGameOver: false,
-              onCellTap: (_, __) {},
-              activeQuestion: null,
-              moveAnimation: null,
+            child: SizedBox(
+              width: 360,
+              height: 440,
+              child: PalabraLinesBoardWidget(
+                board: board,
+                selectedRow: null,
+                selectedCol: null,
+                isLocked: false,
+                isGameOver: false,
+                onCellTap: (_, __) {},
+                activeQuestion: null,
+                moveAnimation: null,
+              ),
             ),
           ),
         ),
@@ -65,7 +69,7 @@ void main() {
           body: Center(
             child: SizedBox(
               width: 420,
-              height: 420,
+              height: 480,
               child: PalabraLinesBoardWidget(
                 board: PalabraLinesBoard.empty(),
                 selectedRow: null,
