@@ -1,7 +1,14 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:palabra/data_core/models/user_meta.dart';
+import 'package:palabra/data_core/models/vocab_item.dart';
+import 'package:palabra/data_core/repositories/user_meta_repository.dart';
+import 'package:palabra/data_core/repositories/vocab_repository.dart';
+import 'package:palabra/feature_palabra_lines/application/palabra_lines_sfx_player.dart';
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_vocab_service.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_board.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_cell.dart';
@@ -15,21 +22,43 @@ import 'package:riverpod/riverpod.dart';
 class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
   PalabraLinesController({
     PalabraLinesVocabService? vocabService,
+    UserMetaRepository? userMetaRepository,
+    VocabRepository? vocabRepository,
+    AssetBundle? assetBundle,
     Random? random,
     int initialHighScore = 0,
-  })  : _rng = random ?? Random(),
-        _vocabService = vocabService,
-        super(
-          PalabraLinesGameState.initial(
-            board: PalabraLinesBoard.empty(),
-            highScore: initialHighScore,
-          ),
-        ) {
+    PalabraLinesSfxPlayer? sfxPlayer,
+  }) : _rng = random ?? Random(),
+       _vocabService = vocabService,
+       _userMetaRepository = userMetaRepository,
+       _vocabRepository = vocabRepository,
+       _assetBundle = assetBundle,
+       _sfxPlayer = sfxPlayer,
+       super(
+         PalabraLinesGameState.initial(
+           board: PalabraLinesBoard.empty(),
+           highScore: initialHighScore,
+         ),
+       ) {
     startNewGame();
+    _bootstrapFuture = _bootstrap();
+    unawaited(_bootstrapFuture);
   }
 
   final Random _rng;
-  final PalabraLinesVocabService? _vocabService;
+  PalabraLinesVocabService? _vocabService;
+  final UserMetaRepository? _userMetaRepository;
+  final VocabRepository? _vocabRepository;
+  final AssetBundle? _assetBundle;
+  UserMeta? _activeMeta;
+  Future<void>? _bootstrapFuture;
+  final PalabraLinesSfxPlayer? _sfxPlayer;
+
+  @override
+  void dispose() {
+    unawaited(_sfxPlayer?.dispose());
+    super.dispose();
+  }
 
   /// Resets the board, score, and preview to a clean game.
   void startNewGame() {
@@ -85,6 +114,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     final fromCol = current.selectedCol!;
     final canMove = _hasPath(current.board, fromRow, fromCol, row, col);
     if (!canMove) {
+      unawaited(_sfxPlayer?.playInvalidMove());
       return;
     }
     _applyMove(fromRow, fromCol, row, col);
@@ -137,7 +167,8 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
         final nextCell = board.cellAt(next.x, next.y);
         final isDestination = next == target;
         final isFree =
-            nextCell.ballColor == null && (!nextCell.hasPreview || isDestination);
+            nextCell.ballColor == null &&
+            (!nextCell.hasPreview || isDestination);
         if (!isFree) {
           continue;
         }
@@ -176,12 +207,14 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       selectedRow: null,
       selectedCol: null,
     );
+    unawaited(_sfxPlayer?.playBubbleMove());
     _handlePostMove(board);
   }
 
   void _handlePostMove(PalabraLinesBoard board) {
     final removal = _findAndRemoveLines(board);
     if (removal.removedCount > 0) {
+      _playLineClearSfx(removal.removedCount);
       _handleLinesCleared(removal);
     } else {
       _spawnNewBalls(removal.board);
@@ -203,6 +236,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       phase: question != null ? PalabraLinesPhase.quiz : PalabraLinesPhase.idle,
       activeQuestion: question,
     );
+    _persistHighScore(newHighScore);
   }
 
   void _spawnNewBalls(PalabraLinesBoard board) {
@@ -223,6 +257,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       );
     }
     final removal = _findAndRemoveLines(workingBoard);
+    _playLineClearSfx(removal.removedCount);
     final updatedScore = state.score + removal.scoreDelta;
     final newHighScore = max(state.highScore, updatedScore);
     workingBoard = removal.board;
@@ -252,6 +287,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       selectedRow: null,
       selectedCol: null,
     );
+    _persistHighScore(newHighScore);
   }
 
   PalabraLinesLineRemovalResult _findAndRemoveLines(PalabraLinesBoard board) {
@@ -278,7 +314,11 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       );
     }
     final removedCount = cellsToClear.length;
-    return PalabraLinesLineRemovalResult(updatedBoard, removedCount, removedCount);
+    return PalabraLinesLineRemovalResult(
+      updatedBoard,
+      removedCount,
+      removedCount,
+    );
   }
 
   void _scanDirection(
@@ -291,8 +331,13 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     if (color == null) {
       return;
     }
-    final forward =
-        _collectInDirection(board, origin.row, origin.col, delta, color);
+    final forward = _collectInDirection(
+      board,
+      origin.row,
+      origin.col,
+      delta,
+      color,
+    );
     final backward = _collectInDirection(
       board,
       origin.row,
@@ -332,7 +377,9 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
   PalabraLinesBoard _seedInitialBalls(PalabraLinesBoard board) {
     var workingBoard = board;
     for (var i = 0; i < PalabraLinesConfig.initialBalls; i++) {
-      final options = workingBoard.emptyPositions(includePreview: true).toList();
+      final options = workingBoard
+          .emptyPositions(includePreview: true)
+          .toList();
       if (options.isEmpty) {
         break;
       }
@@ -386,8 +433,9 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
 
   void _resumeAfterQuiz() {
     state = state.copyWith(
-      phase:
-          state.isGameOver ? PalabraLinesPhase.gameOver : PalabraLinesPhase.idle,
+      phase: state.isGameOver
+          ? PalabraLinesPhase.gameOver
+          : PalabraLinesPhase.idle,
       activeQuestion: null,
     );
   }
@@ -406,6 +454,71 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     return working;
   }
 
+  PalabraLinesQuestionState? _maybeCreateQuestion(int clearedCount) {
+    return _vocabService?.createQuestion(clearedCount);
+  }
+
+  void _playLineClearSfx(int removedCount) {
+    if (removedCount <= 0) {
+      return;
+    }
+    if (removedCount > PalabraLinesConfig.lineLength) {
+      unawaited(_sfxPlayer?.playLargeLineClear());
+    } else {
+      unawaited(_sfxPlayer?.playLineClear());
+    }
+  }
+
+  Future<void> _bootstrap() async {
+    await _loadUserMeta();
+    await _loadVocabulary();
+  }
+
+  Future<void> _loadUserMeta() async {
+    final repository = _userMetaRepository;
+    if (repository == null) {
+      return;
+    }
+    final meta = await repository.getOrCreate();
+    _activeMeta = meta;
+    if (meta.palabraLinesHighScore != state.highScore) {
+      state = state.copyWith(highScore: meta.palabraLinesHighScore);
+    }
+    _vocabService?.updateBaseLevel(meta.level);
+  }
+
+  Future<void> _loadVocabulary() async {
+    final repository = _vocabRepository;
+    final bundle = _assetBundle;
+    if (repository == null || bundle == null) {
+      return;
+    }
+    await repository.ensureLoaded(bundle);
+    final entries = <VocabItem>[];
+    for (final level in UserMeta.levelOrder) {
+      final items = await repository.getByLevel(level);
+      entries.addAll(items);
+    }
+    if (entries.isEmpty) {
+      return;
+    }
+    final baseLevel = _activeMeta?.level ?? UserMeta.levelOrder.first;
+    _vocabService = PalabraLinesVocabService.fromItems(
+      items: entries,
+      baseLevel: baseLevel,
+      random: _rng,
+    );
+  }
+
+  void _persistHighScore(int candidate) {
+    final meta = _activeMeta;
+    if (meta == null || candidate <= meta.palabraLinesHighScore) {
+      return;
+    }
+    meta.palabraLinesHighScore = candidate;
+    unawaited(_userMetaRepository?.save(meta));
+  }
+
   @visibleForTesting
   bool debugHasPath(
     PalabraLinesBoard board,
@@ -413,18 +526,20 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     int fromCol,
     int toRow,
     int toCol,
-  ) =>
-      _hasPath(board, fromRow, fromCol, toRow, toCol);
+  ) => _hasPath(board, fromRow, fromCol, toRow, toCol);
 
   @visibleForTesting
   PalabraLinesLineRemovalResult debugFindAndRemoveLines(
     PalabraLinesBoard board,
-  ) =>
-      _findAndRemoveLines(board);
+  ) => _findAndRemoveLines(board);
 
-  PalabraLinesQuestionState? _maybeCreateQuestion(int clearedCount) {
-    return _vocabService?.createQuestion(clearedCount);
+  @visibleForTesting
+  Future<void> debugWaitForBootstrap() async {
+    await _bootstrapFuture;
   }
+
+  @visibleForTesting
+  void debugPersistHighScore(int candidate) => _persistHighScore(candidate);
 }
 
 /// Result payload from the line detector.

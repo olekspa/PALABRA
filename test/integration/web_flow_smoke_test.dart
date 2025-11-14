@@ -10,6 +10,7 @@ import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/data_core/providers/repository_providers.dart';
 import 'package:palabra/feature_gate/application/gate_detection_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:palabra/feature_gate/presentation/gate_screen.dart';
 import 'package:palabra/feature_numbers/application/number_drill_controller.dart';
 import 'package:palabra/feature_numbers/services/number_audio_service.dart';
 import 'package:palabra/feature_numbers/services/number_pool_service.dart';
@@ -32,6 +33,11 @@ void main() {
   testWidgets('Gate → Pre-run → Run → Finish smoke flow (web)', (
     WidgetTester tester,
   ) async {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding.window.physicalSizeTestValue = const Size(1024, 1920);
+    binding.window.devicePixelRatioTestValue = 1.0;
+    addTearDown(binding.window.clearPhysicalSizeTestValue);
+    addTearDown(binding.window.clearDevicePixelRatioTestValue);
     final fakeMeta = UserMeta()
       ..preferredRows = 4
       ..timeExtendTokens = 0
@@ -97,22 +103,43 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     // Profile selection → Gate.
-    expect(find.text('Choose your profile'), findsOneWidget);
-    if (find.text('Create new profile').evaluate().isNotEmpty) {
-      await tester.tap(find.text('Create new profile'));
-      await tester.pumpAndSettle();
+    expect(find.text("Who's playing?"), findsOneWidget);
+    if (find.text('Create profile').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Create profile'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
       await tester.enterText(find.byType(TextField), 'Test Profile');
       await tester.tap(find.text('Create'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
     } else {
       final firstTile = find.byType(ListTile).first;
       await tester.tap(firstTile);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
     }
 
+    // Game hub → Gate.
+    expect(find.text('Palabra Arcade'), findsOneWidget);
+    final wordMatchCard = find.ancestor(
+      of: find.text('Palabra Word Match'),
+      matching: find.byWidgetPredicate(
+        (widget) => widget.runtimeType.toString() == '_GameCard',
+      ),
+    );
+    final wordMatchPlayButton = find.descendant(
+      of: wordMatchCard,
+      matching: find.widgetWithText(FilledButton, 'Play'),
+    );
+    await tester.tap(wordMatchPlayButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
     // Gate screen → Pre-run.
-    expect(find.text('Palabra'), findsOneWidget);
-    await tester.tap(find.text('Continue'));
+    expect(find.text('Palabra Word Match'), findsWidgets);
+    expect(find.byType(GateScreen), findsOneWidget);
+    final continueButton = find.widgetWithText(ElevatedButton, 'Continue');
+    await tester.tap(continueButton);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
@@ -170,14 +197,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump();
     expect(find.text('Bonus complete!'), findsOneWidget);
-    await tester.tap(find.text('Continue'));
+    await tester.tap(find.text('Return to finish'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     // Finish screen should be displayed.
     expect(find.text('Goal achieved!'), findsOneWidget);
     expect(find.text('Play again'), findsOneWidget);
-    expect(find.text('Exit to gate'), findsOneWidget);
+    expect(find.text('Back to arcade'), findsWidgets);
   });
 }
 

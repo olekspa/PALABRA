@@ -1194,3 +1194,8 @@ For high score persistence:
 Use SharedPreferences or standard app storage to:
 
 Load lines98_vocab_high_score on screen init.
+
+6. Availability & launch instructions
+
+- Palabra Lines now ships alongside Word Match in the Arcade hub—tap the “Palabra Lines” card or deep-link to `/palabra-lines` to jump straight into the grid without passing through the Word Match gate/run flow.
+- High scores persist per profile via `UserMeta.palabraLinesHighScore`, and quizzes pull from the bundled A1–B2 vocabulary assets loaded through `VocabRepository`.

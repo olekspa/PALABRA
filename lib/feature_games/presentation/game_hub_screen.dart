@@ -48,16 +48,21 @@ class GameHubScreen extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final entry = registry[index];
                       final game = entry.descriptor;
+                      VoidCallback? onPlay;
+                      if (game.id == GameId.palabraLines) {
+                        onPlay = () {
+                          context.go(AppRoute.palabraLines.path);
+                        };
+                      } else if (game.id != null) {
+                        onPlay = () {
+                          ref.read(selectedGameProvider.notifier).state =
+                              game.id!;
+                          context.go(AppRoute.gate.path);
+                        };
+                      }
                       return _GameCard(
                         descriptor: game,
-                        onPlay: game.id == null
-                            ? null
-                            : () {
-                                ref
-                                    .read(selectedGameProvider.notifier)
-                                    .state = game.id!;
-                                context.go(AppRoute.gate.path);
-                              },
+                        onPlay: onPlay,
                       );
                     },
                   ),
@@ -162,8 +167,7 @@ class _GameCardState extends State<_GameCard> {
                       ),
                       if (descriptor.comingSoon)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(left: AppSpacing.sm),
+                          padding: const EdgeInsets.only(left: AppSpacing.sm),
                           child: Text(
                             'Arriving soon',
                             style: theme.textTheme.bodySmall?.copyWith(

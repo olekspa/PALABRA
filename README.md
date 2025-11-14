@@ -12,6 +12,7 @@
 
 ## Game Modes
 - **Palabra Word Match:** Tap-to-match sprint focused on English ↔ Spanish vocabulary pairs, streak XP, powerups, and the bonus number drill.
+- **Palabra Lines:** Color Lines / Lines 98 reborn for phones—guide glowing balls across a 9×9 grid, clear five-in-a-row combos, then ace a six-option Spanish translation quiz to keep the board alive.
 - **Coming soon:** Additional listening, verb, and challenge modes are designed into the hub so they can roll out without UX churn.
 
 ## Core Flow

@@ -11,11 +11,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:palabra/app/app.dart';
 import 'package:palabra/feature_gate/application/gate_detection_service.dart';
+import 'package:palabra/feature_gate/presentation/gate_screen.dart';
 import 'package:palabra/feature_run/application/run_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('App boots to the gate screen', (WidgetTester tester) async {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding.window.physicalSizeTestValue = const Size(1024, 1920);
+    binding.window.devicePixelRatioTestValue = 1.0;
+    addTearDown(binding.window.clearPhysicalSizeTestValue);
+    addTearDown(binding.window.clearDevicePixelRatioTestValue);
+
     SharedPreferences.setMockInitialValues(const <String, Object>{});
     await tester.pumpWidget(
       ProviderScope(
@@ -38,16 +45,35 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     // Profile selector appears first.
-    expect(find.text('Choose your profile'), findsOneWidget);
-    if (find.text('Create new profile').evaluate().isNotEmpty) {
-      await tester.tap(find.text('Create new profile'));
-      await tester.pumpAndSettle();
+    expect(find.text("Who's playing?"), findsOneWidget);
+    if (find.text('Create profile').evaluate().isNotEmpty) {
+      await tester.tap(find.text('Create profile'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
       await tester.enterText(find.byType(TextField), 'QA Tester');
       await tester.tap(find.text('Create'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
     } else {
       await tester.tap(find.byType(ListTile).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+
+    expect(find.text('Palabra Arcade'), findsOneWidget);
+    final wordMatchCard = find.ancestor(
+      of: find.text('Palabra Word Match'),
+      matching: find.byWidgetPredicate(
+        (widget) => widget.runtimeType.toString() == '_GameCard',
+      ),
+    );
+    final wordMatchPlayButton = find.descendant(
+      of: wordMatchCard,
+      matching: find.widgetWithText(FilledButton, 'Play'),
+    );
+    await tester.tap(wordMatchPlayButton);
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
     }
 
     const runSettings = RunSettings();
@@ -57,7 +83,8 @@ void main() {
     final expectedObjective =
         "Make ${runSettings.minTargetMatches} correct matches in $minutes:$seconds.";
 
-    expect(find.text('Palabra'), findsOneWidget);
+    expect(find.text('Palabra Word Match'), findsOneWidget);
+    expect(find.byType(GateScreen), findsOneWidget);
     expect(find.text(expectedObjective), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
   });

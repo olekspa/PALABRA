@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 /// Unique identifiers for Palabra mini-games.
 enum GameId {
   wordMatch,
+  palabraLines,
 }
 
 /// Immutable description for a game entry surfaced on the hub.
@@ -44,6 +45,17 @@ const List<GameDescriptor> kGameCatalog = <GameDescriptor>[
     icon: Icons.grid_view_rounded,
     color: Color(0xFF361E59),
     accent: Color(0xFF5CD1FF),
+  ),
+  GameDescriptor(
+    id: GameId.palabraLines,
+    title: 'Palabra Lines',
+    tagline: 'Lines 98 + vocab quiz',
+    description:
+        'Glide glowing marbles across the classic 9×9 grid, clear five-in-a-row '
+        'combos, then lock in a Spanish translation to keep playing.',
+    icon: Icons.blur_circular_rounded,
+    color: Color(0xFF10223C),
+    accent: Color(0xFFFFD166),
   ),
   GameDescriptor(
     title: 'Coming Soon',

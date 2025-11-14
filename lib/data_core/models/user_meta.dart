@@ -99,6 +99,9 @@ class UserMeta {
   /// Progress tracking for the number drill bonus game.
   NumberDrillProgress numberDrillProgress = NumberDrillProgress();
 
+  /// Highest score achieved in Palabra Lines.
+  int palabraLinesHighScore = 0;
+
   /// Hydrates metadata from persisted JSON.
   factory UserMeta.fromJson(Map<String, dynamic> json) {
     final meta = UserMeta()
@@ -122,7 +125,8 @@ class UserMeta {
       ..currentStreak = json['currentStreak'] as int? ?? 0
       ..bestStreak = json['bestStreak'] as int? ?? 0
       ..lastLearnedDelta = json['lastLearnedDelta'] as int? ?? 0
-      ..lastTroubleDelta = json['lastTroubleDelta'] as int? ?? 0;
+      ..lastTroubleDelta = json['lastTroubleDelta'] as int? ?? 0
+      ..palabraLinesHighScore = json['palabraLinesHighScore'] as int? ?? 0;
     meta.syncVersion = json['syncVersion'] as int? ?? 0;
 
     final progressJson = json['levelProgress'];
@@ -184,6 +188,7 @@ class UserMeta {
       'lastTroubleDelta': lastTroubleDelta,
       'xp': xp,
       'xpSinceLastReward': xpSinceLastReward,
+      'palabraLinesHighScore': palabraLinesHighScore,
       'levelProgress': levelProgress.map(
         (key, value) => MapEntry(key, value.toJson()),
       ),

@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:palabra/feature_palabra_lines/application/palabra_lines_controller.dart';
+import 'package:palabra/data_core/in_memory_store.dart';
+import 'package:palabra/data_core/models/user_meta.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
+import 'package:palabra/data_core/repositories/user_meta_repository.dart';
+import 'package:palabra/feature_palabra_lines/application/palabra_lines_controller.dart';
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_vocab_service.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_board.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_cell.dart';
@@ -152,6 +155,23 @@ void main() {
       expect(controller.state.phase, PalabraLinesPhase.idle);
     });
   });
+
+  group('PalabraLines high score persistence', () {
+    test('saves updated high score when surpassed', () async {
+      final meta = UserMeta()..palabraLinesHighScore = 5;
+      final repo = _StubUserMetaRepository(meta);
+      final controller = PalabraLinesController(
+        random: Random(1),
+        vocabService: createVocabService(),
+        userMetaRepository: repo,
+      );
+      await controller.debugWaitForBootstrap();
+      expect(controller.state.highScore, 5);
+      controller.debugPersistHighScore(12);
+      expect(repo.saveCount, 1);
+      expect(repo.metaSnapshot.palabraLinesHighScore, 12);
+    });
+  });
 }
 
 List<VocabItem> _buildItems(String level) {
@@ -164,4 +184,24 @@ List<VocabItem> _buildItems(String level) {
       level: level,
     ),
   );
+}
+
+class _StubUserMetaRepository extends UserMetaRepository {
+  _StubUserMetaRepository(this._meta) : super(store: InMemoryStore.instance);
+
+  UserMeta _meta;
+  int saveCount = 0;
+
+  @override
+  Future<UserMeta> getOrCreate({String? profileId}) async {
+    return _meta;
+  }
+
+  @override
+  Future<void> save(UserMeta meta) async {
+    saveCount += 1;
+    _meta = meta;
+  }
+
+  UserMeta get metaSnapshot => _meta;
 }

@@ -8,6 +8,7 @@ import 'package:palabra/feature_finish/presentation/finish_screen.dart';
 import 'package:palabra/feature_games/presentation/game_hub_screen.dart';
 import 'package:palabra/feature_gate/presentation/gate_screen.dart';
 import 'package:palabra/feature_numbers/presentation/number_drill_screen.dart';
+import 'package:palabra/feature_palabra_lines/presentation/palabra_lines_screen.dart';
 import 'package:palabra/feature_prerun/presentation/prerun_screen.dart';
 import 'package:palabra/feature_profiles/presentation/profile_selector_screen.dart';
 import 'package:palabra/feature_run/presentation/run_screen.dart';
@@ -15,8 +16,10 @@ import 'package:palabra/feature_run/presentation/run_screen.dart';
 /// Declarative identifiers for app navigation targets.
 enum AppRoute {
   profile('/profile'),
+
   /// Game selection hub.
   gameHub('/games'),
+
   /// Landing gate route.
   gate('/gate'),
 
@@ -28,6 +31,9 @@ enum AppRoute {
 
   /// Bonus number drill route.
   numberDrill('/mm/number-drill'),
+
+  /// Palabra Lines mini-game route.
+  palabraLines('/palabra-lines'),
 
   /// Run completion summary route.
   finish('/mm/finish');
@@ -83,6 +89,13 @@ final goRouterProvider = Provider<GoRouter>((Ref ref) {
         name: AppRoute.numberDrill.name,
         builder: (BuildContext context, GoRouterState state) {
           return const NumberDrillScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoute.palabraLines.path,
+        name: AppRoute.palabraLines.name,
+        builder: (BuildContext context, GoRouterState state) {
+          return const PalabraLinesScreen();
         },
       ),
       GoRoute(
