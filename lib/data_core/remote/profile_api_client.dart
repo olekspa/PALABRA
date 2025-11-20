@@ -59,16 +59,14 @@ class RemoteProfileSnapshot {
         (json['userStates'] as Map?)?.cast<String, dynamic>() ??
             <String, dynamic>{},
       ),
-      runLogs:
-          (json['runLogs'] as List?)
-              ?.whereType<Map>()
-              .map((e) => Map<String, dynamic>.from(e.cast<String, dynamic>()))
+      runLogs: (json['runLogs'] as List?)
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => Map<String, dynamic>.from(e))
               .toList() ??
           <Map<String, dynamic>>[],
-      attemptLogs:
-          (json['attemptLogs'] as List?)
-              ?.whereType<Map>()
-              .map((e) => Map<String, dynamic>.from(e.cast<String, dynamic>()))
+      attemptLogs: (json['attemptLogs'] as List?)
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => Map<String, dynamic>.from(e))
               .toList() ??
           <Map<String, dynamic>>[],
       version: json['version'] as int? ?? 0,
@@ -137,10 +135,10 @@ class RemoteProfileApi {
     final decoded = json.decode(response.body);
     if (decoded is List) {
       return decoded
-          .whereType<Map>()
+          .whereType<Map<String, dynamic>>()
           .map(
             (e) => RemoteProfileSummary.fromJson(
-              Map<String, dynamic>.from(e.cast<String, dynamic>()),
+              Map<String, dynamic>.from(e),
             ),
           )
           .toList();

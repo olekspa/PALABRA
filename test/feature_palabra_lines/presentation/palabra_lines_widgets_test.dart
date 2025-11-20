@@ -74,21 +74,20 @@ void main() {
                 board: PalabraLinesBoard.empty(),
                 selectedRow: null,
                 selectedCol: null,
-                isLocked: true,
-                isGameOver: false,
-                onCellTap: (_, __) {},
-                activeQuestion: question,
-                onQuizOptionTap: (_) {},
-                moveAnimation: null,
-              ),
+              isLocked: true,
+              isGameOver: false,
+              onCellTap: (_, __) {},
+              activeQuestion: question,
+              moveAnimation: null,
             ),
           ),
         ),
+      ),
       ),
     );
     for (final letter in <String>['C', 'A', 'M', 'I', 'N']) {
       expect(find.text(letter), findsWidgets);
     }
-    expect(find.byType(FilledButton), findsNWidgets(question.options.length));
+    expect(find.byType(FilledButton), findsNothing);
   });
 }

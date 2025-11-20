@@ -43,7 +43,7 @@ class GateDetectionService {
       case TargetPlatform.linux:
       case TargetPlatform.fuchsia:
         return _fallbackResult(
-          label: describeEnum(defaultTargetPlatform),
+          label: defaultTargetPlatform.name,
           supported: false,
         );
     }
@@ -79,7 +79,7 @@ class GateDetectionService {
       // Detection failed – fall back below.
     }
 
-    final label = describeEnum(defaultTargetPlatform);
+    final label = defaultTargetPlatform.name;
     return _fallbackResult(label: label, supported: defaultTargetPlatform == TargetPlatform.iOS);
   }
 

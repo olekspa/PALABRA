@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palabra/data_core/data_core.dart';
-import 'package:palabra/feature_profiles/application/profile_repository.dart';
 import 'package:palabra/feature_profiles/presentation/profile_selector_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

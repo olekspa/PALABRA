@@ -8,8 +8,8 @@ import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_game_state.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_question.dart';
 
-const double _gridPadding = 8;
-const double _gridSpacing = 2;
+const double _gridPadding = 6;
+const double _gridSpacing = 1.2;
 
 /// Renders the 9x9 Palabra Lines grid with selectable cells.
 class PalabraLinesBoardWidget extends StatelessWidget {
@@ -22,7 +22,6 @@ class PalabraLinesBoardWidget extends StatelessWidget {
     required this.onCellTap,
     required this.activeQuestion,
     required this.moveAnimation,
-    this.onQuizOptionTap,
     super.key,
   });
 
@@ -34,7 +33,6 @@ class PalabraLinesBoardWidget extends StatelessWidget {
   final void Function(int row, int col) onCellTap;
   final PalabraLinesQuestionState? activeQuestion;
   final PalabraLinesMoveAnimation? moveAnimation;
-  final void Function(int index)? onQuizOptionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -104,10 +102,9 @@ class PalabraLinesBoardWidget extends StatelessWidget {
                     boardHeight: boardHeight,
                   ),
                 ],
-                if (activeQuestion != null && onQuizOptionTap != null)
+                if (activeQuestion != null)
                   _BoardQuizOverlay(
                     question: activeQuestion!,
-                    onOptionTap: onQuizOptionTap!,
                     boardWidth: boardWidth,
                     boardHeight: boardHeight,
                   ),
@@ -174,47 +171,70 @@ class _PalabraLinesCellTile extends StatelessWidget {
         : Colors.white.withOpacity(0.08);
     return GestureDetector(
       onTap: isLocked ? null : onTap,
-      child: AnimatedContainer(
-        key: ValueKey<String>('palabraLinesCell_${cell.row}_${cell.col}'),
-        margin: const EdgeInsets.all(1),
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: tileColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: borderColor, width: 1.5),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            if (cell.ballColor == null)
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    gradient: LinearGradient(
-                      colors: <Color>[
-                        Colors.white.withOpacity(0.015),
-                        highlight,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final tileSide = min(constraints.maxWidth, constraints.maxHeight);
+          final ballMin = min(30.0, tileSide);
+          final ballSize = min(
+            tileSide,
+            max(tileSide * 0.82, ballMin),
+          ).toDouble();
+          final previewMax = tileSide * 0.6;
+          final previewMin = min(14.0, previewMax);
+          final previewSize = min(
+            tileSide,
+            max(tileSide * 0.4, previewMin),
+          ).toDouble();
+          final previewInset = max(3.0, tileSide * 0.08);
+          return AnimatedContainer(
+            key: ValueKey<String>('palabraLinesCell_${cell.row}_${cell.col}'),
+            margin: const EdgeInsets.all(0.5),
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: tileColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: borderColor, width: 1.5),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                if (cell.ballColor == null)
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          colors: <Color>[
+                            Colors.white.withOpacity(0.015),
+                            highlight,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            if (cell.hasPreview && cell.previewColor != null)
-              Positioned(
-                top: 6,
-                left: 6,
-                child: _PreviewMarble(color: cell.previewColor!.color),
-              ),
-            if (cell.ballColor != null && !shouldHideBall)
-              _PalabraLinesBall(color: cell.ballColor!.color),
-          ],
-        ),
+                if (cell.hasPreview && cell.previewColor != null)
+                  Positioned(
+                    top: previewInset,
+                    left: previewInset,
+                    child: _PreviewMarble(
+                      color: cell.previewColor!.color,
+                      size: previewSize,
+                    ),
+                  ),
+                if (cell.ballColor != null && !shouldHideBall)
+                  _PalabraLinesBall(
+                    color: cell.ballColor!.color,
+                    diameter: ballSize,
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -257,15 +277,19 @@ class _PalabraLinesBall extends StatelessWidget {
 }
 
 class _PreviewMarble extends StatelessWidget {
-  const _PreviewMarble({required this.color});
+  const _PreviewMarble({
+    required this.color,
+    this.size = 18,
+  });
 
   final Color color;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 18,
-      height: 18,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
@@ -286,13 +310,11 @@ class _PreviewMarble extends StatelessWidget {
 class _BoardQuizOverlay extends StatelessWidget {
   const _BoardQuizOverlay({
     required this.question,
-    required this.onOptionTap,
     required this.boardWidth,
     required this.boardHeight,
   });
 
   final PalabraLinesQuestionState question;
-  final void Function(int index) onOptionTap;
   final double boardWidth;
   final double boardHeight;
 
@@ -302,7 +324,7 @@ class _BoardQuizOverlay extends StatelessWidget {
     final highlightCells = question.highlightCells;
     final cellWidth = _cellExtent(boardWidth);
     final cellHeight = _cellExtent(boardHeight);
-    final scrim = Container(color: Colors.black.withOpacity(0.55));
+    final scrim = Container(color: Colors.black.withOpacity(0.4));
     final letters = question.entry.spanish.characters.toList();
     final letterWidgets = <Widget>[];
     for (var i = 0; i < highlightCells.length; i++) {
@@ -337,90 +359,8 @@ class _BoardQuizOverlay extends StatelessWidget {
     return Stack(
       children: <Widget>[
         scrim,
-        Positioned(
-          top: 16,
-          left: 16,
-          right: 16,
-          child: Column(
-            children: <Widget>[
-              Text(
-                'Translate this word',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              if (question.wrongAttempts > 0) ...<Widget>[
-                const SizedBox(height: 6),
-                Text(
-                  'Try again!',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.error,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
         ...letterWidgets,
-        Positioned(
-          left: 16,
-          right: 16,
-          bottom: 16,
-          child: _QuizOptions(
-            options: question.options,
-            onTap: onOptionTap,
-          ),
-        ),
       ],
-    );
-  }
-}
-
-class _QuizOptions extends StatelessWidget {
-  const _QuizOptions({
-    required this.options,
-    required this.onTap,
-  });
-
-  final List<String> options;
-  final void Function(int index) onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 12,
-      runSpacing: 12,
-      children: List<Widget>.generate(
-        options.length,
-        (index) => SizedBox(
-          width: 140,
-          child: FilledButton(
-            onPressed: () => onTap(index),
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.secondary.withOpacity(0.9),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: Text(
-              options[index],
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -471,7 +411,8 @@ class _MovingBallOverlay extends StatelessWidget {
       end: Offset(end.dx, end.dy),
     );
     final baseSize = min(cellWidth, cellHeight);
-    final ballSize = (baseSize * 0.7).clamp(28.0, baseSize);
+    final ballMin = min(30.0, baseSize);
+    final ballSize = min(baseSize, max(baseSize * 0.82, ballMin));
     return TweenAnimationBuilder<Offset>(
       key: ValueKey<int>(animation.id),
       tween: tween,

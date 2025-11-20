@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palabra/feature_gate/application/gate_detection_service.dart';
-import 'package:palabra/feature_gate/application/gate_detection_service.dart';
 
 /// Compile-time feature switches used to evaluate gate access.
 class GateFeatureFlags {

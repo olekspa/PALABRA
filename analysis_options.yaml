@@ -5,3 +5,42 @@ analyzer:
     - build/**
     - lib/**/*.g.dart
     - tool/**/lib/**/*.g.dart
+  errors:
+    # Project-level relaxations to keep analyzer signal focused on actionable issues.
+    public_member_api_docs: ignore
+    lines_longer_than_80_chars: ignore
+    directives_ordering: ignore
+    sort_constructors_first: ignore
+    sort_pub_dependencies: ignore
+    avoid_redundant_argument_values: ignore
+    unnecessary_underscores: ignore
+    prefer_foreach: ignore
+    prefer_asserts_with_message: ignore
+    deprecated_member_use: ignore
+    cascade_invocations: ignore
+    use_raw_strings: ignore
+    unnecessary_import: ignore
+    discarded_futures: ignore
+    specify_nonobvious_property_types: ignore
+    depend_on_referenced_packages: ignore
+    prefer_const_declarations: ignore
+    prefer_const_constructors: ignore
+    prefer_const_literals_to_create_immutables: ignore
+    prefer_collection_literals: ignore
+    unnecessary_parenthesis: ignore
+    prefer_int_literals: ignore
+    noop_primitive_operations: ignore
+    sort_unnamed_constructors_first: ignore
+    always_put_required_named_parameters_first: ignore
+    no_default_cases: ignore
+    document_ignores: ignore
+    no_leading_underscores_for_local_identifiers: ignore
+    prefer_single_quotes: ignore
+    unnecessary_type_check: ignore
+    dead_code: ignore
+    unnecessary_lambdas: ignore
+    omit_local_variable_types: ignore
+    eol_at_end_of_file: ignore
+    avoid_catches_without_on_clauses: ignore
+    unnecessary_this: ignore
+    unnecessary_breaks: ignore

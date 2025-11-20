@@ -7,6 +7,7 @@ import 'package:palabra/feature_palabra_lines/application/palabra_lines_controll
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_providers.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_config.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_game_state.dart';
+import 'package:palabra/feature_palabra_lines/domain/palabra_lines_question.dart';
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_board_widget.dart';
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_score_column.dart';
 
@@ -106,7 +107,6 @@ class _WidePalabraLinesLayout extends StatelessWidget {
                       isGameOver: state.isGameOver,
                       onCellTap: controller.onCellTap,
                       activeQuestion: state.activeQuestion,
-                      onQuizOptionTap: controller.onQuizOptionTap,
                       moveAnimation: state.moveAnimation,
                     ),
                   );
@@ -121,14 +121,13 @@ class _WidePalabraLinesLayout extends StatelessWidget {
           child: _SidebarInfo(
             state: state,
             onNewGame: controller.startNewGame,
+            onOptionTap: controller.onQuizOptionTap,
           ),
         ),
       ],
     );
   }
 }
-
-const double _mobileBoardHeightFactor = 1.18;
 
 class _StackedPalabraLinesLayout extends StatelessWidget {
   const _StackedPalabraLinesLayout({
@@ -143,61 +142,56 @@ class _StackedPalabraLinesLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, boxConstraints) {
-                final boardWidth = min(
-                  boxConstraints.maxWidth,
-                  boxConstraints.maxHeight,
-                );
-                final availableHeight = boxConstraints.maxHeight;
-                final desiredHeight = boardWidth * _mobileBoardHeightFactor;
-                final boardHeight = min(
-                  availableHeight,
-                  desiredHeight,
-                ).clamp(boardWidth, availableHeight).toDouble();
-                return Center(
-                  child: SizedBox(
-                    width: boardWidth,
-                    height: boardHeight,
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned.fill(
-                          child: PalabraLinesBoardWidget(
-                            board: state.board,
-                            selectedRow: state.selectedRow,
-                            selectedCol: state.selectedCol,
-                            isLocked: isLocked,
-                            isGameOver: state.isGameOver,
-                            onCellTap: controller.onCellTap,
-                            activeQuestion: state.activeQuestion,
-                            onQuizOptionTap: controller.onQuizOptionTap,
-                            moveAnimation: state.moveAnimation,
-                          ),
+    return LayoutBuilder(
+      builder: (context, outerConstraints) {
+        final maxWidth = outerConstraints.maxWidth;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Column(
+            children: <Widget>[
+              _GridOverlayInfoBar(
+                state: state,
+                onNewGame: controller.startNewGame,
+                maxWidth: max(0.0, maxWidth - 8),
+              ),
+              const SizedBox(height: 6),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, boxConstraints) {
+                    final boardSide = min(
+                      boxConstraints.maxWidth,
+                      boxConstraints.maxHeight,
+                    );
+                    return Center(
+                      child: SizedBox(
+                        width: boardSide,
+                        height: boardSide,
+                        child: PalabraLinesBoardWidget(
+                          board: state.board,
+                          selectedRow: state.selectedRow,
+                          selectedCol: state.selectedCol,
+                          isLocked: isLocked,
+                          isGameOver: state.isGameOver,
+                          onCellTap: controller.onCellTap,
+                          activeQuestion: state.activeQuestion,
+                          moveAnimation: state.moveAnimation,
                         ),
-                        Positioned(
-                          top: 12,
-                          left: 12,
-                          right: 12,
-                          child: _GridOverlayInfoBar(
-                            state: state,
-                            onNewGame: controller.startNewGame,
-                            maxWidth: max(0.0, boardWidth - 24),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (state.activeQuestion != null) ...<Widget>[
+                const SizedBox(height: 12),
+                _QuizPanel(
+                  question: state.activeQuestion!,
+                  onOptionTap: controller.onQuizOptionTap,
+                ),
+              ],
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -227,7 +221,7 @@ class _GridOverlayInfoBar extends StatelessWidget {
             border: Border.all(color: Colors.white.withOpacity(0.14), width: 1),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -310,14 +304,124 @@ class _MiniStat extends StatelessWidget {
   }
 }
 
+class _QuizPanel extends StatelessWidget {
+  const _QuizPanel({
+    required this.question,
+    required this.onOptionTap,
+  });
+
+  final PalabraLinesQuestionState question;
+  final void Function(int index) onOptionTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Translate this word',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (question.wrongAttempts > 0)
+                  Text(
+                    'Try again',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withOpacity(0.14)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                child: Center(
+                  child: Text(
+                    question.entry.spanish.toUpperCase(),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: List<Widget>.generate(
+                question.options.length,
+                (index) => SizedBox(
+                  width: 140,
+                  child: FilledButton(
+                    onPressed: () => onOptionTap(index),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.colorScheme.secondary.withOpacity(
+                        0.95,
+                      ),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      question.options[index],
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SidebarInfo extends StatelessWidget {
   const _SidebarInfo({
     required this.state,
     required this.onNewGame,
+    required this.onOptionTap,
   });
 
   final PalabraLinesGameState state;
   final VoidCallback onNewGame;
+  final void Function(int index) onOptionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -336,6 +440,13 @@ class _SidebarInfo extends StatelessWidget {
             context,
           ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
         ),
+        if (state.activeQuestion != null) ...<Widget>[
+          const SizedBox(height: 16),
+          _QuizPanel(
+            question: state.activeQuestion!,
+            onOptionTap: onOptionTap,
+          ),
+        ],
       ],
     );
   }

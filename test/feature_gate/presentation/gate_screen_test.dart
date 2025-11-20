@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palabra/feature_gate/application/gate_access.dart';
 import 'package:palabra/feature_gate/application/gate_detection_service.dart';
-import 'package:palabra/feature_gate/application/gate_detection_service.dart';
 import 'package:palabra/feature_gate/presentation/gate_screen.dart';
 
 void main() {
