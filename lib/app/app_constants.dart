@@ -1,2 +1,2 @@
 /// Semantic app version surfaced on the Gate screen.
-const String kAppVersion = '7.351';
+const String kAppVersion = '7.433';

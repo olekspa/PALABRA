@@ -183,8 +183,10 @@ class _PreRunContent extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
                 _TimeExtendInfo(tokens: meta.timeExtendTokens),
                 const SizedBox(height: AppSpacing.md),
-                _PowerupIdeas(inventory: meta.powerupInventory),
-                const SizedBox(height: AppSpacing.xl),
+                _PowerupGuideButton(
+                  inventory: meta.powerupInventory,
+                ),
+                const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
                   onPressed: isStarting ? null : () => _startRun(context, ref),
                   child: isStarting
@@ -431,6 +433,70 @@ class _PowerupIdeas extends ConsumerWidget {
           );
         }),
       ],
+    );
+  }
+}
+
+class _PowerupGuideButton extends ConsumerWidget {
+  const _PowerupGuideButton({required this.inventory});
+
+  final Map<String, int> inventory;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return OutlinedButton.icon(
+      icon: const Icon(Icons.offline_bolt_outlined),
+      label: const Text('Powerup guide'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+      ),
+      onPressed: () {
+        showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: Colors.black.withValues(alpha: 0.9),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (sheetContext) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Powerups',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.white70,
+                            ),
+                            onPressed: () => Navigator.of(sheetContext).pop(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _PowerupIdeas(inventory: inventory),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
