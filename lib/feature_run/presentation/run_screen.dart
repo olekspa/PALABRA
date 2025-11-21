@@ -698,8 +698,9 @@ class _PowerupChipState extends State<_PowerupChip> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool isAvailable = widget.count > 0 && widget.enabled;
-    final Color badgeColor =
-        isAvailable ? AppColors.secondary : Colors.white.withValues(alpha: 0.2);
+    final Color badgeColor = isAvailable
+        ? AppColors.secondary
+        : Colors.white.withValues(alpha: 0.2);
     final List<Color> gradient = isAvailable
         ? <Color>[
             AppColors.secondary.withValues(alpha: 0.32),
@@ -1023,18 +1024,21 @@ class _RunTileState extends State<_RunTile>
     final theme = Theme.of(context);
     final bool mismatch = widget.isMismatch;
     final highlight = widget.isHighlighted;
-    final double scale =
-        mismatch ? 0.97 : widget.isSelected ? 1.015 : 1.0;
+    final double scale = mismatch
+        ? 0.97
+        : widget.isSelected
+        ? 1.015
+        : 1.0;
     final Color baseBackground = mismatch
         ? AppColors.danger.withValues(alpha: 0.28)
         : widget.isSelected
-            ? AppColors.secondary.withValues(alpha: 0.28)
-            : Colors.white.withValues(alpha: 0.08);
+        ? AppColors.secondary.withValues(alpha: 0.28)
+        : Colors.white.withValues(alpha: 0.08);
     final Color baseBorder = mismatch
         ? AppColors.danger
         : widget.isSelected
-            ? AppColors.secondary
-            : Colors.white.withValues(alpha: 0.18);
+        ? AppColors.secondary
+        : Colors.white.withValues(alpha: 0.18);
     final Color highlightColor = widget.highlightColor ?? AppColors.secondary;
     final Color background = highlight
         ? highlightColor.withValues(alpha: 0.18)
@@ -1046,14 +1050,14 @@ class _RunTileState extends State<_RunTile>
             AppColors.danger.withValues(alpha: 0.12),
           ]
         : widget.isSelected
-            ? <Color>[
-                AppColors.secondary.withValues(alpha: 0.32),
-                AppColors.primary.withValues(alpha: 0.18),
-              ]
-            : <Color>[
-                Colors.white.withValues(alpha: 0.12),
-                Colors.white.withValues(alpha: 0.04),
-              ];
+        ? <Color>[
+            AppColors.secondary.withValues(alpha: 0.32),
+            AppColors.primary.withValues(alpha: 0.18),
+          ]
+        : <Color>[
+            Colors.white.withValues(alpha: 0.12),
+            Colors.white.withValues(alpha: 0.04),
+          ];
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),

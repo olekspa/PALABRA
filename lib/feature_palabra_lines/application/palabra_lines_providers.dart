@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:palabra/data_core/providers/repository_providers.dart';
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_controller.dart';
+import 'package:palabra/feature_palabra_lines/application/palabra_lines_haptics.dart';
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_sfx_player.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_game_state.dart';
 
@@ -14,10 +15,12 @@ final palabraLinesControllerProvider =
       final vocabRepository = ref.watch(vocabRepositoryProvider);
       final userMetaRepository = ref.watch(userMetaRepositoryProvider);
       final sfxPlayer = PalabraLinesSfxPlayer();
+      const haptics = PalabraLinesHaptics();
       return PalabraLinesController(
         vocabRepository: vocabRepository,
         userMetaRepository: userMetaRepository,
         assetBundle: rootBundle,
         sfxPlayer: sfxPlayer,
+        haptics: haptics,
       );
     });

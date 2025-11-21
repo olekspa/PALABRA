@@ -11,11 +11,33 @@ import 'package:palabra/feature_palabra_lines/domain/palabra_lines_question.dart
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_board_widget.dart';
 import 'package:palabra/feature_palabra_lines/presentation/widgets/palabra_lines_score_column.dart';
 
-class PalabraLinesScreen extends ConsumerWidget {
+class PalabraLinesScreen extends ConsumerStatefulWidget {
   const PalabraLinesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PalabraLinesScreen> createState() => _PalabraLinesScreenState();
+}
+
+class _PalabraLinesScreenState extends ConsumerState<PalabraLinesScreen> {
+  ProviderSubscription<PalabraLinesGameState>? _gameSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _gameSubscription = ref.listenManual<PalabraLinesGameState>(
+      palabraLinesControllerProvider,
+      _handleGameStateChanged,
+    );
+  }
+
+  @override
+  void dispose() {
+    _gameSubscription?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(palabraLinesControllerProvider);
     final controller = ref.read(palabraLinesControllerProvider.notifier);
     final isLocked = state.phase == PalabraLinesPhase.quiz;
@@ -44,6 +66,34 @@ class PalabraLinesScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _handleGameStateChanged(
+    PalabraLinesGameState? previous,
+    PalabraLinesGameState next,
+  ) {
+    final feedback = next.feedback;
+    final newFeedback =
+        feedback != null &&
+        feedback.id != previous?.feedback?.id &&
+        feedback.message.isNotEmpty;
+    if (!newFeedback) {
+      return;
+    }
+    final theme = Theme.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(feedback.message),
+          backgroundColor: feedback.isError
+              ? theme.colorScheme.error.withOpacity(0.9)
+              : theme.colorScheme.surfaceVariant.withOpacity(0.95),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 }
 
@@ -381,24 +431,31 @@ class _QuizPanel extends StatelessWidget {
                 question.options.length,
                 (index) => SizedBox(
                   width: 140,
-                  child: FilledButton(
-                    onPressed: () => onOptionTap(index),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: theme.colorScheme.secondary.withOpacity(
-                        0.95,
+                  child: Semantics(
+                    button: true,
+                    label:
+                        'Answer ${index + 1} of ${question.options.length}: ${question.options[index]}',
+                    hint: 'Double tap to submit this answer',
+                    child: FilledButton(
+                      onPressed: () => onOptionTap(index),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: theme.colorScheme.secondary
+                            .withOpacity(
+                              0.95,
+                            ),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: Text(
-                      question.options[index],
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      child: Text(
+                        question.options[index],
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),

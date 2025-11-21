@@ -18,6 +18,7 @@ class PalabraLinesGameState {
     required this.selectedCol,
     required this.activeQuestion,
     required this.moveAnimation,
+    required this.feedback,
   });
 
   factory PalabraLinesGameState.initial({
@@ -35,6 +36,7 @@ class PalabraLinesGameState {
       selectedCol: null,
       activeQuestion: null,
       moveAnimation: null,
+      feedback: null,
     );
   }
 
@@ -48,6 +50,7 @@ class PalabraLinesGameState {
   final int? selectedCol;
   final PalabraLinesQuestionState? activeQuestion;
   final PalabraLinesMoveAnimation? moveAnimation;
+  final PalabraLinesFeedback? feedback;
 
   static const _sentinel = Object();
 
@@ -62,6 +65,7 @@ class PalabraLinesGameState {
     Object? selectedCol = _sentinel,
     Object? activeQuestion = _sentinel,
     Object? moveAnimation = _sentinel,
+    Object? feedback = _sentinel,
   }) {
     return PalabraLinesGameState(
       board: board ?? this.board,
@@ -70,16 +74,21 @@ class PalabraLinesGameState {
       highScore: highScore ?? this.highScore,
       phase: phase ?? this.phase,
       isGameOver: isGameOver ?? this.isGameOver,
-      selectedRow:
-          selectedRow == _sentinel ? this.selectedRow : selectedRow as int?,
-      selectedCol:
-          selectedCol == _sentinel ? this.selectedCol : selectedCol as int?,
+      selectedRow: selectedRow == _sentinel
+          ? this.selectedRow
+          : selectedRow as int?,
+      selectedCol: selectedCol == _sentinel
+          ? this.selectedCol
+          : selectedCol as int?,
       activeQuestion: activeQuestion == _sentinel
           ? this.activeQuestion
           : activeQuestion as PalabraLinesQuestionState?,
       moveAnimation: moveAnimation == _sentinel
           ? this.moveAnimation
           : moveAnimation as PalabraLinesMoveAnimation?,
+      feedback: feedback == _sentinel
+          ? this.feedback
+          : feedback as PalabraLinesFeedback?,
     );
   }
 
@@ -96,6 +105,8 @@ class PalabraLinesMoveAnimation {
     required this.to,
     required this.color,
     required this.path,
+    required this.movementDuration,
+    required this.trailFadeDuration,
   });
 
   final int id;
@@ -103,6 +114,18 @@ class PalabraLinesMoveAnimation {
   final Point<int> to;
   final PalabraLinesColor color;
   final List<Point<int>> path;
+  final Duration movementDuration;
+  final Duration trailFadeDuration;
+}
 
-  static const Duration duration = Duration(milliseconds: 320);
+class PalabraLinesFeedback {
+  const PalabraLinesFeedback({
+    required this.id,
+    required this.message,
+    this.isError = false,
+  });
+
+  final int id;
+  final String message;
+  final bool isError;
 }

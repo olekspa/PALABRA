@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
@@ -169,72 +170,88 @@ class _PalabraLinesCellTile extends StatelessWidget {
     final highlight = isSelected
         ? theme.colorScheme.primary.withOpacity(0.3)
         : Colors.white.withOpacity(0.08);
-    return GestureDetector(
+    final colorLabel = cell.ballColor?.name ?? 'empty';
+    final previewLabel = cell.hasPreview && cell.previewColor != null
+        ? 'preview'
+        : '';
+    final label = StringBuffer()
+      ..write('Row ${cell.row + 1}, column ${cell.col + 1}. ')
+      ..write(cell.ballColor != null ? 'Ball $colorLabel. ' : 'Empty cell. ')
+      ..write(previewLabel);
+    return Semantics(
+      container: true,
+      button: true,
+      selected: isSelected,
+      enabled: !isLocked,
+      focusable: true,
+      label: label.toString().trim(),
+      hint: isLocked ? 'Action locked' : 'Double tap to select or move here',
       onTap: isLocked ? null : onTap,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final tileSide = min(constraints.maxWidth, constraints.maxHeight);
-          final ballMin = min(30.0, tileSide);
-          final ballSize = min(
-            tileSide,
-            max(tileSide * 0.82, ballMin),
-          ).toDouble();
-          final previewMax = tileSide * 0.6;
-          final previewMin = min(14.0, previewMax);
-          final previewSize = min(
-            tileSide,
-            max(tileSide * 0.4, previewMin),
-          ).toDouble();
-          final previewInset = max(3.0, tileSide * 0.08);
-          return AnimatedContainer(
-            key: ValueKey<String>('palabraLinesCell_${cell.row}_${cell.col}'),
-            margin: const EdgeInsets.all(0.5),
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: tileColor,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: borderColor, width: 1.5),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                if (cell.ballColor == null)
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        gradient: LinearGradient(
-                          colors: <Color>[
-                            Colors.white.withOpacity(0.015),
-                            highlight,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+      child: GestureDetector(
+        onTap: isLocked ? null : onTap,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final tileSide = min(constraints.maxWidth, constraints.maxHeight);
+            final ballMin = min(30.0, tileSide);
+            final ballSize = min(
+              tileSide,
+              max(tileSide * 0.82, ballMin),
+            ).toDouble();
+            final previewMax = tileSide * 0.6;
+            final previewMin = min(14.0, previewMax);
+            final previewSize = min(
+              tileSide,
+              max(tileSide * 0.4, previewMin),
+            ).toDouble();
+            return AnimatedContainer(
+              key: ValueKey<String>('palabraLinesCell_${cell.row}_${cell.col}'),
+              margin: const EdgeInsets.all(0.5),
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                color: tileColor,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: borderColor, width: 1.5),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  if (cell.ballColor == null)
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          gradient: LinearGradient(
+                            colors: <Color>[
+                              Colors.white.withOpacity(0.015),
+                              highlight,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                if (cell.hasPreview && cell.previewColor != null)
-                  Positioned(
-                    top: previewInset,
-                    left: previewInset,
-                    child: _PreviewMarble(
-                      color: cell.previewColor!.color,
-                      size: previewSize,
+                  if (cell.hasPreview && cell.previewColor != null)
+                    Align(
+                      alignment: Alignment.center,
+                      child: _PreviewMarble(
+                        color: cell.previewColor!.color,
+                        size: previewSize,
+                      ),
                     ),
-                  ),
-                if (cell.ballColor != null && !shouldHideBall)
-                  _PalabraLinesBall(
-                    color: cell.ballColor!.color,
-                    diameter: ballSize,
-                  ),
-              ],
-            ),
-          );
-        },
+                  if (cell.ballColor != null && !shouldHideBall)
+                    _PalabraLinesBall(
+                      color: cell.ballColor!.color,
+                      diameter: ballSize,
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -389,6 +406,30 @@ Offset _cellOffset(Point<int> cell, double cellWidth, double cellHeight) {
   return Offset(dx, dy);
 }
 
+Offset _offsetAlongPath(
+  List<Point<int>> path,
+  double progress,
+  double cellWidth,
+  double cellHeight,
+) {
+  if (path.isEmpty) {
+    return Offset.zero;
+  }
+  final clamped = progress.clamp(0.0, 1.0);
+  final hopCount = max(path.length - 1, 1);
+  final position = clamped * hopCount;
+  final index = position.floor().clamp(0, hopCount - 1);
+  final t = position - index;
+  final start = path[index];
+  final end = path[min(index + 1, path.length - 1)];
+  final startOffset = _cellOffset(start, cellWidth, cellHeight);
+  final endOffset = _cellOffset(end, cellWidth, cellHeight);
+  return Offset(
+    lerpDouble(startOffset.dx, endOffset.dx, t)!,
+    lerpDouble(startOffset.dy, endOffset.dy, t)!,
+  );
+}
+
 class _MovingBallOverlay extends StatelessWidget {
   const _MovingBallOverlay({
     required this.animation,
@@ -404,23 +445,23 @@ class _MovingBallOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final cellWidth = _cellExtent(boardWidth);
     final cellHeight = _cellExtent(boardHeight);
-    final start = _cellOffset(animation.from, cellWidth, cellHeight);
-    final end = _cellOffset(animation.to, cellWidth, cellHeight);
-    final tween = Tween<Offset>(
-      begin: Offset(start.dx, start.dy),
-      end: Offset(end.dx, end.dy),
-    );
     final baseSize = min(cellWidth, cellHeight);
     final ballMin = min(30.0, baseSize);
     final ballSize = min(baseSize, max(baseSize * 0.82, ballMin));
-    return TweenAnimationBuilder<Offset>(
+    return TweenAnimationBuilder<double>(
       key: ValueKey<int>(animation.id),
-      tween: tween,
-      duration: PalabraLinesMoveAnimation.duration,
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: animation.movementDuration,
       builder: (context, value, child) {
+        final offset = _offsetAlongPath(
+          animation.path,
+          value,
+          cellWidth,
+          cellHeight,
+        );
         return Positioned(
-          left: value.dx,
-          top: value.dy,
+          left: offset.dx,
+          top: offset.dy,
           child: SizedBox(
             width: cellWidth,
             height: cellHeight,
@@ -453,7 +494,7 @@ class _PathOverlay extends StatelessWidget {
     final cellWidth = _cellExtent(boardWidth);
     final cellHeight = _cellExtent(boardHeight);
     final baseSize = min(cellWidth, cellHeight);
-    final trailSize = (baseSize * 0.25).clamp(10, baseSize).toDouble();
+    final trailSize = (baseSize * 0.32).clamp(10, baseSize).toDouble();
     final dots = animation.path.map((point) {
       final offset = _cellOffset(point, cellWidth, cellHeight);
       return Positioned(
@@ -463,26 +504,35 @@ class _PathOverlay extends StatelessWidget {
           width: trailSize,
           height: trailSize,
           decoration: BoxDecoration(
-            color: animation.color.color.withOpacity(0.4),
+            color: animation.color.color.withOpacity(0.55),
             borderRadius: BorderRadius.circular(trailSize / 2),
             boxShadow: <BoxShadow>[
               BoxShadow(
                 color: animation.color.color.withOpacity(0.35),
-                blurRadius: 6,
+                blurRadius: 8,
+                spreadRadius: 0.6,
               ),
             ],
+            border: Border.all(
+              color: Colors.white.withOpacity(0.4),
+              width: 1,
+            ),
           ),
         ),
       );
     }).toList();
     return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 1, end: 0),
-      duration: PalabraLinesMoveAnimation.duration,
-      builder: (context, opacity, child) {
-        return Opacity(
-          opacity: opacity.clamp(0, 1),
-          child: child,
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: animation.trailFadeDuration,
+      builder: (context, value, child) {
+        const holdFraction = 0.35;
+        final fadePortion = ((value - holdFraction) / (1 - holdFraction)).clamp(
+          0,
+          1,
         );
+        final opacity =
+            1 - Curves.easeOutQuad.transform(fadePortion.toDouble());
+        return Opacity(opacity: opacity, child: child);
       },
       child: Stack(children: dots),
     );

@@ -8,6 +8,7 @@ import 'package:palabra/data_core/models/user_meta.dart';
 import 'package:palabra/data_core/models/vocab_item.dart';
 import 'package:palabra/data_core/repositories/user_meta_repository.dart';
 import 'package:palabra/data_core/repositories/vocab_repository.dart';
+import 'package:palabra/feature_palabra_lines/application/palabra_lines_haptics.dart';
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_sfx_player.dart';
 import 'package:palabra/feature_palabra_lines/application/palabra_lines_vocab_service.dart';
 import 'package:palabra/feature_palabra_lines/domain/palabra_lines_board.dart';
@@ -28,12 +29,14 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     Random? random,
     int initialHighScore = 0,
     PalabraLinesSfxPlayer? sfxPlayer,
+    PalabraLinesHaptics? haptics,
   }) : _rng = random ?? Random(),
        _vocabService = vocabService,
        _userMetaRepository = userMetaRepository,
        _vocabRepository = vocabRepository,
        _assetBundle = assetBundle,
        _sfxPlayer = sfxPlayer,
+       _haptics = haptics,
        super(
          PalabraLinesGameState.initial(
            board: PalabraLinesBoard.empty(),
@@ -53,9 +56,11 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
   UserMeta? _activeMeta;
   Future<void>? _bootstrapFuture;
   final PalabraLinesSfxPlayer? _sfxPlayer;
+  final PalabraLinesHaptics? _haptics;
   Timer? _moveAnimationTimer;
   int _moveAnimationCounter = 0;
   final List<Timer> _trailTimers = <Timer>[];
+  int _feedbackCounter = 0;
 
   @override
   void dispose() {
@@ -67,6 +72,8 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
 
   /// Resets the board, score, and preview to a clean game.
   void startNewGame() {
+    _moveAnimationTimer?.cancel();
+    _cancelTrailTimers();
     var board = PalabraLinesBoard.empty();
     board = _seedInitialBalls(board);
     final previewResult = _generatePreview(board);
@@ -82,6 +89,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       selectedCol: null,
       activeQuestion: null,
       moveAnimation: null,
+      feedback: null,
     );
   }
 
@@ -98,6 +106,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     final hasSelection =
         current.selectedRow != null && current.selectedCol != null;
     if (!hasSelection && hasBall) {
+      unawaited(_haptics?.onSelect());
       state = current.copyWith(
         phase: PalabraLinesPhase.ballSelected,
         selectedRow: row,
@@ -106,6 +115,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       return;
     }
     if (hasBall && hasSelection) {
+      unawaited(_haptics?.onSelect());
       state = current.copyWith(
         phase: PalabraLinesPhase.ballSelected,
         selectedRow: row,
@@ -121,6 +131,8 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     final path = _findPath(current.board, fromRow, fromCol, row, col);
     if (path == null) {
       unawaited(_sfxPlayer?.playInvalidMove());
+      unawaited(_haptics?.onInvalid());
+      _publishFeedback('Path blocked — pick a clear route.', isError: true);
       return;
     }
     _applyMove(fromRow, fromCol, row, col, path);
@@ -237,6 +249,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       selectedRow: null,
       selectedCol: null,
       moveAnimation: null,
+      feedback: null,
     );
     _startMoveAnimation(
       color: movingColor,
@@ -270,16 +283,17 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       result.removedCount,
       result.clearedCells.length,
     );
-    final highlightedQuestion = question?.withHighlightCells(result.clearedCells);
+    final highlightedQuestion = question?.withHighlightCells(
+      result.clearedCells,
+    );
     state = state.copyWith(
       board: workingBoard,
       preview: previewResult.preview,
       score: updatedScore,
       highScore: newHighScore,
-      phase:
-          highlightedQuestion != null
-              ? PalabraLinesPhase.quiz
-              : PalabraLinesPhase.idle,
+      phase: highlightedQuestion != null
+          ? PalabraLinesPhase.quiz
+          : PalabraLinesPhase.idle,
       activeQuestion: highlightedQuestion,
       moveAnimation: null,
     );
@@ -540,12 +554,20 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     if (repository == null) {
       return;
     }
-    final meta = await repository.getOrCreate();
-    _activeMeta = meta;
-    if (meta.palabraLinesHighScore != state.highScore) {
-      state = state.copyWith(highScore: meta.palabraLinesHighScore);
+    try {
+      final meta = await repository.getOrCreate();
+      _activeMeta = meta;
+      if (meta.palabraLinesHighScore != state.highScore) {
+        state = state.copyWith(highScore: meta.palabraLinesHighScore);
+      }
+      _vocabService?.updateBaseLevel(meta.level);
+    } catch (err, stack) {
+      debugPrint('Failed to load user meta: $err\n$stack');
+      _publishFeedback(
+        'Profile data unavailable. Progress may not save this session.',
+        isError: true,
+      );
     }
-    _vocabService?.updateBaseLevel(meta.level);
   }
 
   Future<void> _loadVocabulary() async {
@@ -554,21 +576,33 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     if (repository == null || bundle == null) {
       return;
     }
-    await repository.ensureLoaded(bundle);
-    final entries = <VocabItem>[];
-    for (final level in UserMeta.levelOrder) {
-      final items = await repository.getByLevel(level);
-      entries.addAll(items);
+    try {
+      await repository.ensureLoaded(bundle);
+      final entries = <VocabItem>[];
+      for (final level in UserMeta.levelOrder) {
+        final items = await repository.getByLevel(level);
+        entries.addAll(items);
+      }
+      if (entries.isEmpty) {
+        _publishFeedback(
+          'Vocabulary not available. Quizzes will stay hidden.',
+          isError: true,
+        );
+        return;
+      }
+      final baseLevel = _activeMeta?.level ?? UserMeta.levelOrder.first;
+      _vocabService = PalabraLinesVocabService.fromItems(
+        items: entries,
+        baseLevel: baseLevel,
+        random: _rng,
+      );
+    } catch (err, stack) {
+      debugPrint('Failed to load vocabulary: $err\n$stack');
+      _publishFeedback(
+        'Unable to load words. Play continues without quiz prompts.',
+        isError: true,
+      );
     }
-    if (entries.isEmpty) {
-      return;
-    }
-    final baseLevel = _activeMeta?.level ?? UserMeta.levelOrder.first;
-    _vocabService = PalabraLinesVocabService.fromItems(
-      items: entries,
-      baseLevel: baseLevel,
-      random: _rng,
-    );
   }
 
   void _persistHighScore(int candidate) {
@@ -611,18 +645,28 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
     required List<Point<int>> path,
   }) {
     _cancelTrailTimers();
+    unawaited(_haptics?.onMoveStart());
+    final hopCount = max(path.length - 1, 1);
+    final movementMs = hopCount * 160;
+    final movementDuration = Duration(
+      milliseconds: movementMs.clamp(320, 1500),
+    );
+    final trailFadeDuration = Duration(
+      milliseconds: (movementMs + 600).clamp(700, 2000),
+    );
     final animation = PalabraLinesMoveAnimation(
       id: _moveAnimationCounter++,
       from: Point<int>(fromRow, fromCol),
       to: Point<int>(toRow, toCol),
       color: color,
       path: List<Point<int>>.unmodifiable(path),
+      movementDuration: movementDuration,
+      trailFadeDuration: trailFadeDuration,
     );
     state = state.copyWith(moveAnimation: animation);
     _moveAnimationTimer?.cancel();
-    final hopCount = max(path.length - 1, 0);
     if (hopCount > 0) {
-      final totalMs = PalabraLinesMoveAnimation.duration.inMilliseconds;
+      final totalMs = movementDuration.inMilliseconds;
       for (var i = 1; i <= hopCount; i++) {
         final delayMs = (totalMs * i ~/ hopCount);
         final timer = Timer(Duration(milliseconds: delayMs), () {
@@ -635,7 +679,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       }
     }
     _moveAnimationTimer = Timer(
-      PalabraLinesMoveAnimation.duration,
+      trailFadeDuration,
       () {
         if (!mounted) {
           return;
@@ -643,6 +687,16 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
         _cancelTrailTimers();
         state = state.copyWith(moveAnimation: null);
       },
+    );
+  }
+
+  void _publishFeedback(String message, {bool isError = false}) {
+    state = state.copyWith(
+      feedback: PalabraLinesFeedback(
+        id: _feedbackCounter++,
+        message: message,
+        isError: isError,
+      ),
     );
   }
 
