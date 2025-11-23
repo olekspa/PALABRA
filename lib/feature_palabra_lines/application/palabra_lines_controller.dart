@@ -186,10 +186,7 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
           continue;
         }
         final nextCell = board.cellAt(next.x, next.y);
-        final isDestination = next == target;
-        final isFree =
-            nextCell.ballColor == null &&
-            (!nextCell.hasPreview || isDestination);
+        final isFree = nextCell.ballColor == null;
         if (!isFree) {
           continue;
         }
@@ -295,7 +292,6 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
           ? PalabraLinesPhase.quiz
           : PalabraLinesPhase.idle,
       activeQuestion: highlightedQuestion,
-      moveAnimation: null,
     );
     _persistHighScore(newHighScore);
   }
@@ -334,7 +330,6 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
         activeQuestion: null,
         selectedRow: null,
         selectedCol: null,
-        moveAnimation: null,
       );
       return;
     }
@@ -348,7 +343,6 @@ class PalabraLinesController extends StateNotifier<PalabraLinesGameState> {
       activeQuestion: null,
       selectedRow: null,
       selectedCol: null,
-      moveAnimation: null,
     );
     _persistHighScore(newHighScore);
   }

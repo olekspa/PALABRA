@@ -91,18 +91,12 @@ class PalabraLinesBoardWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (moveAnimation != null) ...[
-                  _PathOverlay(
-                    animation: moveAnimation!,
-                    boardWidth: boardWidth,
-                    boardHeight: boardHeight,
-                  ),
+                if (moveAnimation != null)
                   _MovingBallOverlay(
                     animation: moveAnimation!,
                     boardWidth: boardWidth,
                     boardHeight: boardHeight,
                   ),
-                ],
                 if (activeQuestion != null)
                   _BoardQuizOverlay(
                     question: activeQuestion!,
@@ -235,11 +229,13 @@ class _PalabraLinesCellTile extends StatelessWidget {
                       ),
                     ),
                   if (cell.hasPreview && cell.previewColor != null)
-                    Align(
-                      alignment: Alignment.center,
-                      child: _PreviewMarble(
-                        color: cell.previewColor!.color,
-                        size: previewSize,
+                    Center(
+                      child: SizedBox.square(
+                        dimension: previewSize,
+                        child: _PreviewMarble(
+                          color: cell.previewColor!.color,
+                          size: previewSize,
+                        ),
                       ),
                     ),
                   if (cell.ballColor != null && !shouldHideBall)
@@ -474,67 +470,6 @@ class _MovingBallOverlay extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _PathOverlay extends StatelessWidget {
-  const _PathOverlay({
-    required this.animation,
-    required this.boardWidth,
-    required this.boardHeight,
-  });
-
-  final PalabraLinesMoveAnimation animation;
-  final double boardWidth;
-  final double boardHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    final cellWidth = _cellExtent(boardWidth);
-    final cellHeight = _cellExtent(boardHeight);
-    final baseSize = min(cellWidth, cellHeight);
-    final trailSize = (baseSize * 0.32).clamp(10, baseSize).toDouble();
-    final dots = animation.path.map((point) {
-      final offset = _cellOffset(point, cellWidth, cellHeight);
-      return Positioned(
-        left: offset.dx + (cellWidth - trailSize) / 2,
-        top: offset.dy + (cellHeight - trailSize) / 2,
-        child: Container(
-          width: trailSize,
-          height: trailSize,
-          decoration: BoxDecoration(
-            color: animation.color.color.withOpacity(0.55),
-            borderRadius: BorderRadius.circular(trailSize / 2),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: animation.color.color.withOpacity(0.35),
-                blurRadius: 8,
-                spreadRadius: 0.6,
-              ),
-            ],
-            border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-              width: 1,
-            ),
-          ),
-        ),
-      );
-    }).toList();
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: animation.trailFadeDuration,
-      builder: (context, value, child) {
-        const holdFraction = 0.35;
-        final fadePortion = ((value - holdFraction) / (1 - holdFraction)).clamp(
-          0,
-          1,
-        );
-        final opacity =
-            1 - Curves.easeOutQuad.transform(fadePortion.toDouble());
-        return Opacity(opacity: opacity, child: child);
-      },
-      child: Stack(children: dots),
     );
   }
 }
